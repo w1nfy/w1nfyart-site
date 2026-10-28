@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY | Кажется, в аду прикольно...</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="Кажется, в аду прикольно но меня выгнали б утром | W1NFY">
+    <meta property="og:description" content="Темно-бордовая тема с нежными розовыми акцентами.">
+    <meta property="og:image" content="https://w1nfyart-site.layero.app/images/theme-hell.jpg">
+    <meta property="og:url" content="https://w1nfyart-site.layero.app/theme-hell.html">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">W1NFY<span>_CUSTOMS</span></a>
+        <nav>
+            <a href="index.html">← Назад</a>
+            <a href="https://t.me/w1nfyart" target="_blank" class="btn-social">Telegram</a>
+            <a href="https://discord.gg/86ZsPBGCS5" target="_blank" class="btn-social">Discord</a>
+        </nav>
+    </header>
+
+    <main class="theme-page">
+        <h1 class="theme-title">Кажется, в аду прикольно но меня выгнали б утром</h1>
+        <p class="theme-desc">Темно-бордовая тема с нежными розовыми акцентами.</p>
+        <img src="images/theme-hell.jpg" alt="Превью темы" class="large-preview">
+        
+        <div class="theme-actions" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <button id="download-btn" class="link-btn" style="max-width: 300px; background-color: #6A5ACD; color: #fff;" onclick="downloadTheme()">💾 Скачать файл темы (.css)</button>
+            <button id="copy-btn" class="link-btn" style="max-width: 300px;" onclick="copyCode()">📋 Скопировать код</button>
+        </div>
+
+        <div class="install-guide" style="margin-top: 40px;">
+            <h2>🛠 Как установить тему</h2>
+            <div class="guide-step"><h3>Шаг 1: Установка Millennium</h3><p>Скачай Millennium с официального сайта. Запусти установщик и следуй инструкциям.</p></div>
+            <div class="guide-step"><h3>Шаг 2: Установка Minimal Dark</h3><p><b>Это обязательно!</b> В меню Steam перейди в <code>Millennium -> Settings -> Themes</code>. Найди <b>Minimal Dark</b> и нажми «Install».</p></div>
+            <div class="guide-step"><h3>Шаг 3: Вставка кода (Quick CSS)</h3><p>В настройках Millennium перейди во вкладку <b>Quick CSS</b>. Скопируй код темы и вставь в окно Quick CSS. Нажми <b>Save</b>.</p></div>
+            <div class="guide-step"><h3>Шаг 4: Установка баннера</h3><p>Скачай баннер, зайди в библиотеку Steam, нажми ПКМ по фону игры -> «Установить свой фон» и выбери картинку.</p></div>
+        </div>
+    </main>
+
+    <footer><p>&copy; 2026 W1NFY.</p></footer>
+
+    <script>
+        const themeData = {
+            title: "Кажется, в аду прикольно но меня выгнали б утром",
+            file: "themes/hell.css",
+            banner: "images/banner-hell.jpg"
+        };
+        async function downloadTheme() {
+            try {
+                const response = await fetch(themeData.file);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `w1nfy_hell.css`;
+                document.body.appendChild(a); a.click(); a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (e) { alert("Ошибка скачивания"); }
+        }
+        async function copyCode() {
+            try {
+                const response = await fetch(themeData.file);
+                const text = await response.text();
+                await navigator.clipboard.writeText(text);
+                alert("Код скопирован!");
+            } catch (e) { alert("Ошибка чтения файла"); }
+        }
+        window.onload = () => {
+            const dlLink = document.getElementById('banner-dl-link');
+            if (dlLink) { dlLink.href = themeData.banner; dlLink.download = 'banner-hell.jpg'; }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY | Студия</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { display: flex; height: 100vh; overflow: hidden; background-color: #0a0a0c; margin: 0; color: #e0e0e0; font-family: 'Roboto Mono', monospace; }
+        .sidebar { width: 240px; background-color: #0d0d12; border-right: 1px solid #2a2a35; display: flex; flex-direction: column; padding-top: 20px; }
+        .logo-area { padding: 0 20px 30px; font-family: 'Rubik Glitch', cursive; font-size: 24px; color: #fff; }
+        .logo-area span { color: #6A5ACD; }
+        .logo-area a { text-decoration: none; color: inherit; }
+        .menu-item { padding: 12px 20px; color: #aaa; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; border-left: 3px solid transparent; }
+        .menu-item:hover { background: #1a1a20; color: #fff; }
+        .menu-item.active { background: #1a1a20; color: #fff; border-left-color: #6A5ACD; font-weight: bold; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 30px; overflow-y: auto; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .top-bar h1 { margin: 0; font-size: 2rem; color: #fff; }
+        .btn-create { background: #6A5ACD; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-create:hover { background: #5849b0; }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .project-card { background: #131318; border: 1px solid #2a2a35; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: 0.2s; }
+        .project-card:hover { border-color: #6A5ACD; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(106,90,205,0.2); }
+        .project-preview { height: 150px; background: #050505; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid #2a2a35; background-image: radial-gradient(#222 1px, transparent 1px); background-size: 16px 16px; }
+        .project-preview span { color: #555; font-size: 3rem; font-weight: bold; }
+        .project-info { padding: 15px; }
+        .project-info h3 { margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .project-info p { margin: 0; color: #777; font-size: 0.8rem; }
+        .project-actions { display: flex; border-top: 1px solid #2a2a35; background: #0f0f14; }
+        .project-actions button { flex: 1; background: transparent; border: none; color: #aaa; padding: 10px; cursor: pointer; transition: 0.2s; font-family: inherit; font-size: 0.9rem; border-right: 1px solid #2a2a35; }
+        .project-actions button:last-child { border-right: none; }
+        .project-actions button:hover { background: #222; color: #fff; }
+        .project-actions button.delete:hover { background: #3a1515; color: #ff4444; }
+        .empty-state { text-align: center; color: #666; margin-top: 50px; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-area"><a href="index.html">W1NFY<span>_STUDIO</span></a></div>
+        <div class="menu-item active" onclick="window.location.href='studio.html'">🖼 Студия</div>
+        <div class="menu-item" onclick="window.location.href='index.html'">🏠 На главную</div>
+        <div class="menu-item" onclick="window.open('https://t.me/w1nfyart', '_blank')">💬 Чат / Новости</div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1>Студия</h1>
+            <button class="btn-create" onclick="window.location.href='editor.html'">
+                <span>+</span> Создать проект
+            </button>
+        </div>
+
+        <div class="projects-grid" id="projects-grid"></div>
+        <div class="empty-state" id="empty-state" style="display:none;">
+            У тебя пока нет сохраненных проектов.<br>Нажми «Создать проект», чтобы начать.
+        </div>
+    </div>
+
+    <!-- МОДАЛКА CONFIRM -->
+    <div class="w1-modal-overlay" id="modal-confirm">
+        <div class="w1-modal">
+            <h2>Подтверждение</h2>
+            <p id="confirm-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="resolveConfirm(false)">Отмена</button>
+                <button class="w1-btn w1-btn-primary" onclick="resolveConfirm(true)">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function customConfirm(text) {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-text').innerText = text;
+                document.getElementById('modal-confirm').classList.add('active');
+                window._resolveConfirm = resolve;
+            });
+        }
+        function resolveConfirm(val) {
+            document.getElementById('modal-confirm').classList.remove('active');
+            if (window._resolveConfirm) window._resolveConfirm(val);
+        }
+
+        let projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+        const grid = document.getElementById('projects-grid');
+        const emptyState = document.getElementById('empty-state');
+
+        function renderProjects() {
+            grid.innerHTML = '';
+            if (projects.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            projects.sort((a, b) => b.id - a.id);
+
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                const date = new Date(parseInt(p.id)).toLocaleDateString('ru-RU');
+
+                card.innerHTML = `
+                    <div class="project-preview">
+                        <span>${p.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div class="project-info">
+                        <h3 title="${p.name}">${p.name}</h3>
+                        <p>${date}</p>
+                    </div>
+                    <div class="project-actions">
+                        <button onclick="editProject('${p.id}')">✏️ Открыть</button>
+                        <button onclick="duplicateProject('${p.id}')">📋 Копия</button>
+                        <button class="delete" onclick="deleteProject('${p.id}')">🗑 Удалить</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function editProject(id) {
+            window.location.href = `editor.html?id=${id}`;
+        }
+
+        function duplicateProject(id) {
+            const original = projects.find(p => p.id === id);
+            if (!original) return;
+            
+            const copy = JSON.parse(JSON.stringify(original));
+            copy.id = Date.now().toString();
+            copy.name = original.name + ' (Копия)';
+            
+            projects.push(copy);
+            saveAndRender();
+        }
+
+        async function deleteProject(id) {
+            const isConfirmed = await customConfirm('Точно удалить этот проект?');
+            if (!isConfirmed) return;
+            
+            projects = projects.filter(p => p.id !== id);
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
+            renderProjects();
+        }
+
+        renderProjects();
+    </script>
+    <script src="animations.js"></script>
+</body>
+</html>

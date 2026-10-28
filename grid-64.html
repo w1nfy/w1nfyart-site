@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY | Просмотр сетки</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="Сетка: опианариум | W1NFY">
+    <meta property="og:description" content="Скачай сетку героев для Dota 2 от W1NFY.">
+    <meta property="og:image" content="https://w1nfyart-site.layero.app/images/64-2.jpg">
+    <meta property="og:url" content="https://w1nfyart-site.layero.app/grid-64.html">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">W1NFY<span>_CUSTOMS</span></a>
+        <nav>
+            <a href="index.html">← Назад</a>
+            <a href="#" id="tg-link-header" target="_blank" class="btn-social">Оригинал в TG</a>
+        </nav>
+    </header>
+
+    <main class="theme-page">
+        <h1 class="theme-title" id="grid-title">Загрузка...</h1>
+        <p class="theme-desc" id="grid-desc">Листай вправо/влево, чтобы посмотреть оригинал и вид в игре.</p>
+        
+        <div class="slider-wrapper">
+            <button class="slider-btn prev" id="btn-prev" onclick="scrollSlider(-1)" style="display: none;">&#10094;</button>
+            <div class="slider-container" id="slider"></div>
+            <button class="slider-btn next" id="btn-next" onclick="scrollSlider(1)" style="display: none;">&#10095;</button>
+        </div>
+
+        <div class="theme-actions" style="display: flex; flex-direction: column; gap: 15px; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <button id="download-btn" class="link-btn" style="width: auto; background-color: #6A5ACD; color: #fff;" onclick="downloadGrid()">
+                    💾 Скачать файл сетки (.json)
+                </button>
+                <button id="share-btn" class="share-btn">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    Скопировать ссылку
+                </button>
+            </div>
+            <a href="#" id="tg-link-btn" target="_blank" class="link-btn" style="max-width: 300px;">Скачать в Telegram</a>
+        </div>
+
+        <div class="install-guide" style="margin-top: 40px;">
+            <h2>Как установить?</h2>
+            <p>1. Нажми кнопку «Скачать файл сетки» выше. У тебя скачается файл <b>hero_grid_config.json</b>.</p>
+            <p>2. Открой папку Steam: <code>C:\Program Files (x86)\Steam\userdata\ТВОЙ_ID\570\remote\cfg</code></p>
+            <p>3. Перекинь туда скачанный файл с заменой старого.</p>
+            <p>4. Зайди в Dota 2, открой «Герои» и выбери сетку в списке «Сортировка».</p>
+        </div>
+    </main>
+
+    <footer><p>&copy; 2026 W1NFY.</p></footer>
+
+    <div class="w1-modal-overlay" id="modal-alert">
+        <div class="w1-modal">
+            <h2>Уведомление</h2>
+            <p id="alert-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-primary" onclick="closeModal('modal-alert')">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function customAlert(text) {
+            document.getElementById('alert-text').innerText = text;
+            document.getElementById('modal-alert').classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        const currentGridId = "64";
+
+        function scrollSlider(direction) {
+            const slider = document.getElementById('slider');
+            const scrollAmount = slider.clientWidth + 15;
+            slider.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        async function downloadGrid() {
+            if (!currentGridId) return;
+            const fileUrl = `grids/${currentGridId}.json`;
+            try {
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('Файл не найден');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `hero_grid_config.json`; 
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                fetch(`https://abacus.jasoncameron.dev/hit/w1nfy-customs/${currentGridId}`).catch(() => {});
+                fetch(`https://abacus.jasoncameron.dev/hit/w1nfy-customs/total`).catch(() => {});
+            } catch (error) {
+                customAlert("Ошибка: Файл сетки не найден.");
+            }
+        }
+
+        window.onload = function() {
+            const data = {
+                "7": { title: "как испортить вечеринку", tgLink: "https://t.me/w1nfyart/7", images: ["images/7-2.jpg"] },
+                "59": { title: "еби меня, малышка", tgLink: "https://t.me/w1nfyart/59", images: ["images/59-2.jpg"] },
+                "48": { title: "кажется, в аду прикольно", tgLink: "https://t.me/w1nfyart/48", images: ["images/48-2.jpg"] },
+                "98": { title: "cupsizeholic", tgLink: "https://t.me/w1nfyart/98", images: ["images/98-2.jpg"] },
+                "64": { title: "опианариум", tgLink: "https://t.me/w1nfyart/64", images: ["images/64-2.jpg"] },
+                "99": { title: "chance", tgLink: "https://t.me/w1nfyart/99", images: ["images/99-2.jpg"] },
+                "102": { title: "кабуу", tgLink: "https://t.me/w1nfyart/102", images: ["images/102-2.jpg"] },
+                "137": { title: "сборник хуйни и картинки", tgLink: "https://t.me/w1nfyart/137", images: ["images/137-2.jpg"] },
+                "150": { title: "8 способов бросить дрочить", tgLink: "https://t.me/w1nfyart/150", images: ["images/150-2.jpg"] },
+                "159": { title: "научи меня курить", tgLink: "https://t.me/w1nfyart/159", images: ["images/159-2.jpg"] },
+                "189": { title: "11:11", tgLink: "https://t.me/w1nfyart/189", images: ["images/189-2.jpg"] },
+                "190": { title: "они устали", tgLink: "https://t.me/w1nfyart/190", images: ["images/190-2.jpg"] },
+                "210": { title: "лёд", tgLink: "https://t.me/w1nfyart/210", images: ["images/210-2.jpg"] },
+                "209": { title: "кургазацкий варенник", tgLink: "https://t.me/w1nfyart/209", images: ["images/209-2.jpg"] },
+                "212": { title: "ветмо инвокер", tgLink: "https://t.me/w1nfyart/212", images: ["images/212-2.jpg"] },
+                "239": { title: "не забирай меня домой", tgLink: "https://t.me/w1nfyart/239", images: ["images/239-2.jpg"] },
+                "240": { title: "неуравновешеннолетниепесни пт1", tgLink: "https://t.me/w1nfyart/240", images: ["images/240-2.jpg"] },
+                "241": { title: "ты принадлежишь мне", tgLink: "https://t.me/w1nfyart/241", images: ["images/241-2.jpg"] },
+                "287": { title: "спасибо что живой", tgLink: "https://t.me/w1nfyart/287", images: ["images/287-1.jpg", "images/287-2.jpg"] },
+                "285": { title: "every time", tgLink: "https://t.me/w1nfyart/285", images: ["images/285-1.jpg", "images/285-2.jpg"] },
+                "282": { title: "дабл ар", tgLink: "https://t.me/w1nfyart/282", images: ["images/282-1.jpg", "images/282-2.jpg"] },
+                "295": { title: "ярче звезд", tgLink: "https://t.me/w1nfyart/295", images: ["images/295-1.jpg", "images/295-2.jpg"] },
+                "321": { title: "опианариум (старый)", tgLink: "https://t.me/w1nfyart/321", images: ["images/321-1.jpg", "images/321-2.jpg"] },
+                "323": { title: "арима", tgLink: "https://t.me/w1nfyart/323", images: ["images/323-1.jpg", "images/323-2.jpg"] },
+                "327": { title: "характер", tgLink: "https://t.me/w1nfyart/327", images: ["images/327-1.jpg", "images/327-2.jpg"] },
+                "331": { title: "mudada", tgLink: "https://t.me/w1nfyart/331", images: ["images/331-1.jpg", "images/331-2.jpg"] },
+                "339": { title: "королевский", tgLink: "https://t.me/w1nfyart/339", images: ["images/339-1.jpg", "images/339-2.jpg"] },
+                "347": { title: "crystal castles", tgLink: "https://t.me/w1nfyart/347", images: ["images/347-1.jpg", "images/347-2.jpg"] },
+                "356": { title: "sewerslvt", tgLink: "https://t.me/w1nfyart/356", images: ["images/356-1.jpg", "images/356-2.jpg"] },
+                "360": { title: "дробовик", tgLink: "https://t.me/w1nfyart/360", images: ["images/360-1.jpg", "images/360-2.jpg"] },
+                "379": { title: "дели на два", tgLink: "https://t.me/w1nfyart/379", images: ["images/379-1.jpg", "images/379-2.jpg"] },
+                "383": { title: "сематари", tgLink: "https://t.me/w1nfyart/383", images: ["images/383-1.jpg", "images/383-2.jpg"] },
+                "395": { title: "в моих легких выросли цветы", tgLink: "https://t.me/w1nfyart/395", images: ["images/395-1.jpg", "images/395-2.jpg"] },
+                "398": { title: "типичная вечеринка с бассейном", tgLink: "https://t.me/w1nfyart/398", images: ["images/398-1.jpg", "images/398-2.jpg"] },
+                "400": { title: "пламени языки", tgLink: "https://t.me/w1nfyart/400", images: ["images/400-1.jpg", "images/400-2.jpg"] },
+                "415": { title: "дабл терапия", tgLink: "https://t.me/w1nfyart/415", images: ["images/415-1.jpg", "images/415-2.jpg"] }
+            };
+            document.getElementById('share-btn').onclick = () => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    customAlert("Ссылка на эту сетку скопирована в буфер обмена!");
+                }).catch(() => { customAlert("Не удалось скопировать ссылку."); });
+            };
+            document.getElementById('grid-title').innerText = "Сетка: " + data[currentGridId].title;
+            document.title = "Сетка: " + data[currentGridId].title + " | W1NFY";
+            document.getElementById('tg-link-header').href = data[currentGridId].tgLink;
+            document.getElementById('tg-link-btn').href = data[currentGridId].tgLink;
+            const slider = document.getElementById('slider');
+            data[currentGridId].images.forEach(imgSrc => {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = data[currentGridId].title;
+                slider.appendChild(img);
+            });
+            if (data[currentGridId].images.length > 1) {
+                document.getElementById('btn-prev').style.display = 'flex';
+                document.getElementById('btn-next').style.display = 'flex';
+            } else {
+                document.getElementById('grid-desc').style.display = 'none';
+            }
+            fetch(`https://abacus.jasoncameron.dev/get/w1nfy-customs/${currentGridId}`).then(res => res.json()).then(data => {
+                document.getElementById('grid-downloads').innerText = data.value || 0;
+            }).catch(() => {});
+        };
+    </script>
+    <script src="animations.js"></script>
+</body>
+</html>

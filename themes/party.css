@@ -1,0 +1,282 @@
+/*
+==========================================================================
+STEAM THEME: "КАК ИСПОРТИТЬ ВЕЧЕРИНКУ?" (CUPSIZE)
+BY W1NFY
+==========================================================================
+*/
+
+/* --- 1. ПЕРЕМЕННЫЕ --- */
+:root, body {
+  --minimal_dark_color: #ffffff !important; 
+  --minimal_dark_color_rgb: 255, 255, 255 !important;
+  --minimal_dark_be_grey: #1a1a1a !important;
+  --minimal_dark_black: #050505 !important; 
+  --minimal_dark_blacker: #000000 !important;
+  --minimal_dark_blacker_alt: #111111 !important;
+  --minimal_dark_greyblack: #2a2a2a !important;
+  --minimal_dark_topgrey: #ffffff !important;
+  --minimal_dark_less_white: #ffffff !important; 
+  --minimal_dark_invisiblegrey: rgba(255, 255, 255, 0.2) !important;
+  --minimal_dark_corner: 0px !important; 
+
+  --bg-all: url("https://i.ibb.co/Kj2FK6Tc/image.png");
+  
+  --shade: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95));
+  --shade-left: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+}
+
+/* =========================================
+   2. ГЛОБАЛЬНЫЙ ФОН
+   ========================================= */
+body, 
+.Library,
+.ReactVirtualized__Grid,
+.ReactVirtualized__List,
+.ActivityFeedContainer,
+.RightColumn,
+.FriendsSection,
+.CommunityContentContainer {
+  background-color: #050505 !important;
+  background-image: var(--shade), var(--bg-all) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  backdrop-filter: none !important;
+}
+
+/* =========================================
+   3. КНОПКИ (Глобальные стили для вкладок)
+   ========================================= */
+.Library [class*="Tabs"] [class*="Tab"],
+.Library button:not([class*="windowControlButton"]):not([class*="PlayBar"] button),
+.Library [class*="Button"]:not([class*="PlayBar"] [class*="Button"]) {
+  background-color: rgba(0, 0, 0, 0.6) !important; 
+  color: #ffffff !important;
+  border: none !important; 
+  outline: none !important; 
+  box-shadow: none !important; 
+  font-weight: bold !important;
+  border-radius: 0px !important;
+}
+
+.Library [class*="Tabs"] [class*="Tab"]:hover,
+.Library button:not([class*="windowControlButton"]):not([class*="PlayBar"] button):hover,
+.Library [class*="Button"]:not([class*="PlayBar"] [class*="Button"]):hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.Library button:hover span,
+.Library [class*="Button"]:hover span,
+.Library button:hover svg *,
+.Library [class*="Button"]:hover svg * {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* =========================================
+   4. ТОТАЛЬНЫЙ ФИКС ПАНЕЛИ СТАТИСТИКИ (Убираем квадраты)
+   ========================================= */
+/* Убиваем любой фон у всех элементов внутри полосы с игрой */
+.Library [class*="PlayBar"] *,
+.Library [class*="PlayBar"] div,
+.Library [class*="PlayBar"] span,
+.Library [class*="PlayBar"] button,
+.Library [class*="PlayBar"] [class*="Button"],
+.Library [class*="PlayBar"] [class*="Focusable"],
+.Library [class*="GameStat"],
+.Library [class*="CloudStatus"] {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Оставляем красивый эффект при наведении на кнопки справа */
+.Library [class*="PlayBar"] button:hover,
+.Library [class*="PlayBar"] [class*="Focusable"]:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Сама кнопка Play (треугольник) тоже без фона */
+.Library [class*="PlayButton"] {
+  background-color: transparent !important;
+}
+.Library [class*="PlayButton"]:hover {
+  background-color: #ffffff !important;
+}
+
+/* =========================================
+   5. ПАНЕЛИ (Активность, Друзья)
+   ========================================= */
+.Library [class*="ActivityFeedContainer"],
+.Library [class*="RightColumn"],
+.Library [class*="FriendsSection"] {
+  border: none !important;
+  background-color: rgba(10, 10, 10, 0.8) !important; 
+  border-radius: 0px !important;
+}
+
+[class*="ActivityFeed"] input,
+[class*="ActivityFeed"] textarea,
+.DialogInput,
+input[type="text"] {
+  background-color: #000000 !important;
+  border: 1px solid #333333 !important; 
+  color: #ffffff !important;
+  outline: none !important;
+}
+
+/* =========================================
+   6. СПИСОК ИГР
+   ========================================= */
+.Library .ReactVirtualized__List,
+.Library .ReactVirtualized__Grid,
+.Library [class*="GameList"] {
+  background-image: var(--shade-left), var(--bg-all) !important;
+  background-attachment: local !important; 
+}
+
+.Library [class*="GameListEntryContainer"],
+.Library [class*="LibraryItem"],
+.Library [class*="libraryItem"],
+.Library [class*="gamelistentry"] {
+  background: transparent !important;
+  background-image: none !important; 
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; 
+}
+
+.Library [class*="LibraryItem"]:hover,
+.Library [class*="libraryItem"]:hover,
+.Library .GameListEntryContainer:hover,
+.Library [class*="Selected"] .GameListEntryContainer,
+.Library .GameListEntryContainer[class*="Selected"] {
+  background: #ffffff !important;
+}
+
+.Library [class*="LibraryItem"]:hover span,
+.Library [class*="libraryItem"]:hover span,
+.Library [class*="Selected"] .GameListEntryContainer span,
+.Library .GameListEntryContainer[class*="Selected"] span {
+  color: #000000 !important;
+}
+
+/* =========================================
+   7. ТЕКСТЫ И ИКОНКИ
+   ========================================= */
+body,
+.Library,
+.friendsui-container,
+[class*="PlayBarLabel"],
+[class*="SectionName"],
+[class*="HeaderText"],
+[class*="Label"],
+[class*="Title"],
+span {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0px #000000 !important; 
+}
+
+svg[class*="SVGIcon"],
+svg[class*="SVGIcon"] * {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* =========================================
+   8. ВЕРХНЯЯ ПАНЕЛЬ
+   ========================================= */
+.TopBar,
+.TopBar > div,
+.TopBar .TitleBar,
+.TopBar .RootMenuBar,
+.TopBar .DragArea,
+.TopBar .SuperNavBar,
+.TopBar .SuperNav {
+  background-color: #000000 !important;
+  background-image: var(--shade), var(--bg-all) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.TopBar .RootMenuButton:hover,
+.TopBar .MenuWrapper:hover,
+.TopBar .SuperNav .SuperNavMenu:hover,
+.TopBar .SuperNav .Arrow:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.TopBar .SuperNav .Arrow:hover path { fill: #000000 !important; }
+.TopBar .SuperNav .Arrow path { fill: #ffffff !important; }
+
+.TopBar .SuperNav .SuperNavMenu.Selected .MenuButton {
+  color: #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+
+.TopBar .windowControlButton { background: transparent !important; border: none !important; box-shadow: none !important; outline: none !important; }
+.TopBar .windowControlButton svg * { fill: #ffffff !important; }
+.TopBar .windowControlButton:hover { background: #ffffff !important; }
+.TopBar .windowControlButton:hover svg * { fill: #000000 !important; }
+
+/* =========================================
+   9. ЛОГОТИП
+   ========================================= */
+.TopBar .RootMenuButton img,
+.TopBar .RootMenuButton svg,
+svg.SVGIcon_SteamLogo,
+[class*="SVGIcon_SteamLogo"] {
+  animation: GrungeGlitch 2s steps(2, end) infinite !important;
+  filter: grayscale(100%) contrast(200%) brightness(10) !important;
+  transform-origin: center !important;
+}
+
+@keyframes GrungeGlitch {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  25% { transform: translate(-1px, 1px) scale(1.02); opacity: 0.8; }
+  50% { transform: translate(1px, -1px) scale(1); opacity: 1; }
+  75% { transform: translate(-1px, -1px) scale(0.98); opacity: 0.9; }
+}
+
+/* =========================================
+   10. ОКНО ДРУЗЕЙ
+   ========================================= */
+.friendsui-container,
+.popup_chat_frame,
+.chat_main,
+.friendlist,
+.FriendsListContent,
+.friendlistListContainer {
+  background-color: #000000 !important;
+  background-image: var(--shade), var(--bg-all) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #ffffff !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.friend:hover, .friendStatusHover:hover { background: #ffffff !important; }
+.friend:hover .playerName, .friendStatusHover:hover .playerName { color: #000000 !important; }
+
+.friend.online .playerName { color: #ffffff !important; font-weight: bold !important; }
+.friend.in-game .playerName { color: #aaaaaa !important; }
+.friend.offline .playerName { color: #555555 !important; }
+
+.friendTab.activeTab {
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+/* =========================================
+   11. СКРОЛЛБАР
+   ========================================= */
+::-webkit-scrollbar { width: 10px !important; }
+::-webkit-scrollbar-track { background: #000000 !important; }
+::-webkit-scrollbar-thumb { background: #ffffff !important; border-radius: 0px !important; }
+::-webkit-scrollbar-thumb:hover { background: #aaaaaa !important; }

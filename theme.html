@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY | Просмотр темы</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
+    
+    <!-- ЕДИНАЯ ПРЕВЬЮШКА ДЛЯ ТЕМ -->
+    <meta property="og:title" content="W1NFY | Кастомная тема для Steam">
+    <meta property="og:description" content="Скачай кастомную тему для Steam Millennium от W1NFY.">
+    <meta property="og:image" content="https://w1nfyart-site.layero.app/images/theme-hell.jpg">
+    <meta property="og:url" content="https://w1nfyart-site.layero.app/">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">W1NFY<span>_CUSTOMS</span></a>
+        <nav>
+            <a href="index.html">← Назад</a>
+            <a href="https://t.me/w1nfyart" target="_blank" class="btn-social">Telegram</a>
+            <a href="https://discord.gg/86ZsPBGCS5" target="_blank" class="btn-social">Discord</a>
+        </nav>
+    </header>
+
+    <main class="theme-page">
+        <h1 class="theme-title" id="theme-title">Загрузка...</h1>
+        <p class="theme-desc" id="theme-desc">Описание темы...</p>
+        
+        <img src="" alt="Превью темы" class="large-preview" id="theme-image">
+        
+        <div class="theme-actions" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <button id="download-btn" class="link-btn" style="max-width: 300px; background-color: #6A5ACD; color: #fff;" onclick="downloadTheme()">
+                💾 Скачать файл темы (.css)
+            </button>
+            <button id="copy-btn" class="link-btn" style="max-width: 300px;" onclick="copyCode()">
+                📋 Скопировать код
+            </button>
+            
+            <!-- КНОПКА СКОПИРОВАТЬ ССЫЛКУ -->
+            <button id="share-btn" class="share-btn">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                Скопировать ссылку
+            </button>
+        </div>
+
+        <div class="install-guide" style="margin-top: 40px;">
+            <h2>🛠 Как установить тему (Полный гайд)</h2>
+            
+            <div class="guide-step">
+                <h3>Шаг 1: Установка Millennium</h3>
+                <p>Скачай программу Millennium с официального сайта (или из их GitHub). Запусти установщик и следуй инструкциям на экране. После установки Millennium автоматически перезапустит Steam.</p>
+            </div>
+
+            <div class="guide-step">
+                <h3>Шаг 2: Установка Minimal Dark</h3>
+                <p><b>Это обязательно!</b> Все мои темы делаются на базе Minimal Dark. В меню Steam перейди в <code>Millennium -> Settings -> Themes</code>. Найди тему <b>Minimal Dark</b> и нажми «Install» (Установить). Включи её.</p>
+            </div>
+
+            <div class="guide-step">
+                <h3>Шаг 3: Вставка кода (Quick CSS)</h3>
+                <p>В настройках Millennium перейди во вкладку <b>Quick CSS</b>. Нажми кнопку «Скачать файл темы» на этом сайте, открой скачанный файл блокнотом, скопируй оттуда весь код и вставь его в окно Quick CSS. Нажми <b>Save</b> (Сохранить).</p>
+            </div>
+
+            <div class="guide-step">
+                <h3>Шаг 4: Установка кастомного фона (Баннера)</h3>
+                <p>Чтобы установить атмосферный фон, <a href="#" id="banner-dl-link" download="banner.jpg" style="color: #6A5ACD; font-weight: bold; text-decoration: underline; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6A5ACD'">скачай этот баннер</a> прямо с нашего сайта.</p>
+                <p>После скачивания зайди в библиотеку Steam, нажми <b>ПКМ (правой кнопкой мыши) по фону игры</b> (на пустом месте, где обычно баннер) -> выбери <b>«Установить свой фон»</b> и укажи только что скачанную картинку.</p>
+            </div>
+            
+            <p style="margin-top: 20px; color: #a89bf5; font-weight: bold;">Если что-то пошло не так — зайди в наш Discord, там поможем!</p>
+        </div>
+    </main>
+
+    <footer><p>&copy; 2026 W1NFY.</p></footer>
+
+    <!-- МОДАЛКА ALERT -->
+    <div class="w1-modal-overlay" id="modal-alert">
+        <div class="w1-modal">
+            <h2>Уведомление</h2>
+            <p id="alert-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-primary" onclick="closeModal('modal-alert')">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function customAlert(text) {
+            document.getElementById('alert-text').innerText = text;
+            document.getElementById('modal-alert').classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        const themesData = {
+            "hell": {
+                title: "Кажется, в аду прикольно но меня выгнали б утром",
+                desc: "Темно-бордовая тема с нежными розовыми акцентами.",
+                image: "images/theme-hell.jpg",
+                file: "themes/hell.css",
+                banner: "images/banner-hell.jpg"
+            },
+            "party": {
+                title: "Как испортить вечеринку?",
+                desc: "Мрачный черно-белый гранж по обложке CUPSIZE.",
+                image: "images/theme-party.jpg",
+                file: "themes/party.css",
+                banner: "images/banner-party.jpg"
+            },
+            "flowers": {
+                title: "В моих легких выросли цветы",
+                desc: "Атмосферная оливково-желтая тема по обложке альбома CUPSIZE.",
+                image: "images/theme-flowers.jpg",
+                file: "themes/flowers.css",
+                banner: "images/banner-flowers.jpg"
+            }
+        };
+
+        let currentThemeId = "";
+
+        async function downloadTheme() {
+            if (!currentThemeId) return;
+            const data = themesData[currentThemeId];
+            try {
+                const response = await fetch(data.file);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `w1nfy_${currentThemeId}.css`; 
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                customAlert("Ошибка скачивания файла темы."); 
+            }
+        }
+
+        async function copyCode() {
+            if (!currentThemeId) return;
+            const data = themesData[currentThemeId];
+            try {
+                const response = await fetch(data.file);
+                const text = await response.text();
+                await navigator.clipboard.writeText(text);
+                customAlert("Код темы успешно скопирован в буфер обмена!"); 
+            } catch (error) {
+                customAlert("Ошибка чтения файла."); 
+            }
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentThemeId = urlParams.get('id');
+
+            if (currentThemeId && themesData[currentThemeId]) {
+                const data = themesData[currentThemeId];
+                
+                // === КОПИРОВАНИЕ ССЫЛКИ ===
+                document.getElementById('share-btn').onclick = () => {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        customAlert("Ссылка на эту тему скопирована в буфер обмена!");
+                    }).catch(() => {
+                        customAlert("Не удалось скопировать ссылку.");
+                    });
+                };
+
+                // === ЗАПОЛНЕНИЕ СТРАНИЦЫ ===
+                document.getElementById('theme-title').innerText = data.title;
+                document.title = "Тема: " + data.title + " | W1NFY";
+                document.getElementById('theme-desc').innerText = data.desc;
+                document.getElementById('theme-image').src = data.image;
+                
+                const dlLink = document.getElementById('banner-dl-link');
+                dlLink.href = data.banner;
+                dlLink.download = `banner-${currentThemeId}.jpg`;
+            } else {
+                document.getElementById('theme-title').innerText = "Тема не найдена :(";
+                document.getElementById('theme-desc').style.display = 'none';
+                document.getElementById('theme-image').style.display = 'none';
+                document.querySelector('.theme-actions').style.display = 'none';
+                document.querySelector('.install-guide').style.display = 'none';
+            }
+        };
+    </script>
+    <script src="animations.js"></script>
+</body>
+</html>

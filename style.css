@@ -1,0 +1,709 @@
+/* ==========================================
+   SITE: W1NFY CUSTOMS - PURPLE EDITION
+   BY W1NFY
+   ========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0a0710; 
+    background-image: 
+        repeating-radial-gradient(circle at 0 0, transparent 0, #0a0710 40px),
+        repeating-linear-gradient(#4b2c82, #4b2c82);
+    background-blend-mode: overlay;
+    color: #e0e0e0;
+    font-family: 'Roboto Mono', monospace;
+    line-height: 1.6;
+}
+
+/* Шапка */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: rgba(13, 9, 20, 0.95);
+    backdrop-filter: blur(5px);
+    border-bottom: 2px solid #6A5ACD;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    font-family: 'Rubik Glitch', cursive;
+    font-size: 24px;
+    color: #fff;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+
+.logo span { color: #6A5ACD; }
+
+nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+nav a {
+    color: #ccc;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav a:hover { color: #6A5ACD; }
+
+.btn-social {
+    border: 1px solid #6A5ACD;
+    padding: 5px 15px;
+    border-radius: 4px;
+}
+
+.btn-social:hover {
+    background-color: #6A5ACD;
+    color: #fff !important;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.5);
+}
+
+/* Главный экран */
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: linear-gradient(rgba(10, 7, 16, 0.85), rgba(10, 7, 16, 0.95)), url('https://i.ibb.co/Kj2FK6Tc/image.png') center/cover;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(106, 90, 205, 0.7);
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+/* Обертка для поиска и кнопки рандома */
+.search-wrapper {
+    display: flex;
+    max-width: 650px;
+    margin: 0 auto;
+    gap: 10px;
+}
+
+/* Поисковая строка */
+.search-container {
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    background-color: rgba(20, 15, 30, 0.9);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-container input:focus {
+    border-color: #6A5ACD;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.5);
+}
+
+.search-container input::placeholder { color: #666; }
+
+/* Кнопка Рандом */
+.random-btn {
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 2px solid #6A5ACD;
+    background-color: rgba(20, 15, 30, 0.9);
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.random-btn:hover {
+    background-color: #6A5ACD;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.6);
+}
+
+/* ВЫПАДАЮЩЕЕ МЕНЮ ПОИСКА */
+.search-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    margin-top: 5px;
+    background-color: #111116;
+    border: 1px solid #6A5ACD;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 200;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+}
+
+.search-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #2a2a35;
+    transition: background-color 0.2s;
+    text-align: left;
+}
+
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background-color: rgba(106, 90, 205, 0.2); }
+
+.search-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding-right: 10px;
+}
+
+/* Секции галереи */
+.gallery-section { padding: 60px 40px; }
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h2 {
+    font-size: 2rem;
+    border-left: 4px solid #6A5ACD;
+    padding-left: 15px;
+    color: #fff;
+    margin: 0;
+}
+
+.toggle-btn {
+    background-color: transparent;
+    color: #a89bf5;
+    border: 1px solid #6A5ACD;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background-color: #6A5ACD;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.5);
+}
+
+/* Сетка карточек */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+#themes-container.collapsed .card:nth-child(n+4) { display: none !important; }
+#dota-container.collapsed .card:nth-child(n+6) { display: none !important; }
+
+/* Карточка */
+.card {
+    background-color: #131318;
+    border: 1px solid #2a2a35;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: #6A5ACD;
+    box-shadow: 0 10px 25px rgba(106, 90, 205, 0.2);
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.badge-theme { background-color: #ff4500; color: #fff; }
+.badge-grid { background-color: #6A5ACD; color: #fff; }
+
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #2a2a35;
+}
+
+.card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-content h3 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.card-content p {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 15px;
+    flex-grow: 1; 
+}
+
+.card-counter {
+    font-size: 0.85rem;
+    color: #a89bf5;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.card-counter span {
+    color: #fff;
+    background-color: rgba(106, 90, 205, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.card-buttons {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+}
+
+.copy-btn, .link-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    background-color: rgba(106, 90, 205, 0.1);
+    color: #a89bf5;
+    border: 1px solid #6A5ACD;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.copy-btn:hover, .link-btn:hover {
+    background-color: #6A5ACD;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.6);
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ ТЕМЫ И СЕТОК
+   ========================================== */
+.theme-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.large-preview {
+    width: 100%;
+    border-radius: 8px;
+    border: 2px solid #2a2a35;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.theme-title {
+    font-size: 2.5rem;
+    color: #fff;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(106, 90, 205, 0.5);
+}
+
+.theme-desc {
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+.theme-actions { margin-bottom: 50px; }
+
+.install-guide {
+    background-color: #131318;
+    border-left: 4px solid #6A5ACD;
+    padding: 30px;
+    border-radius: 0 8px 8px 0;
+}
+
+.install-guide h2 {
+    color: #fff;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.install-guide p {
+    color: #bbb;
+    margin-bottom: 10px;
+}
+
+.install-guide code {
+    background-color: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #a89bf5;
+    font-family: monospace;
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ СЛАЙДЕРА И СТРЕЛОК
+   ========================================== */
+.slider-wrapper { position: relative; width: 100%; }
+
+.slider-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    scroll-behavior: smooth;
+    width: 100%;
+    max-width: 100%;
+}
+
+.slider-container::-webkit-scrollbar { display: none; }
+.slider-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+.slider-container img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: auto;
+    max-height: 65vh;
+    object-fit: contain;
+    scroll-snap-align: center;
+    background-color: #131318;
+    border-radius: 8px;
+    border: 1px solid #2a2a35;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(19, 19, 24, 0.8);
+    color: #6A5ACD;
+    border: 1px solid #6A5ACD;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.slider-btn:hover {
+    background-color: #6A5ACD;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(106, 90, 205, 0.8);
+}
+
+.slider-btn.prev { left: 15px; }
+.slider-btn.next { right: 15px; }
+
+/* Подвал */
+footer {
+    text-align: center;
+    padding: 30px;
+    background-color: rgba(13, 9, 20, 0.95);
+    backdrop-filter: blur(5px);
+    border-top: 1px solid #2a2a35;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 40px;
+}
+
+.footer-links { margin-bottom: 15px; }
+
+.footer-links a {
+    color: #6A5ACD;
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #fff;
+    text-shadow: 0 0 8px #6A5ACD;
+}
+
+/* ==========================================
+   КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА (W1-MODAL)
+   ========================================== */
+.w1-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center; z-index: 10000;
+}
+.w1-modal-overlay.active { display: flex; }
+.w1-modal {
+    background: #131318; border: 1px solid #6A5ACD; border-radius: 8px;
+    padding: 25px; min-width: 350px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    display: flex; flex-direction: column; gap: 15px; font-family: 'Roboto Mono', monospace;
+    animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.w1-modal h2 { margin: 0; color: #fff; font-size: 1.3rem; border-bottom: 1px solid #2a2a35; padding-bottom: 10px; }
+.w1-modal p { color: #ccc; margin: 0; line-height: 1.5; }
+.w1-modal input {
+    background: #0a0a0c; border: 1px solid #444; color: #fff; padding: 12px;
+    border-radius: 4px; font-family: inherit; font-size: 1rem; outline: none;
+}
+.w1-modal input:focus { border-color: #6A5ACD; box-shadow: 0 0 10px rgba(106, 90, 205, 0.3); }
+.w1-modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+.w1-btn { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; font-family: inherit; transition: 0.2s; }
+.w1-btn-primary { background: #6A5ACD; color: #fff; }
+.w1-btn-primary:hover { background: #5849b0; }
+.w1-btn-secondary { background: #333; color: #fff; }
+.w1-btn-secondary:hover { background: #444; }
+/* ==========================================
+   SITE: W1NFY CUSTOMS - PURPLE EDITION
+   BY W1NFY
+   ========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0a0710; 
+    background-image: 
+        repeating-radial-gradient(circle at 0 0, transparent 0, #0a0710 40px),
+        repeating-linear-gradient(#4b2c82, #4b2c82);
+    background-blend-mode: overlay;
+    color: #e0e0e0;
+    font-family: 'Roboto Mono', monospace;
+    line-height: 1.6;
+}
+
+/* ... (остальной CSS без изменений, добавлены только стили для портретов) ... */
+
+/* ==========================================
+   СТИЛИ ДЛЯ ПОРТРЕТОВ ГЕРОЕВ В РЕДАКТОРЕ
+   ========================================== */
+.hero-portrait {
+    position: absolute;
+    width: 48px;
+    height: 72px;
+    border: 2px solid #6A5ACD;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: grab;
+    z-index: 25;
+    box-shadow: 0 0 10px rgba(106, 90, 205, 0.5);
+    transition: transform 0.1s;
+}
+.hero-portrait:hover {
+    transform: scale(1.05);
+    z-index: 30;
+}
+.hero-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+/* ==========================================
+   АНИМАЦИИ И ПРЕЛОАДЕР
+   ========================================== */
+
+/* Прелоадер */
+.preloader {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #0a0710; display: flex; align-items: center; justify-content: center;
+    z-index: 99999; transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.preloader.hidden { opacity: 0; visibility: hidden; }
+.preloader-logo {
+    font-family: 'Rubik Glitch', cursive; font-size: 48px; color: #fff;
+    animation: pulseGlow 1.5s ease-in-out infinite;
+}
+.preloader-logo span { color: #6A5ACD; }
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); text-shadow: 0 0 20px rgba(106,90,205,0.5); }
+    50% { transform: scale(1.1); text-shadow: 0 0 40px rgba(106,90,205,0.9); }
+}
+
+/* Плавное появление/затухание страницы */
+body { opacity: 1; transition: opacity 0.4s ease; }
+body.fade-out { opacity: 0; }
+
+/* Анимация появления элементов при скролле */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Небольшая задержка для карточек, чтобы они появлялись по очереди */
+.card:nth-child(1) { transition-delay: 0.05s; }
+.card:nth-child(2) { transition-delay: 0.1s; }
+.card:nth-child(3) { transition-delay: 0.15s; }
+.card:nth-child(4) { transition-delay: 0.2s; }
+.card:nth-child(5) { transition-delay: 0.25s; }
+.card:nth-child(6) { transition-delay: 0.3s; }
+/* ==========================================
+   SPOTLIGHT HOVER (Свечение за курсором)
+   ========================================== */
+.card {
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: var(--mouse-y, 50%);
+    left: var(--mouse-x, 50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(106, 90, 205, 0.4) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 50%;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* Чтобы контент был поверх свечения */
+.card-content, .card img {
+    position: relative;
+    z-index: 2;
+}
+
+/* ==========================================
+   КНОПКА ПОДЕЛИТЬСЯ
+   ========================================== */
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #2AABEE; /* Цвет Telegram */
+    border: 1px solid #2AABEE;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    background-color: #2AABEE;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(42, 171, 238, 0.5);
+}
+
+.share-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+/* ==========================================
+   SPOTLIGHT HOVER (Динамическая подсветка)
+   ========================================== */
+.card {
+    position: relative;
+    overflow: hidden; /* Чтобы свечение не вылезало за края */
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: var(--mouse-y, 50%);
+    left: var(--mouse-x, 50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(106, 90, 205, 0.4) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 50%;
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* Чтобы контент был поверх свечения */
+.card-content, .card img {
+    position: relative;
+    z-index: 2;
+}

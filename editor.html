@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY | Редактор сеток Dota 2</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Стили для редактора */
+        body { display: flex; height: 100vh; overflow: hidden; background-color: #0a0a0c; margin: 0; color: #fff; font-family: 'Roboto Mono', monospace; user-select: none; }
+        
+        /* ЛЕВАЯ ПАНЕЛЬ */
+        .left-panel { width: 260px; flex-shrink: 0; background-color: #111116; border-right: 1px solid #2a2a35; display: flex; flex-direction: column; z-index: 10; }
+        .tool-box { padding: 10px; border-bottom: 1px solid #2a2a35; }
+        .tool-btn { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #ccc; cursor: pointer; border-radius: 4px; transition: 0.2s; margin-bottom: 5px; font-size: 0.95rem; }
+        .tool-btn:hover { background: #222; color: #fff; }
+        .tool-btn.active { background: #6A5ACD; color: #fff; }
+        
+        .symbol-categories { display: flex; flex-direction: column; gap: 5px; padding: 10px; overflow-y: auto; flex-grow: 1; }
+        .cat-title { font-size: 0.75rem; color: #888; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .sym-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+        .sym-btn { background: #1a1a1f; border: 1px solid #333; color: #fff; font-size: 1rem; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; transition: 0.1s; }
+        .sym-btn:hover { border-color: #888; }
+        .sym-btn.active { background: #6A5ACD; border-color: #6A5ACD; }
+
+        /* ЦЕНТР */
+        .center-panel { flex-grow: 1; flex-shrink: 1; display: flex; flex-direction: column; position: relative; background: #0a0a0c; overflow: hidden; min-width: 0; }
+        .top-bar { height: 60px; flex-shrink: 0; background: #111116; border-bottom: 1px solid #2a2a35; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 20; }
+        
+        .canvas-wrapper { 
+            flex-grow: 1; overflow: auto; position: relative;
+            background-color: #15151a;
+            background-image: radial-gradient(#222 1px, transparent 1px); background-size: 20px 20px;
+            cursor: crosshair;
+        }
+        .canvas-wrapper.panning { cursor: grabbing; }
+        
+        .artboard-wrapper {
+            position: relative;
+            margin: 200px auto;
+            width: 1280px; 
+            height: 720px;
+        }
+        
+        .artboard {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center center;
+            width: 1280px; height: 720px;
+            border: 2px dashed #6A5ACD;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            background-color: #050505;
+            transition: transform 0.1s ease-out;
+            box-sizing: border-box;
+        }
+
+        .grid-visual {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 16px 16px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Референс */
+        #ref-container {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            z-index: 1; 
+            pointer-events: none;
+            overflow: hidden;
+        }
+        #ref-img {
+            width: 100%; height: 100%; object-fit: fill;
+            opacity: 0.5;
+        }
+        
+        body.tool-ref-active #ref-container { z-index: 5; pointer-events: auto; cursor: move; border: 1px dashed #fff; }
+        body.tool-ref-active #ref-img { opacity: 0.9; }
+
+        .ref-handle {
+            position: absolute; width: 12px; height: 12px; background: #6A5ACD;
+            border: 1px solid #fff; border-radius: 2px;
+            display: none; z-index: 6; pointer-events: auto;
+        }
+        body.tool-ref-active .ref-handle { display: block; }
+        
+        .ref-handle[data-dir="nw"] { top: -6px; left: -6px; cursor: nwse-resize; }
+        .ref-handle[data-dir="ne"] { top: -6px; right: -6px; cursor: nesw-resize; }
+        .ref-handle[data-dir="sw"] { bottom: -6px; left: -6px; cursor: nesw-resize; }
+        .ref-handle[data-dir="se"] { bottom: -6px; right: -6px; cursor: nwse-resize; }
+
+        #points-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+        
+        .point {
+            position: absolute;
+            font-size: 14px;
+            line-height: 1;
+            color: #fff;
+            transform: translate(-50%, -50%);
+            white-space: pre;
+        }
+
+        #categories-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        /* === КАТЕГОРИИ === */
+        .category-zone {
+            position: absolute; 
+            border: 2px solid #6A5ACD; 
+            background: rgba(10, 10, 15, 0.85);
+            cursor: default; 
+            box-sizing: border-box; 
+            display: flex; flex-direction: column; overflow: hidden; border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            min-width: 100px;
+            min-height: 85px; /* Чтобы всегда был виден хотя бы один ряд героев */
+        }
+        .category-zone:hover { border-color: #fff; box-shadow: 0 0 20px rgba(106, 90, 205, 0.6); }
+        
+        .category-zone .cat-header {
+            background: #6A5ACD; color: #fff; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center; height: 20px; flex-shrink: 0;
+            cursor: move; /* Заголовок двигает категорию */
+        }
+        
+        .category-zone .heroes-container {
+            display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; align-content: flex-start;
+            flex-grow: 1; overflow-y: auto; /* Скролл, если не влезают */
+            cursor: pointer; /* Клик по героям открывает выбор */
+        }
+        .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
+        .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
+
+        .hero-portrait {
+            width: 36px; height: 48px; border: 1px solid #333; border-radius: 2px;
+            overflow: hidden; background: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        .hero-portrait img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Ручки ресайза по 4 углам */
+        .cat-resize-handle {
+            position: absolute; width: 10px; height: 10px; background: #6A5ACD;
+            z-index: 10; border-radius: 2px;
+        }
+        .cat-resize-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
+        .cat-resize-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
+        .cat-resize-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+        .cat-resize-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+        /* --- ВЫДЕЛЕНИЕ --- */
+        #selection-box {
+            position: absolute; border: 1px dashed #6A5ACD; background: rgba(106, 90, 205, 0.15);
+            display: none; z-index: 50; cursor: move;
+            box-sizing: border-box;
+            pointer-events: auto;
+        }
+        .sel-handle {
+            position: absolute; width: 12px; height: 12px; background: #6A5ACD;
+            bottom: -6px; right: -6px; cursor: nwse-resize; border-radius: 2px;
+        }
+        
+        #selection-ghost {
+            position: absolute; border: 2px solid #fff; background: rgba(255, 255, 255, 0.1);
+            display: none; z-index: 49; pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        /* ПРАВАЯ ПАНЕЛЬ */
+        .right-panel { width: 220px; flex-shrink: 0; background-color: #111116; border-left: 1px solid #2a2a35; padding: 15px; display: flex; flex-direction: column; gap: 15px; z-index: 10; }
+        .prop-group { display: flex; flex-direction: column; gap: 5px; }
+        .prop-group label { font-size: 0.8rem; color: #888; display: flex; justify-content: space-between; }
+        .prop-group input, .prop-group select { background: #0a0a0c; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; font-family: inherit; }
+        .prop-group input[type="file"] { padding: 5px; }
+        
+        .btn-save { background: #6A5ACD; color: #fff; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: auto; font-family: inherit; transition: 0.2s; }
+        .btn-save:hover { background: #5849b0; }
+        .top-btn { background: transparent; color: #ccc; border: 1px solid #333; padding: 8px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+        .top-btn:hover { border-color: #6A5ACD; color: #fff; }
+
+        /* ЗУМ ПАНЕЛЬ */
+        .zoom-panel {
+            position: absolute; bottom: 20px; right: 20px;
+            background: #111116; border: 1px solid #333; border-radius: 6px;
+            padding: 5px 10px; display: flex; align-items: center; gap: 10px;
+            z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .zoom-btn {
+            background: #222; border: 1px solid #444; color: #fff; width: 24px; height: 24px;
+            border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px; transition: 0.2s;
+        }
+        .zoom-btn:hover { background: #6A5ACD; border-color: #6A5ACD; }
+        .zoom-panel input { width: 100px; accent-color: #6A5ACD; cursor: pointer; }
+        .zoom-panel span { font-size: 0.9rem; color: #ccc; width: 45px; text-align: right; }
+
+        /* === МОДАЛЬНЫЕ ОКНА === */
+        .w1-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .w1-modal-overlay.active { display: flex; }
+        .w1-modal {
+            background: #131318; border: 1px solid #6A5ACD; border-radius: 8px;
+            padding: 25px; min-width: 400px; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            display: flex; flex-direction: column; gap: 15px; animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .w1-modal h2 { margin: 0; color: #fff; font-size: 1.5rem; border-bottom: 1px solid #2a2a35; padding-bottom: 10px; }
+        .w1-modal input, .w1-modal textarea { background: #0a0a0c; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 4px; font-family: inherit; font-size: 1rem; outline: none; }
+        .w1-modal textarea { height: 150px; resize: vertical; font-family: monospace; font-size: 0.85rem; }
+        .w1-modal input:focus, .w1-modal textarea:focus { border-color: #6A5ACD; box-shadow: 0 0 10px rgba(106, 90, 205, 0.3); }
+        .w1-modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .w1-btn { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; font-family: inherit; transition: 0.2s; }
+        .w1-btn-primary { background: #6A5ACD; color: #fff; }
+        .w1-btn-primary:hover { background: #5849b0; }
+        .w1-btn-secondary { background: #333; color: #fff; }
+        .w1-btn-secondary:hover { background: #444; }
+
+        /* === МОДАЛКА ВЫБОРА ГЕРОЕВ === */
+        .hero-picker-modal { width: 850px; max-width: 90vw; max-height: 85vh; }
+        .hero-picker-filters { display: flex; gap: 10px; margin-bottom: 10px; }
+        .hero-picker-filters input { flex-grow: 1; }
+        .attr-filters { display: flex; gap: 5px; flex-wrap: wrap; }
+        .attr-btn { background: #222; border: 1px solid #333; padding: 8px 12px; border-radius: 4px; cursor: pointer; color: #aaa; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+        .attr-btn.active { background: #6A5ACD; color: #fff; border-color: #6A5ACD; }
+        .attr-btn img { width: 16px; height: 16px; }
+        
+        .hero-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px;
+            overflow-y: auto; max-height: 55vh; padding-right: 5px;
+        }
+        .hero-grid::-webkit-scrollbar { width: 6px; }
+        .hero-grid::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 3px; }
+        
+        .hero-card {
+            background: #0a0a0c; border: 1px solid #333; border-radius: 6px; cursor: pointer;
+            position: relative; overflow: hidden; transition: 0.2s; display: flex; flex-direction: column;
+            height: 150px;
+        }
+        .hero-card .portrait-container {
+            width: 100%; height: 110px; overflow: hidden; position: relative;
+        }
+        .hero-card .portrait-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .hero-card .hero-name { 
+            font-size: 0.75rem; color: #ccc; padding: 6px; text-align: center; background: #111; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: auto;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .hero-card .attr-icon { width: 14px; height: 14px; }
+        
+        .hero-card:hover { border-color: #6A5ACD; transform: scale(1.05); z-index: 2; }
+        .hero-card.selected { border: 2px solid #6A5ACD; box-shadow: 0 0 10px #6A5ACD; }
+        .hero-card .hero-check { 
+            position: absolute; top: 4px; right: 4px; background: #6A5ACD; color: #fff; 
+            width: 20px; height: 20px; border-radius: 50%; font-size: 12px; display: none; 
+            align-items: center; justify-content: center; font-weight: bold; z-index: 5;
+        }
+        .hero-card.selected .hero-check { display: flex; }
+    </style>
+</head>
+<body>
+
+    <!-- ЛЕВАЯ ПАНЕЛЬ -->
+    <div class="left-panel">
+        <div class="tool-box">
+            <div class="tool-btn active" onclick="setTool('brush')" id="tool-brush">🖌 Кисть</div>
+            <div class="tool-btn" onclick="setTool('category')" id="tool-category">⬚ Категория героев</div>
+            <div class="tool-btn" onclick="setTool('lasso')" id="tool-lasso">🔲 Выделение</div>
+            <div class="tool-btn" onclick="setTool('ref')" id="tool-ref">🖼 Референс</div>
+            <div class="tool-btn" onclick="setTool('eraser')" id="tool-eraser">🧽 Ластик</div>
+        </div>
+        <div class="symbol-categories" id="sym-panel"></div>
+    </div>
+
+    <!-- ЦЕНТР -->
+    <div class="center-panel">
+        <div class="top-bar">
+            <div style="display:flex; gap: 15px; align-items:center;">
+                <a href="index.html" class="logo" style="text-decoration: none; color: #fff; font-family: 'Rubik Glitch', cursive; font-size: 20px;">W1NFY<span style="color: #6A5ACD;">_EDITOR</span></a>
+                <a href="studio.html" class="top-btn">← В Студию</a>
+                <span style="color:#fff; font-weight:bold;" id="project-title">Новая сетка</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items:center;">
+                <button class="top-btn" id="btn-undo" onclick="undo()" title="Отменить (Ctrl+Z)">↩ Отмена</button>
+                <button class="top-btn" id="btn-redo" onclick="redo()" title="Повторить (Ctrl+Y)">↪ Повтор</button>
+                <div style="width: 1px; height: 20px; background: #333; margin: 0 5px;"></div>
+                <button class="top-btn" onclick="document.getElementById('modal-import').classList.add('active')">📥 Импорт</button>
+                <button class="btn-save" onclick="exportJSON()" style="width:auto; margin:0; background:#333;">💾 Экспорт</button>
+                <button class="btn-save" onclick="saveToStudio()" style="width:auto; margin:0;">💾 Сохранить</button>
+            </div>
+        </div>
+        
+        <div class="canvas-wrapper" id="canvas-wrapper">
+            <div class="artboard-wrapper" id="zoom-container">
+                <div class="artboard" id="artboard">
+                    <!-- Слой референса -->
+                    <div id="ref-container">
+                        <img id="ref-img" src="" alt="reference">
+                        <div class="ref-handle" data-dir="nw"></div>
+                        <div class="ref-handle" data-dir="ne"></div>
+                        <div class="ref-handle" data-dir="sw"></div>
+                        <div class="ref-handle" data-dir="se"></div>
+                    </div>
+                    
+                    <!-- Визуальная сетка -->
+                    <div class="grid-visual" id="grid-visual"></div>
+                    
+                    <!-- Точки -->
+                    <div id="points-layer"></div>
+                    
+                    <!-- Категории -->
+                    <div id="categories-layer"></div>
+                    
+                    <!-- Рамка выделения -->
+                    <div id="selection-box">
+                        <div class="sel-handle"></div>
+                    </div>
+                    <div id="selection-ghost"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Зум панель -->
+        <div class="zoom-panel">
+            <button class="zoom-btn" onclick="stepZoom(-10)">-</button>
+            <input type="range" id="zoom-slider" min="10" max="800" value="100">
+            <button class="zoom-btn" onclick="stepZoom(10)">+</button>
+            <span id="zoom-val">100%</span>
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ -->
+    <div class="right-panel">
+        <h3 style="color:#fff; margin:0;">Свойства</h3>
+        <div class="prop-group">
+            <label>Плотность кисти</label>
+            <input type="range" id="brush-density" min="2" max="20" value="5">
+            <span style="font-size:0.7rem; color:#666; text-align:right;" id="density-val">5 px</span>
+        </div>
+        <div class="prop-group">
+            <label>Размер ластика</label>
+            <select id="eraser-size">
+                <option value="10">10 x 10</option>
+                <option value="20" selected>20 x 20</option>
+                <option value="40">40 x 40</option>
+            </select>
+        </div>
+        
+        <hr style="border-color:#2a2a35; width:100%; margin: 5px 0;">
+        
+        <h3 style="color:#fff; margin:0;">Референс</h3>
+        <div class="prop-group">
+            <label>Загрузить картинку</label>
+            <input type="file" id="ref-upload" accept="image/*">
+        </div>
+        <div class="prop-group">
+            <label>Прозрачность</label>
+            <input type="range" id="ref-opacity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="prop-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#ccc; font-size:0.9rem;">
+                <input type="checkbox" id="ref-hide" checked style="width:16px; height:16px; accent-color:#6A5ACD;">
+                Показывать референс
+            </label>
+        </div>
+
+        <button class="btn-save" style="background:#ff4444; margin-top:auto;" onclick="clearCanvas()">Очистить всё</button>
+    </div>
+
+    <!-- МОДАЛКИ -->
+    <div class="w1-modal-overlay" id="modal-prompt">
+        <div class="w1-modal">
+            <h2 id="prompt-title">Введите название</h2>
+            <input type="text" id="prompt-input" placeholder="...">
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="promptCancel()">Отмена</button>
+                <button class="w1-btn w1-btn-primary" id="prompt-ok">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="w1-modal-overlay" id="modal-alert">
+        <div class="w1-modal">
+            <h2>Уведомление</h2>
+            <p id="alert-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-primary" onclick="closeModal('modal-alert')">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="w1-modal-overlay" id="modal-confirm">
+        <div class="w1-modal">
+            <h2>Подтверждение</h2>
+            <p id="confirm-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="resolveConfirm(false)">Отмена</button>
+                <button class="w1-btn w1-btn-primary" onclick="resolveConfirm(true)">Да</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ИМПОРТА -->
+    <div class="w1-modal-overlay" id="modal-import">
+        <div class="w1-modal">
+            <h2>Импорт сетки (JSON)</h2>
+            <div class="prop-group">
+                <label>Выберите файл .json</label>
+                <input type="file" id="import-file" accept=".json">
+            </div>
+            <div style="text-align: center; color: #666; margin: 5px 0;">— ИЛИ ВСТАВЬТЕ ТЕКСТ —</div>
+            <textarea id="import-text" placeholder="Вставьте содержимое JSON здесь..."></textarea>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="closeModal('modal-import')">Отмена</button>
+                <button class="w1-btn w1-btn-primary" onclick="processImport()">Импортировать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ВЫБОРА ГЕРОЕВ -->
+    <div class="w1-modal-overlay" id="modal-heroes">
+        <div class="w1-modal hero-picker-modal">
+            <h2 id="hero-picker-title">Выбор героев</h2>
+            <div class="hero-picker-filters">
+                <input type="text" id="hero-search" placeholder="Поиск по имени...">
+                <div class="attr-filters">
+                    <div class="attr-btn active" onclick="filterHeroes('all')">Все</div>
+                    <div class="attr-btn" onclick="filterHeroes('str')"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png"> Сила</div>
+                    <div class="attr-btn" onclick="filterHeroes('agi')"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_agility.png"> Ловкость</div>
+                    <div class="attr-btn" onclick="filterHeroes('int')"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_intelligence.png"> Интеллект</div>
+                    <div class="attr-btn" onclick="filterHeroes('uni')"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png"> Универсал</div>
+                </div>
+            </div>
+            <div class="hero-grid" id="hero-grid"></div>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="closeModal('modal-heroes')">Отмена</button>
+                <button class="w1-btn w1-btn-primary" onclick="saveHeroesToCategory()">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ИКОНКИ АТРИБУТОВ
+        // ==========================================
+        const ATTR_ICONS = {
+            str: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png",
+            agi: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_agility.png",
+            int: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_intelligence.png",
+            uni: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png"
+        };
+
+        // ==========================================
+        // БАЗА ДАННЫХ ГЕРОЕВ
+        // ==========================================
+        const HEROES = [
+            { id: 1, name: "Anti-Mage", attr: "agi", img: "antimage" },
+            { id: 2, name: "Axe", attr: "str", img: "axe" },
+            { id: 3, name: "Bane", attr: "uni", img: "bane" },
+            { id: 4, name: "Bloodseeker", attr: "agi", img: "bloodseeker" },
+            { id: 5, name: "Crystal Maiden", attr: "int", img: "crystal_maiden" },
+            { id: 6, name: "Drow Ranger", attr: "agi", img: "drow_ranger" },
+            { id: 7, name: "Earthshaker", attr: "str", img: "earthshaker" },
+            { id: 8, name: "Juggernaut", attr: "agi", img: "juggernaut" },
+            { id: 9, name: "Mirana", attr: "uni", img: "mirana" },
+            { id: 10, name: "Morphling", attr: "agi", img: "morphling" },
+            { id: 11, name: "Shadow Fiend", attr: "agi", img: "nevermore" },
+            { id: 12, name: "Phantom Lancer", attr: "agi", img: "phantom_lancer" },
+            { id: 13, name: "Puck", attr: "int", img: "puck" },
+            { id: 14, name: "Pudge", attr: "str", img: "pudge" },
+            { id: 15, name: "Razor", attr: "agi", img: "razor" },
+            { id: 16, name: "Sand King", attr: "uni", img: "sand_king" },
+            { id: 17, name: "Storm Spirit", attr: "int", img: "storm_spirit" },
+            { id: 18, name: "Sven", attr: "str", img: "sven" },
+            { id: 19, name: "Tiny", attr: "str", img: "tiny" },
+            { id: 20, name: "Vengeful Spirit", attr: "uni", img: "vengefulspirit" },
+            { id: 21, name: "Windranger", attr: "uni", img: "windrunner" },
+            { id: 22, name: "Zeus", attr: "int", img: "zuus" },
+            { id: 23, name: "Kunkka", attr: "str", img: "kunkka" },
+            { id: 25, name: "Lina", attr: "int", img: "lina" },
+            { id: 26, name: "Lion", attr: "int", img: "lion" },
+            { id: 27, name: "Shadow Shaman", attr: "int", img: "shadow_shaman" },
+            { id: 28, name: "Slardar", attr: "str", img: "slardar" },
+            { id: 29, name: "Tidehunter", attr: "str", img: "tidehunter" },
+            { id: 30, name: "Witch Doctor", attr: "int", img: "witch_doctor" },
+            { id: 31, name: "Lich", attr: "int", img: "lich" },
+            { id: 32, name: "Riki", attr: "agi", img: "riki" },
+            { id: 33, name: "Enigma", attr: "uni", img: "enigma" },
+            { id: 34, name: "Tinker", attr: "int", img: "tinker" },
+            { id: 35, name: "Sniper", attr: "agi", img: "sniper" },
+            { id: 36, name: "Necrophos", attr: "int", img: "necrolyte" },
+            { id: 37, name: "Warlock", attr: "int", img: "warlock" },
+            { id: 38, name: "Beastmaster", attr: "uni", img: "beastmaster" },
+            { id: 39, name: "Queen of Pain", attr: "int", img: "queenofpain" },
+            { id: 40, name: "Venomancer", attr: "uni", img: "venomancer" },
+            { id: 41, name: "Faceless Void", attr: "agi", img: "faceless_void" },
+            { id: 42, name: "Wraith King", attr: "str", img: "skeleton_king" },
+            { id: 43, name: "Death Prophet", attr: "int", img: "death_prophet" },
+            { id: 44, name: "Phantom Assassin", attr: "agi", img: "phantom_assassin" },
+            { id: 45, name: "Pugna", attr: "int", img: "pugna" },
+            { id: 46, name: "Templar Assassin", attr: "agi", img: "templar_assassin" },
+            { id: 47, name: "Viper", attr: "agi", img: "viper" },
+            { id: 48, name: "Luna", attr: "agi", img: "luna" },
+            { id: 49, name: "Dragon Knight", attr: "str", img: "dragon_knight" },
+            { id: 50, name: "Dazzle", attr: "uni", img: "dazzle" },
+            { id: 51, name: "Clockwerk", attr: "uni", img: "rattletrap" },
+            { id: 52, name: "Leshrac", attr: "int", img: "leshrac" },
+            { id: 53, name: "Nature's Prophet", attr: "int", img: "furion" },
+            { id: 54, name: "Lifestealer", attr: "str", img: "life_stealer" },
+            { id: 55, name: "Dark Seer", attr: "uni", img: "dark_seer" },
+            { id: 56, name: "Clinkz", attr: "agi", img: "clinkz" },
+            { id: 57, name: "Omniknight", attr: "str", img: "omniknight" },
+            { id: 58, name: "Enchantress", attr: "int", img: "enchantress" },
+            { id: 59, name: "Huskar", attr: "str", img: "huskar" },
+            { id: 60, name: "Night Stalker", attr: "str", img: "night_stalker" },
+            { id: 61, name: "Broodmother", attr: "uni", img: "broodmother" },
+            { id: 62, name: "Bounty Hunter", attr: "agi", img: "bounty_hunter" },
+            { id: 63, name: "Weaver", attr: "agi", img: "weaver" },
+            { id: 64, name: "Jakiro", attr: "int", img: "jakiro" },
+            { id: 65, name: "Batrider", attr: "uni", img: "batrider" },
+            { id: 66, name: "Chen", attr: "uni", img: "chen" },
+            { id: 67, name: "Spectre", attr: "agi", img: "spectre" },
+            { id: 68, name: "Ancient Apparition", attr: "int", img: "ancient_apparition" },
+            { id: 69, name: "Doom", attr: "str", img: "doom_bringer" },
+            { id: 70, name: "Ursa", attr: "agi", img: "ursa" },
+            { id: 71, name: "Spirit Breaker", attr: "str", img: "spirit_breaker" },
+            { id: 72, name: "Gyrocopter", attr: "agi", img: "gyrocopter" },
+            { id: 73, name: "Alchemist", attr: "str", img: "alchemist" },
+            { id: 74, name: "Invoker", attr: "int", img: "invoker" },
+            { id: 75, name: "Silencer", attr: "int", img: "silencer" },
+            { id: 76, name: "Outworld Destroyer", attr: "int", img: "obsidian_destroyer" },
+            { id: 77, name: "Lycan", attr: "uni", img: "lycan" },
+            { id: 78, name: "Brewmaster", attr: "uni", img: "brewmaster" },
+            { id: 79, name: "Shadow Demon", attr: "int", img: "shadow_demon" },
+            { id: 80, name: "Lone Druid", attr: "uni", img: "lone_druid" },
+            { id: 81, name: "Chaos Knight", attr: "str", img: "chaos_knight" },
+            { id: 82, name: "Meepo", attr: "agi", img: "meepo" },
+            { id: 83, name: "Treant Protector", attr: "str", img: "treant" },
+            { id: 84, name: "Ogre Magi", attr: "int", img: "ogre_magi" },
+            { id: 85, name: "Undying", attr: "str", img: "undying" },
+            { id: 86, name: "Rubick", attr: "int", img: "rubick" },
+            { id: 87, name: "Disruptor", attr: "int", img: "disruptor" },
+            { id: 88, name: "Nyx Assassin", attr: "uni", img: "nyx_assassin" },
+            { id: 89, name: "Naga Siren", attr: "agi", img: "naga_siren" },
+            { id: 90, name: "Keeper of the Light", attr: "int", img: "keeper_of_the_light" },
+            { id: 91, name: "Io", attr: "uni", img: "wisp" },
+            { id: 92, name: "Visage", attr: "uni", img: "visage" },
+            { id: 93, name: "Slark", attr: "agi", img: "slark" },
+            { id: 94, name: "Medusa", attr: "agi", img: "medusa" },
+            { id: 95, name: "Troll Warlord", attr: "agi", img: "troll_warlord" },
+            { id: 96, name: "Centaur Warrunner", attr: "str", img: "centaur" },
+            { id: 97, name: "Magnus", attr: "uni", img: "magnataur" },
+            { id: 98, name: "Timbersaw", attr: "uni", img: "shredder" },
+            { id: 99, name: "Bristleback", attr: "str", img: "bristleback" },
+            { id: 100, name: "Tusk", attr: "str", img: "tusk" },
+            { id: 101, name: "Skywrath Mage", attr: "int", img: "skywrath_mage" },
+            { id: 102, name: "Abaddon", attr: "uni", img: "abaddon" },
+            { id: 103, name: "Elder Titan", attr: "str", img: "elder_titan" },
+            { id: 104, name: "Legion Commander", attr: "str", img: "legion_commander" },
+            { id: 105, name: "Techies", attr: "uni", img: "techies" },
+            { id: 106, name: "Ember Spirit", attr: "agi", img: "ember_spirit" },
+            { id: 107, name: "Earth Spirit", attr: "str", img: "earth_spirit" },
+            { id: 108, name: "Underlord", attr: "str", img: "abyssal_underlord" },
+            { id: 109, name: "Terrorblade", attr: "agi", img: "terrorblade" },
+            { id: 110, name: "Phoenix", attr: "uni", img: "phoenix" },
+            { id: 111, name: "Oracle", attr: "int", img: "oracle" },
+            { id: 112, name: "Winter Wyvern", attr: "uni", img: "winter_wyvern" },
+            { id: 113, name: "Arc Warden", attr: "agi", img: "arc_warden" },
+            { id: 114, name: "Monkey King", attr: "agi", img: "monkey_king" },
+            { id: 119, name: "Dark Willow", attr: "uni", img: "dark_willow" },
+            { id: 120, name: "Pangolier", attr: "uni", img: "pangolier" },
+            { id: 121, name: "Grimstroke", attr: "int", img: "grimstroke" },
+            { id: 123, name: "Hoodwink", attr: "agi", img: "hoodwink" },
+            { id: 126, name: "Void Spirit", attr: "uni", img: "void_spirit" },
+            { id: 128, name: "Snapfire", attr: "uni", img: "snapfire" },
+            { id: 129, name: "Mars", attr: "str", img: "mars" },
+            { id: 131, name: "Ringmaster", attr: "int", img: "ringmaster" },
+            { id: 135, name: "Dawnbreaker", attr: "str", img: "dawnbreaker" },
+            { id: 136, name: "Marci", attr: "uni", img: "marci" },
+            { id: 137, name: "Primal Beast", attr: "str", img: "primal_beast" },
+            { id: 138, name: "Muerta", attr: "int", img: "muerta" }
+        ].map(h => ({ ...h, img: `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${h.img}.png` }));
+
+        // ==========================================
+        // БАЗА СИМВОЛОВ
+        // ==========================================
+        const SYMBOL_CATEGORIES = {
+            "База": ['·', '•', '—', '|', '/', '\\', '+', '*', '#', '█', '▓', '▒', '░', ' '],
+            "Стрелки": ['←', '→', '↑', '↓', '↔', '↕', '↖', '↗', '↘', '↙'],
+            "Геометрия": ['■', '□', '▲', '△', '▼', '▽', '◆', '◇', '○', '●', '▼', '▲'],
+            "Звезды": ['★', '☆', '✦', '✧', '✩', '✪', '✫', '✬', '✭', '✮', '✯', '✰'],
+            "Спец": ['!', '@', '$', '%', '^', '&', '?', '~', '©', '®', '§', '¶', '†', '‡'],
+            "Математика": ['+', '-', '=', '×', '÷', '±', '∞', '√', '∑', '∏', '∫', '≈']
+        };
+
+        // ==========================================
+        // КАСТОМНЫЕ МОДАЛКИ
+        // ==========================================
+        function customPrompt(title, defaultVal = "") {
+            return new Promise((resolve) => {
+                document.getElementById('prompt-title').innerText = title;
+                const input = document.getElementById('prompt-input');
+                input.value = defaultVal;
+                document.getElementById('modal-prompt').classList.add('active');
+                setTimeout(() => input.focus(), 100);
+                window._resolvePrompt = resolve;
+                document.getElementById('prompt-ok').onclick = () => { closeModal('modal-prompt'); resolve(input.value); };
+                input.onkeydown = (e) => { if (e.key === 'Enter') document.getElementById('prompt-ok').click(); };
+            });
+        }
+        function promptCancel() {
+            closeModal('modal-prompt');
+            if (window._resolvePrompt) {
+                window._resolvePrompt(null);
+                window._resolvePrompt = null;
+            }
+        }
+        function customAlert(text) { document.getElementById('alert-text').innerText = text; document.getElementById('modal-alert').classList.add('active'); }
+        function customConfirm(text) { return new Promise((resolve) => { document.getElementById('confirm-text').innerText = text; document.getElementById('modal-confirm').classList.add('active'); window._resolveConfirm = resolve; }); }
+        function resolveConfirm(val) { closeModal('modal-confirm'); if (window._resolveConfirm) window._resolveConfirm(val); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // ==========================================
+        // ЛОГИКА РЕДАКТОРА
+        // ==========================================
+        const artboard = document.getElementById('artboard');
+        const pointsLayer = document.getElementById('points-layer');
+        const categoriesLayer = document.getElementById('categories-layer');
+        const refContainer = document.getElementById('ref-container');
+        const refImg = document.getElementById('ref-img');
+        const selBox = document.getElementById('selection-box');
+        const selGhost = document.getElementById('selection-ghost');
+        const zoomContainer = document.getElementById('zoom-container');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        
+        let currentTool = 'brush';
+        let activeSym = SYMBOL_CATEGORIES["База"][0];
+        let isDrawing = false;
+        let isDraggingCategory = false;
+        let isResizingCategory = false;
+        let isDraggingCategoryPos = false;
+        let isResizingCatDir = null;
+        let isSelecting = false;
+        let isDraggingLasso = false;
+        let isResizingLasso = false;
+        
+        let catStartX = 0, catStartY = 0, catEndX = 0, catEndY = 0;
+        let activeResizeCat = -1;
+        
+        let selStartX = 0, selStartY = 0;
+        let dragStartMouseX = 0, dragStartMouseY = 0;
+        let originalBoxX = 0, originalBoxY = 0;
+        
+        let points = []; 
+        let categories = []; 
+        
+        let activeCategoryIndex = -1;
+        let selectedHeroesForCategory = new Set();
+        let currentFilter = 'all';
+
+        let activeSelection = []; 
+        let lastX = -1000, lastY = -1000;
+        let dragCatIndex = -1; // Индекс двигаемой категории
+
+        // История (Undo/Redo)
+        let history = [];
+        let historyIndex = -1;
+
+        function saveState() {
+            history = history.slice(0, historyIndex + 1);
+            const state = {
+                points: JSON.parse(JSON.stringify(points)),
+                categories: JSON.parse(JSON.stringify(categories))
+            };
+            history.push(state);
+            historyIndex++;
+            updateHistoryButtons();
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                loadState(history[historyIndex]);
+                updateHistoryButtons();
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                loadState(history[historyIndex]);
+                updateHistoryButtons();
+            }
+        }
+
+        function loadState(state) {
+            points = JSON.parse(JSON.stringify(state.points));
+            categories = JSON.parse(JSON.stringify(state.categories));
+            renderAll();
+        }
+
+        function updateHistoryButtons() {
+            document.getElementById('btn-undo').style.opacity = historyIndex > 0 ? '1' : '0.5';
+            document.getElementById('btn-redo').style.opacity = historyIndex < history.length - 1 ? '1' : '0.5';
+        }
+
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        function init() {
+            renderSymbols();
+            saveState();
+            
+            setTimeout(() => {
+                canvasWrapper.scrollLeft = (canvasWrapper.scrollWidth - canvasWrapper.offsetWidth) / 2;
+                canvasWrapper.scrollTop = (canvasWrapper.scrollHeight - canvasWrapper.offsetHeight) / 2;
+            }, 100);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) loadProject(id);
+
+            renderAll();
+            updateHistoryButtons();
+            setZoom(100);
+        }
+
+        // --- ЗУМ И ПАН ---
+        let zoom = 100;
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomVal = document.getElementById('zoom-val');
+
+        function setZoom(val) {
+            const oldZoom = zoom;
+            zoom = Math.max(10, Math.min(800, val));
+            zoomSlider.value = zoom;
+            zoomVal.innerText = zoom + '%';
+            
+            const scale = zoom / 100;
+            artboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            
+            const padding = 400; 
+            zoomContainer.style.width = (1280 * scale + padding * 2) + 'px';
+            zoomContainer.style.height = (720 * scale + padding * 2) + 'px';
+            
+            if (oldZoom !== zoom) {
+                const oldCenterX = canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2;
+                const oldCenterY = canvasWrapper.scrollTop + canvasWrapper.offsetHeight / 2;
+                
+                const scaleDiff = scale / (oldZoom / 100);
+                
+                setTimeout(() => {
+                    canvasWrapper.scrollLeft = oldCenterX * scaleDiff - canvasWrapper.offsetWidth / 2;
+                    canvasWrapper.scrollTop = oldCenterY * scaleDiff - canvasWrapper.offsetHeight / 2;
+                }, 10);
+            }
+        }
+
+        function stepZoom(delta) {
+            setZoom(zoom + delta);
+        }
+
+        zoomSlider.addEventListener('input', (e) => {
+            setZoom(parseInt(e.target.value));
+        });
+
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+        let scrollLeftStart = 0, scrollTopStart = 0;
+
+        canvasWrapper.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.left-panel') || e.target.closest('.right-panel') || e.target.closest('.top-bar') || e.target.closest('.zoom-panel')) return;
+            if (e.target.closest('.category-zone') || e.target.closest('#selection-box') || e.target.closest('#ref-container') || e.target.closest('.ref-handle')) return;
+
+            if (e.button === 1) {
+                e.preventDefault();
+                isPanning = true;
+                canvasWrapper.classList.add('panning');
+                panStartX = e.clientX;
+                panStartY = e.clientY;
+                scrollLeftStart = canvasWrapper.scrollLeft;
+                scrollTopStart = canvasWrapper.scrollTop;
+                return;
+            }
+            
+            if (e.button !== 0 && e.button !== 2) return; 
+            
+            const coords = getCanvasCoords(e);
+            
+            if (e.button === 2) {
+                eraseAt(coords.x, coords.y);
+                return;
+            }
+
+            if (currentTool === 'brush') {
+                isDrawing = true;
+                lastX = -1000; lastY = -1000; 
+                drawAt(coords.x, coords.y);
+            } else if (currentTool === 'eraser') {
+                isDrawing = true;
+                eraseAt(coords.x, coords.y);
+            } else if (currentTool === 'category') {
+                isDraggingCategory = true;
+                catStartX = coords.x;
+                catStartY = coords.y;
+                catEndX = catStartX;
+                catEndY = catStartY;
+            } else if (currentTool === 'lasso') {
+                isSelecting = true;
+                selStartX = coords.x;
+                selStartY = coords.y;
+                
+                selBox.style.display = 'block';
+                selBox.style.left = selStartX + 'px';
+                selBox.style.top = selStartY + 'px';
+                selBox.style.width = '0px';
+                selBox.style.height = '0px';
+            }
+        });
+
+        selBox.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('sel-handle')) return;
+            isDraggingLasso = true;
+            
+            dragStartMouseX = e.clientX;
+            dragStartMouseY = e.clientY;
+            originalBoxX = parseFloat(selBox.style.left);
+            originalBoxY = parseFloat(selBox.style.top);
+            
+            selGhost.style.display = 'block';
+            selGhost.style.left = originalBoxX + 'px';
+            selGhost.style.top = originalBoxY + 'px';
+            selGhost.style.width = selBox.style.width;
+            selGhost.style.height = selBox.style.height;
+            
+            e.stopPropagation();
+        });
+
+        document.querySelector('.sel-handle').addEventListener('mousedown', (e) => {
+            isResizingLasso = true;
+            e.stopPropagation();
+        });
+
+        // --- ДВИЖЕНИЕ МЫШИ ---
+        document.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                const walkX = e.clientX - panStartX;
+                const walkY = e.clientY - panStartY;
+                canvasWrapper.scrollLeft = scrollLeftStart - walkX;
+                canvasWrapper.scrollTop = scrollTopStart - walkY;
+                return;
+            }
+
+            const scale = zoom / 100;
+            const coords = getCanvasCoords(e);
+
+            if (isDrawing) {
+                if (currentTool === 'brush') drawAt(coords.x, coords.y);
+                if (currentTool === 'eraser') eraseAt(coords.x, coords.y);
+            }
+
+            if (isDraggingRef) {
+                refX = refStartX + (e.clientX - refStartMouseX) / scale;
+                refY = refStartY + (e.clientY - refStartMouseY) / scale;
+                updateRefStyle();
+            }
+            if (isResizingRef) {
+                const dx = (e.clientX - refStartMouseX) / scale;
+                const dy = (e.clientY - refStartMouseY) / scale;
+                
+                if (currentRefDir.includes('e')) refW = Math.max(50, refStartW + dx);
+                if (currentRefDir.includes('s')) refH = Math.max(50, refStartH + dy);
+                if (currentRefDir.includes('w')) {
+                    const newW = Math.max(50, refStartW - dx);
+                    if (newW > 50) { refX = refStartX + dx; refW = newW; }
+                }
+                if (currentRefDir.includes('n')) {
+                    const newH = Math.max(50, refStartH - dy);
+                    if (newH > 50) { refY = refStartY + dy; refH = newH; }
+                }
+                updateRefStyle();
+            }
+
+            if (isSelecting) {
+                const minX = Math.min(selStartX, coords.x);
+                const maxX = Math.max(selStartX, coords.x);
+                const minY = Math.min(selStartY, coords.y);
+                const maxY = Math.max(selStartY, coords.y);
+                
+                selBox.style.left = minX + 'px';
+                selBox.style.top = minY + 'px';
+                selBox.style.width = (maxX - minX) + 'px';
+                selBox.style.height = (maxY - minY) + 'px';
+            }
+            
+            if (isDraggingLasso) {
+                const dx = (e.clientX - dragStartMouseX) / scale;
+                const dy = (e.clientY - dragStartMouseY) / scale;
+                selGhost.style.left = (originalBoxX + dx) + 'px';
+                selGhost.style.top = (originalBoxY + dy) + 'px';
+            }
+
+            if (isResizingLasso) {
+                const startX = parseFloat(selBox.style.left);
+                const startY = parseFloat(selBox.style.top);
+                selBox.style.width = Math.max(5, coords.x - startX) + 'px';
+                selBox.style.height = Math.max(5, coords.y - startY) + 'px';
+            }
+
+            if (isDraggingCategory) {
+                catEndX = coords.x;
+                catEndY = coords.y;
+            }
+            
+            // ДВИЖЕНИЕ КАТЕГОРИИ
+            if (isDraggingCategoryPos && dragCatIndex !== -1) {
+                const cat = categories[dragCatIndex];
+                const dx = (e.clientX - dragStartMouseX) / scale;
+                const dy = (e.clientY - dragStartMouseY) / scale;
+                cat.x = catStartX + dx;
+                cat.y = catStartY + dy;
+                renderCategories();
+            }
+
+            // РЕСАЙЗ КАТЕГОРИИ
+            if (isResizingCategory && activeResizeCat !== -1) {
+                const cat = categories[activeResizeCat];
+                const dx = (e.clientX - dragStartMouseX) / scale;
+                const dy = (e.clientY - dragStartMouseY) / scale;
+                
+                let newX = catStartX;
+                let newY = catStartY;
+                let newW = catStartW;
+                let newH = catStartH;
+
+                if (isResizingCatDir.includes('e')) newW = Math.max(100, catStartW + dx);
+                if (isResizingCatDir.includes('s')) newH = Math.max(85, catStartH + dy);
+                if (isResizingCatDir.includes('w')) {
+                    const possibleW = Math.max(100, catStartW - dx);
+                    if (possibleW > 100) { newX = catStartX + dx; newW = possibleW; }
+                }
+                if (isResizingCatDir.includes('n')) {
+                    const possibleH = Math.max(85, catStartH - dy);
+                    if (possibleH > 85) { newY = catStartY + dy; newH = possibleH; }
+                }
+
+                cat.x = newX;
+                cat.y = newY;
+                cat.w = newW;
+                cat.h = newH;
+                renderCategories();
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => { 
+            if (isPanning) {
+                isPanning = false;
+                canvasWrapper.classList.remove('panning');
+                return;
+            }
+
+            if (isDrawing) { saveState(); }
+            isDrawing = false; 
+            isDraggingRef = false;
+            isResizingRef = false;
+            
+            if (isSelecting) {
+                isSelecting = false;
+                if (parseFloat(selBox.style.width) < 5 || parseFloat(selBox.style.height) < 5) {
+                    selBox.style.display = 'none';
+                    activeSelection = [];
+                } else {
+                    const selLeft = parseFloat(selBox.style.left);
+                    const selTop = parseFloat(selBox.style.top);
+                    const selW = parseFloat(selBox.style.width);
+                    const selH = parseFloat(selBox.style.height);
+
+                    activeSelection = points.filter(p => 
+                        p.x >= selLeft && p.x <= selLeft + selW && 
+                        p.y >= selTop && p.y <= selTop + selH
+                    );
+                }
+            }
+
+            if (isDraggingLasso) {
+                isDraggingLasso = false;
+                selGhost.style.display = 'none';
+                
+                const scale = zoom / 100;
+                const dx = (e.clientX - dragStartMouseX) / scale;
+                const dy = (e.clientY - dragStartMouseY) / scale;
+                
+                if (dx !== 0 || dy !== 0) {
+                    activeSelection.forEach(p => {
+                        p.x += dx;
+                        p.y += dy;
+                    });
+                    
+                    selBox.style.left = (originalBoxX + dx) + 'px';
+                    selBox.style.top = (originalBoxY + dy) + 'px';
+                    
+                    renderPoints();
+                    saveState();
+                }
+            }
+
+            if (isResizingLasso) {
+                isResizingLasso = false;
+            }
+
+            if (isDraggingCategoryPos) {
+                isDraggingCategoryPos = false;
+                dragCatIndex = -1;
+                saveState();
+            }
+
+            if (isResizingCategory) {
+                isResizingCategory = false;
+                saveState();
+            }
+
+            if (isDraggingCategory) {
+                isDraggingCategory = false;
+                let minX = Math.min(catStartX, catEndX);
+                let maxX = Math.max(catStartX, catEndX);
+                let minY = Math.min(catStartY, catEndY);
+                let maxY = Math.max(catStartY, catEndY);
+                
+                if (maxX - minX < 20 || maxY - minY < 20) {
+                    minX = catStartX - 100;
+                    minY = catStartY - 125;
+                    maxX = catStartX + 100;
+                    maxY = catStartY + 125;
+                }
+
+                customPrompt("Название категории (можно оставить пустым)", "Керри").then(name => {
+                    if (name === null) return; 
+                    categories.push({
+                        name: name, 
+                        x: minX,
+                        y: minY,
+                        w: maxX - minX,
+                        h: maxY - minY,
+                        heroes: []
+                    });
+                    renderCategories();
+                    openHeroPicker(categories.length - 1);
+                    setTool('brush');
+                    saveState();
+                });
+            }
+        });
+
+        function drawAt(x, y) {
+            const density = parseInt(document.getElementById('brush-density').value);
+            const dist = Math.hypot(x - lastX, y - lastY);
+            
+            if (dist >= density) {
+                points.push({ x: x, y: y, sym: activeSym });
+                lastX = x;
+                lastY = y;
+                renderPoints();
+            }
+        }
+
+        function eraseAt(x, y) {
+            const eraserSize = parseInt(document.getElementById('eraser-size').value);
+            points = points.filter(p => {
+                const dist = Math.hypot(x - p.x, y - p.y);
+                return dist > eraserSize / 2;
+            });
+            renderPoints();
+        }
+
+        document.getElementById('brush-density').addEventListener('input', function(e) {
+            document.getElementById('density-val').innerText = e.target.value + ' px';
+        });
+
+        // --- РЕНДЕР ---
+        function renderPoints() {
+            pointsLayer.innerHTML = '';
+            points.forEach(p => {
+                const span = document.createElement('div');
+                span.className = 'point';
+                span.style.left = p.x + 'px';
+                span.style.top = p.y + 'px';
+                span.innerText = p.sym;
+                pointsLayer.appendChild(span);
+            });
+        }
+
+        let catStartW = 0, catStartH = 0; // Для ресайза
+
+        function renderCategories() {
+            categoriesLayer.innerHTML = '';
+            categories.forEach((cat, i) => {
+                const zone = document.createElement('div');
+                zone.className = 'category-zone';
+                zone.style.left = cat.x + 'px';
+                zone.style.top = cat.y + 'px';
+                zone.style.width = cat.w + 'px';
+                zone.style.height = cat.h + 'px';
+                zone.dataset.index = i;
+                
+                // Заголовок (двигает и редактирует имя)
+                const header = document.createElement('div');
+                header.className = 'cat-header';
+                
+                const displayName = cat.name ? cat.name : '⚙️';
+                header.innerHTML = `<span style="flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${displayName}</span> <span>${cat.heroes.length}</span>`;
+                
+                let isDraggingHeader = false;
+                
+                header.onmousedown = (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    isDraggingHeader = true;
+                    isDraggingCategoryPos = true;
+                    dragCatIndex = i;
+                    dragStartMouseX = e.clientX;
+                    dragStartMouseY = e.clientY;
+                    catStartX = cat.x;
+                    catStartY = cat.y;
+                };
+                
+                header.onmouseup = (e) => {
+                    e.stopPropagation();
+                    if (isDraggingHeader) {
+                        isDraggingHeader = false;
+                        isDraggingCategoryPos = false;
+                        dragCatIndex = -1;
+                        // Если сдвинули меньше 5px, считаем это кликом
+                        if (Math.abs(e.clientX - dragStartMouseX) < 5 && Math.abs(e.clientY - dragStartMouseY) < 5) {
+                            customPrompt("Название категории (очистите для удаления)", cat.name).then(newName => {
+                                if (newName !== null) {
+                                    cat.name = newName;
+                                    renderCategories();
+                                    saveState();
+                                }
+                            });
+                        }
+                    }
+                };
+                
+                zone.appendChild(header);
+
+                // Контейнер с героями (клик открывает выбор)
+                const heroesContainer = document.createElement('div');
+                heroesContainer.className = 'heroes-container';
+                heroesContainer.onclick = (e) => {
+                    e.stopPropagation();
+                    openHeroPicker(i);
+                };
+                
+                cat.heroes.forEach(hId => {
+                    const hero = HEROES.find(x => x.id === hId);
+                    if (!hero) return;
+                    const portrait = document.createElement('div');
+                    portrait.className = 'hero-portrait';
+                    portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
+                    heroesContainer.appendChild(portrait);
+                });
+                zone.appendChild(heroesContainer);
+                
+                // 4 угловые ручки для ресайза
+                ['nw', 'ne', 'sw', 'se'].forEach(dir => {
+                    const handle = document.createElement('div');
+                    handle.className = `cat-resize-handle ${dir}`;
+                    handle.onmousedown = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        isResizingCategory = true;
+                        isResizingCatDir = dir;
+                        activeResizeCat = i;
+                        dragStartMouseX = e.clientX;
+                        dragStartMouseY = e.clientY;
+                        catStartX = cat.x;
+                        catStartY = cat.y;
+                        catStartW = cat.w;
+                        catStartH = cat.h;
+                    };
+                    zone.appendChild(handle);
+                });
+                
+                categoriesLayer.appendChild(zone);
+            });
+        }
+
+        function renderAll() {
+            renderPoints();
+            renderCategories();
+        }
+
+        function renderSymbols() {
+            const symPanel = document.getElementById('sym-panel');
+            symPanel.innerHTML = '';
+            for (const [catName, symbols] of Object.entries(SYMBOL_CATEGORIES)) {
+                const title = document.createElement('div');
+                title.className = 'cat-title';
+                title.innerText = catName;
+                symPanel.appendChild(title);
+                const grid = document.createElement('div');
+                grid.className = 'sym-grid';
+                symbols.forEach(sym => {
+                    const btn = document.createElement('div');
+                    btn.className = 'sym-btn' + (sym === activeSym ? ' active' : '');
+                    btn.innerText = sym;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        activeSym = sym;
+                        setTool('brush');
+                    };
+                    grid.appendChild(btn);
+                });
+                symPanel.appendChild(grid);
+            }
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.getElementById('tool-brush').classList.toggle('active', tool === 'brush');
+            document.getElementById('tool-category').classList.toggle('active', tool === 'category');
+            document.getElementById('tool-lasso').classList.toggle('active', tool === 'lasso');
+            document.getElementById('tool-ref').classList.toggle('active', tool === 'ref');
+            document.getElementById('tool-eraser').classList.toggle('active', tool === 'eraser');
+            
+            if (tool === 'ref') {
+                document.body.classList.add('tool-ref-active');
+                selBox.style.display = 'none';
+            } else {
+                document.body.classList.remove('tool-ref-active');
+            }
+
+            if (tool !== 'lasso') {
+                selBox.style.display = 'none';
+                activeSelection = [];
+            }
+        }
+
+        function getCanvasCoords(e) {
+            const rect = artboard.getBoundingClientRect();
+            const scale = zoom / 100;
+            return {
+                x: (e.clientX - rect.left) / scale,
+                y: (e.clientY - rect.top) / scale
+            };
+        }
+
+        // --- РЕФЕРЕНС ---
+        let refX = 0, refY = 0, refW = 1280, refH = 720;
+        let isDraggingRef = false;
+        let isResizingRef = false;
+        let refStartX, refStartY, refStartW, refStartH, refStartMouseX, refStartMouseY;
+        let currentRefDir = '';
+
+        document.getElementById('ref-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    refImg.src = event.target.result;
+                    refContainer.style.display = 'block';
+                    document.getElementById('ref-hide').checked = true;
+                    refX = 0; refY = 0; refW = 1280; refH = 720;
+                    updateRefStyle();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('ref-opacity').addEventListener('input', function(e) {
+            refImg.style.opacity = e.target.value;
+        });
+
+        document.getElementById('ref-hide').addEventListener('change', function(e) {
+            if (refImg.src) {
+                refContainer.style.opacity = e.target.checked ? '1' : '0';
+                if (!e.target.checked && currentTool === 'ref') {
+                    setTool('brush');
+                }
+            }
+        });
+
+        function updateRefStyle() {
+            refContainer.style.left = refX + 'px';
+            refContainer.style.top = refY + 'px';
+            refContainer.style.width = refW + 'px';
+            refContainer.style.height = refH + 'px';
+        }
+
+        refContainer.addEventListener('mousedown', (e) => {
+            if (currentTool !== 'ref') return;
+            if (e.target.classList.contains('ref-handle')) return;
+            isDraggingRef = true;
+            refStartX = refX;
+            refStartY = refY;
+            refStartMouseX = e.clientX;
+            refStartMouseY = e.clientY;
+            e.preventDefault();
+        });
+
+        document.querySelectorAll('.ref-handle').forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                if (currentTool !== 'ref') return;
+                isResizingRef = true;
+                currentRefDir = handle.dataset.dir;
+                refStartMouseX = e.clientX;
+                refStartMouseY = e.clientY;
+                refStartX = refX; refStartY = refY;
+                refStartW = refW; refStartH = refH;
+                e.stopPropagation();
+                e.preventDefault();
+            });
+        });
+
+        // --- ВЫБОР ГЕРОЕВ ---
+        function openHeroPicker(catIndex) {
+            activeCategoryIndex = catIndex;
+            selectedHeroesForCategory = new Set(categories[catIndex].heroes);
+            document.getElementById('hero-picker-title').innerText = `Группа: ${categories[catIndex].name || 'Без имени'}`;
+            document.getElementById('hero-search').value = '';
+            renderHeroGrid();
+            document.getElementById('modal-heroes').classList.add('active');
+        }
+
+        function renderHeroGrid() {
+            const grid = document.getElementById('hero-grid');
+            grid.innerHTML = '';
+            const query = document.getElementById('hero-search').value.toLowerCase();
+            
+            const filtered = HEROES.filter(h => {
+                const matchName = h.name.toLowerCase().includes(query);
+                const matchAttr = currentFilter === 'all' || h.attr === currentFilter;
+                return matchName && matchAttr;
+            });
+
+            filtered.forEach(h => {
+                const card = document.createElement('div');
+                card.className = 'hero-card' + (selectedHeroesForCategory.has(h.id) ? ' selected' : '');
+                card.innerHTML = `
+                    <div class="portrait-container">
+                        <img src="${h.img}" title="${h.name}">
+                    </div>
+                    <div class="hero-name">
+                        ${h.name} <img src="${ATTR_ICONS[h.attr]}" class="attr-icon">
+                    </div>
+                    <div class="hero-check">✓</div>
+                `;
+                card.onclick = () => {
+                    if (selectedHeroesForCategory.has(h.id)) {
+                        selectedHeroesForCategory.delete(h.id);
+                        card.classList.remove('selected');
+                    } else {
+                        selectedHeroesForCategory.add(h.id);
+                        card.classList.add('selected');
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function filterHeroes(attr) {
+            currentFilter = attr;
+            document.querySelectorAll('.attr-btn').forEach(b => b.classList.remove('active'));
+            event.target.closest('.attr-btn').classList.add('active');
+            renderHeroGrid();
+        }
+        document.getElementById('hero-search').addEventListener('input', renderHeroGrid);
+
+        function saveHeroesToCategory() {
+            if (activeCategoryIndex !== -1) {
+                categories[activeCategoryIndex].heroes = Array.from(selectedHeroesForCategory);
+                renderCategories();
+                saveState();
+            }
+            closeModal('modal-heroes');
+        }
+
+        // --- ИМПОРТ JSON ---
+        document.getElementById('import-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('import-text').value = event.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function processImport() {
+            const jsonText = document.getElementById('import-text').value.trim();
+            if (!jsonText) {
+                customAlert("Пожалуйста, вставьте JSON или выберите файл.");
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonText);
+                
+                let rawCategories = [];
+                if (data.configs && data.configs.length > 0 && data.configs[0].categories) {
+                    rawCategories = data.configs[0].categories;
+                } else if (data.categories) {
+                    rawCategories = data.categories; 
+                } else {
+                    throw new Error("Не найдены конфигурации (configs) в JSON.");
+                }
+
+                const newPoints = [];
+                const newCategories = [];
+
+                rawCategories.forEach(cat => {
+                    if (cat.hero_ids && cat.hero_ids.length > 0) {
+                        newCategories.push({
+                            name: cat.category_name || "",
+                            x: parseFloat(cat.x_position) || 0,
+                            y: parseFloat(cat.y_position) || 0,
+                            w: parseFloat(cat.width) || 200,
+                            h: parseFloat(cat.height) || 250,
+                            heroes: cat.hero_ids
+                        });
+                    } else {
+                        newPoints.push({
+                            x: parseFloat(cat.x_position) || 0,
+                            y: parseFloat(cat.y_position) || 0,
+                            sym: cat.category_name || "·"
+                        });
+                    }
+                });
+
+                points = newPoints;
+                categories = newCategories;
+                
+                renderAll();
+                saveState();
+                closeModal('modal-import');
+                customAlert(`Успешно импортировано! Точек: ${points.length}, Категорий: ${categories.length}`);
+                
+            } catch (error) {
+                console.error(error);
+                customAlert("Ошибка при чтении JSON: " + error.message);
+            }
+        }
+
+        // --- ЭКСПОРТ И СОХРАНЕНИЕ ---
+        function exportJSON() {
+            const exportCats = [];
+            
+            points.forEach(p => {
+                if (p.x >= 0 && p.x <= 1280 && p.y >= 0 && p.y <= 720) {
+                    exportCats.push({ 
+                        category_name: p.sym, 
+                        x_position: p.x, 
+                        y_position: p.y, 
+                        width: 30, 
+                        height: 30, 
+                        hero_ids: [] 
+                    });
+                }
+            });
+
+            categories.forEach(cat => {
+                exportCats.push({ 
+                    category_name: cat.name, 
+                    x_position: cat.x, 
+                    y_position: cat.y, 
+                    width: cat.w, 
+                    height: cat.h, 
+                    hero_ids: cat.heroes 
+                });
+            });
+
+            if (exportCats.length === 0) { customAlert("Сначала нарисуй что-нибудь!"); return; }
+
+            const config = { "_comment": "Сетка создана на W1NFY CUSTOMS", "version": 3, "configs": [{ "config_name": "W1NFY Grid", "categories": exportCats }] };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr; a.download = "hero_grid_config.json"; a.click();
+        }
+
+        async function saveToStudio() {
+            let name = document.getElementById('project-title').innerText;
+            if (name === 'Новая сетка' || !name) { name = await customPrompt("Название проекта", "Моя сетка"); if (!name) return; }
+            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+            const id = Date.now().toString();
+            projects.push({ id: id, name: name, date: new Date().toLocaleDateString('ru-RU'), points: points, categories: categories });
+            localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
+            customAlert("Проект сохранен!");
+            setTimeout(() => window.location.href = 'studio.html', 1000);
+        }
+
+        function clearCanvas() {
+            customConfirm("Очистить холст?").then(res => {
+                if (res) {
+                    points = []; categories = [];
+                    renderAll();
+                    refContainer.style.display = 'none';
+                    saveState();
+                }
+            });
+        }
+
+        function loadProject(id) {
+            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+            const p = projects.find(x => x.id === id);
+            if (p) {
+                document.getElementById('project-title').innerText = p.name;
+                points = p.points || [];
+                categories = p.categories || [];
+                renderAll();
+                saveState();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                undo();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        });
+
+        init();
+    </script>
+    <script src="animations.js"></script>
+</body>
+</html>

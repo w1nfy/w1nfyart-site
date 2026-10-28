@@ -1,0 +1,839 @@
+<!-- ========================================== -->
+<!-- SITE: W1NFY CUSTOMS -->
+<!-- BY W1NFY -->
+<!-- ========================================== -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W1NFY CUSTOMS | Steam & Dota 2</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Иконка сайта (Favicon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
+    
+    <!-- ОГ-теги для красивого превью в Телеграме (ГЛАВНАЯ) -->
+    <meta property="og:title" content="W1NFY CUSTOMS | Кастомные темы для Steam">
+    <meta property="og:description" content="Атмосферные темы для Millennium и сетки героев для Dota 2.">
+    <meta property="og:image" content="https://w1nfyart-site.layero.app/images/main-preview.jpg">
+    <meta property="og:url" content="https://w1nfyart-site.layero.app/">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">W1NFY<span>_CUSTOMS</span></a>
+        <nav>
+            <a href="#themes">Steam Темы</a>
+            <a href="#dota">Dota 2 Сетки</a>
+            <a href="studio.html" style="color: #6A5ACD; text-decoration: underline; font-weight: bold;">🛠 Студия</a>
+            <a href="guide.html" style="color: #ff4500; font-weight: bold;">📖 Гайд</a>
+            
+            <a href="https://t.me/w1nfyart" target="_blank" class="btn-social">Telegram</a>
+            <a href="https://www.tiktok.com/@w1nfyyyy" target="_blank" class="btn-social">TikTok</a>
+            <a href="https://discord.gg/86ZsPBGCS5" target="_blank" class="btn-social">Discord</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Добро пожаловать в мой уголок</h1>
+        <p>Здесь я выкладываю свои кастомные оформления для Steam и сетки для Dota 2.</p>
+        
+        <div class="search-wrapper">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Поиск по темам и сеткам..." autocomplete="off">
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </div>
+            <!-- Кнопка РАНДОМ -->
+            <button class="random-btn" onclick="randomPick()" title="Мне повезет!">🎲</button>
+        </div>
+    </section>
+
+    <!-- ТЕМЫ STEAM -->
+    <section id="themes" class="gallery-section">
+        <div class="section-header">
+            <h2>Steam Темы</h2>
+            <button class="toggle-btn" id="btn-themes" onclick="toggleSection('themes')">Показать все</button>
+        </div>
+        <div class="grid-container collapsed" id="themes-container">
+            
+            <!-- ТЕМА 1 -->
+            <div class="card" data-type="theme">
+                <span class="badge badge-theme">Тема</span>
+                <img src="images/theme-hell.jpg" alt="Тема В аду прикольно">
+                <div class="card-content">
+                    <h3>Кажется, в аду прикольно но меня выгнали б утром</h3>
+                    <p>Темно-бордовая тема с нежными розовыми акцентами.</p>
+                    <div class="card-buttons">
+                        <a href="theme-hell.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <button class="copy-btn" onclick="copyTheme('hell')">Скопировать CSS</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ТЕМА 2 -->
+            <div class="card" data-type="theme">
+                <span class="badge badge-theme">Тема</span>
+                <img src="images/theme-party.jpg" alt="Тема Как испортить вечеринку">
+                <div class="card-content">
+                    <h3>Как испортить вечеринку?</h3>
+                    <p>Мрачный черно-белый гранж по обложке CUPSIZE.</p>
+                    <div class="card-buttons">
+                        <a href="theme-party.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <button class="copy-btn" onclick="copyTheme('party')">Скопировать CSS</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ТЕМА 3 -->
+            <div class="card" data-type="theme">
+                <span class="badge badge-theme">Тема</span>
+                <img src="images/theme-flowers.jpg" alt="Тема В моих легких выросли цветы">
+                <div class="card-content">
+                    <h3>В моих легких выросли цветы</h3>
+                    <p>Атмосферная тема по обложке альбома CUPSIZE.</p>
+                    <div class="card-buttons">
+                        <a href="theme-flowers.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <button class="copy-btn" onclick="copyTheme('flowers')">Скопировать CSS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- СЕТКИ ДОТЫ -->
+    <section id="dota" class="gallery-section">
+        <div class="section-header">
+            <h2>Dota 2 Сетки</h2>
+            <button class="toggle-btn" id="btn-dota" onclick="toggleSection('dota')">Показать все</button>
+        </div>
+        <div class="grid-container collapsed" id="dota-container">
+            
+            <!-- 1 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/7-2.jpg" alt="как испортить вечеринку">
+                <div class="card-content">
+                    <h3>как испортить вечеринку</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="7">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-7.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/7" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/59-2.jpg" alt="еби меня, малышка">
+                <div class="card-content">
+                    <h3>еби меня, малышка</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="59">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-59.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/59" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/48-2.jpg" alt="кажется, в аду прикольно">
+                <div class="card-content">
+                    <h3>кажется, в аду прикольно</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="48">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-48.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/48" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/98-2.jpg" alt="cupsizeholic">
+                <div class="card-content">
+                    <h3>cupsizeholic</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="98">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-98.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/98" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/64-2.jpg" alt="опианариум">
+                <div class="card-content">
+                    <h3>опианариум</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="64">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-64.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/64" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/99-2.jpg" alt="chance">
+                <div class="card-content">
+                    <h3>chance</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="99">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-99.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/99" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/102-2.jpg" alt="кабуу">
+                <div class="card-content">
+                    <h3>кабуу</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="102">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-102.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/102" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/137-2.jpg" alt="сборник хуйни и картинки">
+                <div class="card-content">
+                    <h3>сборник хуйни и картинки</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="137">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-137.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/137" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/150-2.jpg" alt="8 способов бросить дрочить">
+                <div class="card-content">
+                    <h3>8 способов бросить дрочить</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="150">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-150.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/150" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/159-2.jpg" alt="научи меня курить">
+                <div class="card-content">
+                    <h3>научи меня курить</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="159">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-159.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/159" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/189-2.jpg" alt="11:11">
+                <div class="card-content">
+                    <h3>11:11</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="189">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-189.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/189" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/190-2.jpg" alt="они устали">
+                <div class="card-content">
+                    <h3>они устали</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="190">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-190.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/190" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/210-2.jpg" alt="лёд">
+                <div class="card-content">
+                    <h3>лёд</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="210">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-210.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/210" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 14 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/209-2.jpg" alt="кургазацкий варенник">
+                <div class="card-content">
+                    <h3>кургазацкий варенник</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="209">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-209.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/209" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 15 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/212-2.jpg" alt="ветмо инвокер">
+                <div class="card-content">
+                    <h3>ветмо инвокер</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="212">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-212.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/212" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 16 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/239-2.jpg" alt="не забирай меня домой">
+                <div class="card-content">
+                    <h3>не забирай меня домой</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="239">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-239.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/239" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 17 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/240-2.jpg" alt="неуравновешеннолетниепесни пт1">
+                <div class="card-content">
+                    <h3>неуравновешеннолетниепесни пт1</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="240">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-240.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/240" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 18 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/241-2.jpg" alt="ты принадлежишь мне">
+                <div class="card-content">
+                    <h3>ты принадлежишь мне</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="241">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-241.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/241" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 19 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/287-2.jpg" alt="спасибо что живой">
+                <div class="card-content">
+                    <h3>спасибо что живой</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="287">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-287.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/287" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 20 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/285-2.jpg" alt="every time">
+                <div class="card-content">
+                    <h3>every time</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="285">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-285.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/285" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 21 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/282-2.jpg" alt="дабл ар">
+                <div class="card-content">
+                    <h3>дабл ар</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="282">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-282.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/282" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 22 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/295-2.jpg" alt="ярче звезд">
+                <div class="card-content">
+                    <h3>ярче звезд</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="295">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-295.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/295" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 23 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/321-2.jpg" alt="опианариум (старый)">
+                <div class="card-content">
+                    <h3>опианариум (старый)</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="321">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-321.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/321" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 24 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/323-2.jpg" alt="арима">
+                <div class="card-content">
+                    <h3>арима</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="323">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-323.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/323" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 25 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/327-2.jpg" alt="характер">
+                <div class="card-content">
+                    <h3>характер</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="327">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-327.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/327" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 26 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/331-2.jpg" alt="mudada">
+                <div class="card-content">
+                    <h3>mudada</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="331">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-331.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/331" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 27 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/339-2.jpg" alt="королевский">
+                <div class="card-content">
+                    <h3>королевский</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="339">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-339.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/339" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 28 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/347-2.jpg" alt="crystal castles">
+                <div class="card-content">
+                    <h3>crystal castles</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="347">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-347.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/347" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 29 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/356-2.jpg" alt="sewerslvt">
+                <div class="card-content">
+                    <h3>sewerslvt</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="356">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-356.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/356" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 30 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/360-2.jpg" alt="дробовик">
+                <div class="card-content">
+                    <h3>дробовик</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="360">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-360.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/360" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 31 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/379-2.jpg" alt="дели на два">
+                <div class="card-content">
+                    <h3>дели на два</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="379">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-379.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/379" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 32 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/383-2.jpg" alt="сематари">
+                <div class="card-content">
+                    <h3>сематари</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="383">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-383.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/383" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 33 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/395-2.jpg" alt="в моих легких выросли цветы">
+                <div class="card-content">
+                    <h3>в моих легких выросли цветы</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="395">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-395.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/395" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 34 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/398-2.jpg" alt="типичная вечеринка с бассейном">
+                <div class="card-content">
+                    <h3>типичная вечеринка с бассейном</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="398">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-398.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/398" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 35 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/400-2.jpg" alt="пламени языки">
+                <div class="card-content">
+                    <h3>пламени языки</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="400">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-400.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/400" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 36 -->
+            <div class="card" data-type="grid">
+                <span class="badge badge-grid">Сетка</span>
+                <img src="images/415-2.jpg" alt="дабл терапия">
+                <div class="card-content">
+                    <h3>дабл терапия</h3>
+                    <p>Сетка героев Dota 2</p>
+                    <div class="card-counter">Скачали: <span class="count-value" data-id="415">0</span></div>
+                    <div class="card-buttons">
+                        <a href="grid-415.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="https://t.me/w1nfyart/415" target="_blank" class="link-btn">Скачать в Telegram</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://t.me/w1nfyart" target="_blank">Telegram</a>
+            <a href="https://www.tiktok.com/@w1nfyyyy" target="_blank">TikTok</a>
+            <a href="https://discord.gg/86ZsPBGCS5" target="_blank">Discord</a>
+        </div>
+        
+        <p style="margin-bottom: 10px; color: #a89bf5;">
+            Всего файлов скачано: <span id="global-downloads" style="font-weight: bold; font-size: 1.1em;">...</span>
+        </p>
+
+        <p>&copy; 2026 W1NFY. Сделано с душой.</p>
+    </footer>
+
+    <!-- МОДАЛКА ALERT -->
+    <div class="w1-modal-overlay" id="modal-alert">
+        <div class="w1-modal">
+            <h2>Уведомление</h2>
+            <p id="alert-text" style="color: #ccc;">...</p>
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-primary" onclick="closeModal('modal-alert')">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function customAlert(text) {
+            document.getElementById('alert-text').innerText = text;
+            document.getElementById('modal-alert').classList.add('active');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        const themeCodes = {
+            "hell": `/* Вставь сюда код темы hell */`,
+            "party": `/* Вставь сюда код темы party */`,
+            "flowers": `/* Вставь сюда код темы flowers */`
+        };
+
+        function randomPick() {
+            const links = Array.from(document.querySelectorAll('.card .link-btn')).map(a => a.href);
+            if (links.length > 0) {
+                window.location.href = links[Math.floor(Math.random() * links.length)];
+            }
+        }
+
+        function copyTheme(themeId) {
+            if(themeCodes[themeId]) {
+                navigator.clipboard.writeText(themeCodes[themeId]).then(() => {
+                    customAlert("Код темы успешно скопирован! Вставь его в Quick CSS.");
+                }).catch(err => customAlert("Ошибка копирования. Попробуй зайти на страницу темы и скачать файл."));
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const themesContainer = document.getElementById('themes-container');
+            const themeCards = Array.from(themesContainer.querySelectorAll('.card'));
+            shuffleArray(themeCards).forEach(card => themesContainer.appendChild(card));
+
+            const dotaContainer = document.getElementById('dota-container');
+            const gridCards = Array.from(dotaContainer.querySelectorAll('.card'));
+            shuffleArray(gridCards).forEach(card => dotaContainer.appendChild(card));
+        });
+
+        function toggleSection(sectionId) {
+            const container = document.getElementById(`${sectionId}-container`);
+            const btn = document.getElementById(`btn-${sectionId}`);
+            container.classList.toggle('collapsed');
+            btn.innerText = container.classList.contains('collapsed') ? 'Показать все' : 'Скрыть';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            const searchDropdown = document.getElementById('searchDropdown');
+            const allCards = document.querySelectorAll('.card');
+            let searchData = [];
+
+            allCards.forEach(card => {
+                const title = card.querySelector('h3').innerText;
+                const type = card.getAttribute('data-type') === 'theme' ? 'Тема' : 'Сетка';
+                const link = card.querySelector('.link-btn').getAttribute('href');
+                searchData.push({ title, type, link });
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                searchDropdown.innerHTML = ''; 
+
+                if (!query) {
+                    searchDropdown.style.display = 'none';
+                    document.getElementById('themes-container').classList.add('collapsed');
+                    document.getElementById('dota-container').classList.add('collapsed');
+                    document.getElementById('btn-themes').innerText = 'Показать все';
+                    document.getElementById('btn-dota').innerText = 'Показать все';
+                    return;
+                }
+
+                document.getElementById('themes-container').classList.remove('collapsed');
+                document.getElementById('dota-container').classList.remove('collapsed');
+
+                const results = searchData.filter(item => item.title.toLowerCase().includes(query));
+
+                if (results.length > 0) {
+                    results.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        const badgeClass = item.type === 'Тема' ? 'badge-theme' : 'badge-grid';
+                        div.innerHTML = `<span class="search-title">${item.title}</span><span class="badge ${badgeClass}" style="position: static; padding: 2px 6px; font-size: 0.7rem;">${item.type}</span>`;
+                        div.onclick = () => { window.location.href = item.link; };
+                        searchDropdown.appendChild(div);
+                    });
+                    searchDropdown.style.display = 'block';
+                } else {
+                    searchDropdown.innerHTML = '<div class="search-item" style="color:#666; cursor:default;">Ничего не найдено</div>';
+                    searchDropdown.style.display = 'block';
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+        });
+
+        window.addEventListener('load', () => {
+            fetch('https://abacus.jasoncameron.dev/get/w1nfy-customs/total')
+                .then(res => res.json()).then(data => { document.getElementById('global-downloads').innerText = data.value || 0; })
+                .catch(() => { document.getElementById('global-downloads').innerText = "0"; });
+
+            const counters = document.querySelectorAll('.count-value');
+            const CACHE_KEY = 'w1nfy_counters_cache';
+            const CACHE_TIME_KEY = 'w1nfy_counters_time';
+            const now = new Date().getTime();
+            const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+            const cachedData = localStorage.getItem(CACHE_KEY);
+
+            if (cachedTime && cachedData && (now - cachedTime < 300000)) {
+                const parsedData = JSON.parse(cachedData);
+                counters.forEach(el => {
+                    const id = el.getAttribute('data-id');
+                    if (parsedData[id] !== undefined) el.innerText = parsedData[id];
+                });
+            } else {
+                const newData = {};
+                counters.forEach(el => {
+                    const id = el.getAttribute('data-id');
+                    fetch(`https://abacus.jasoncameron.dev/get/w1nfy-customs/${id}`)
+                        .then(res => res.json()).then(data => {
+                            el.innerText = data.value || 0;
+                            newData[id] = data.value || 0;
+                            if(Object.keys(newData).length === counters.length) {
+                                localStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+                                localStorage.setItem(CACHE_TIME_KEY, now);
+                            }
+                        }).catch(() => { el.innerText = "0"; });
+                });
+            }
+        });
+
+        // ==========================================
+        // ДИНАМИЧЕСКАЯ ПОДСВЕТКА КАРТОЧЕК (SPOTLIGHT)
+        // ==========================================
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body>
+</html>
