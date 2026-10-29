@@ -38,9 +38,9 @@
         
         .artboard-wrapper {
             position: relative;
-            margin: 200px auto;
-            width: 1280px; 
-            height: 720px;
+            margin: 50px auto; /* Уменьшил отступ, чтобы лучше влезало на экран */
+            width: 1193px; 
+            height: 593px;
         }
         
         .artboard {
@@ -48,7 +48,7 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(1);
             transform-origin: center center;
-            width: 1280px; height: 720px;
+            width: 1193px; height: 593px; /* НОВЫЙ РАЗМЕР ХОЛСТА */
             border: 2px dashed #6A5ACD;
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             background-color: #050505;
@@ -125,36 +125,38 @@
         /* === КАТЕГОРИИ === */
         .category-zone {
             position: absolute; 
-            border: 2px solid #6A5ACD; 
-            background: rgba(10, 10, 15, 0.85);
+            border: 1px solid #444; 
+            background: rgba(10, 10, 15, 0.95);
             cursor: default; 
             box-sizing: border-box; 
-            display: flex; flex-direction: column; overflow: hidden; border-radius: 4px;
+            display: flex; flex-direction: column; overflow: hidden; border-radius: 2px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             pointer-events: auto;
-            min-width: 100px;
-            min-height: 85px; /* Чтобы всегда был виден хотя бы один ряд героев */
+            min-width: 55px; /* Чтобы влезал 1 герой */
+            min-height: 90px; /* Заголовок + 1 герой */
         }
-        .category-zone:hover { border-color: #fff; box-shadow: 0 0 20px rgba(106, 90, 205, 0.6); }
+        .category-zone:hover { border-color: #6A5ACD; box-shadow: 0 0 15px rgba(106, 90, 205, 0.4); }
         
         .category-zone .cat-header {
-            background: #6A5ACD; color: #fff; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
+            background: #1a1a1f; color: #aaa; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
             display: flex; justify-content: space-between; align-items: center; height: 20px; flex-shrink: 0;
-            cursor: move; /* Заголовок двигает категорию */
+            cursor: move; border-bottom: 1px solid #333;
         }
         
         .category-zone .heroes-container {
-            display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; align-content: flex-start;
-            flex-grow: 1; overflow-y: auto; /* Скролл, если не влезают */
-            cursor: pointer; /* Клик по героям открывает выбор */
+            display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; align-content: flex-start;
+            flex-grow: 1; overflow-y: auto; 
+            cursor: pointer; 
         }
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
+        /* ПРЯМОУГОЛЬНЫЕ ПОРТРЕТЫ КАК В ДОТЕ */
         .hero-portrait {
-            width: 36px; height: 48px; border: 1px solid #333; border-radius: 2px;
+            width: 44px; height: 58px; /* Вертикальные пропорции 3:4 */
+            border: 1px solid #111; border-radius: 1px;
             overflow: hidden; background: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            flex-shrink: 0;
+            flex-shrink: 0; position: relative;
         }
         .hero-portrait img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -762,8 +764,9 @@
             artboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
             
             const padding = 400; 
-            zoomContainer.style.width = (1280 * scale + padding * 2) + 'px';
-            zoomContainer.style.height = (720 * scale + padding * 2) + 'px';
+            // ОБНОВЛЕНО ПОД НОВЫЕ РАЗМЕРЫ
+            zoomContainer.style.width = (1193 * scale + padding * 2) + 'px';
+            zoomContainer.style.height = (593 * scale + padding * 2) + 'px';
             
             if (oldZoom !== zoom) {
                 const oldCenterX = canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2;
@@ -955,15 +958,15 @@
                 let newW = catStartW;
                 let newH = catStartH;
 
-                if (isResizingCatDir.includes('e')) newW = Math.max(100, catStartW + dx);
-                if (isResizingCatDir.includes('s')) newH = Math.max(85, catStartH + dy);
+                if (isResizingCatDir.includes('e')) newW = Math.max(55, catStartW + dx);
+                if (isResizingCatDir.includes('s')) newH = Math.max(90, catStartH + dy);
                 if (isResizingCatDir.includes('w')) {
-                    const possibleW = Math.max(100, catStartW - dx);
-                    if (possibleW > 100) { newX = catStartX + dx; newW = possibleW; }
+                    const possibleW = Math.max(55, catStartW - dx);
+                    if (possibleW > 55) { newX = catStartX + dx; newW = possibleW; }
                 }
                 if (isResizingCatDir.includes('n')) {
-                    const possibleH = Math.max(85, catStartH - dy);
-                    if (possibleH > 85) { newY = catStartY + dy; newH = possibleH; }
+                    const possibleH = Math.max(90, catStartH - dy);
+                    if (possibleH > 90) { newY = catStartY + dy; newH = possibleH; }
                 }
 
                 cat.x = newX;
@@ -1049,10 +1052,10 @@
                 let maxY = Math.max(catStartY, catEndY);
                 
                 if (maxX - minX < 20 || maxY - minY < 20) {
-                    minX = catStartX - 100;
-                    minY = catStartY - 125;
-                    maxX = catStartX + 100;
-                    maxY = catStartY + 125;
+                    minX = catStartX - 30;
+                    minY = catStartY - 45;
+                    maxX = catStartX + 30;
+                    maxY = catStartY + 45;
                 }
 
                 customPrompt("Название категории (можно оставить пустым)", "Керри").then(name => {
@@ -1270,7 +1273,7 @@
         }
 
         // --- РЕФЕРЕНС ---
-        let refX = 0, refY = 0, refW = 1280, refH = 720;
+        let refX = 0, refY = 0, refW = 1193, refH = 593; // Новые дефолтные размеры
         let isDraggingRef = false;
         let isResizingRef = false;
         let refStartX, refStartY, refStartW, refStartH, refStartMouseX, refStartMouseY;
@@ -1284,7 +1287,7 @@
                     refImg.src = event.target.result;
                     refContainer.style.display = 'block';
                     document.getElementById('ref-hide').checked = true;
-                    refX = 0; refY = 0; refW = 1280; refH = 720;
+                    refX = 0; refY = 0; refW = 1193; refH = 593; // Новые размеры
                     updateRefStyle();
                 };
                 reader.readAsDataURL(file);
@@ -1470,8 +1473,9 @@
         function exportJSON() {
             const exportCats = [];
             
+            // ОБНОВЛЕНО ПОД НОВЫЕ РАЗМЕРЫ 1193x593
             points.forEach(p => {
-                if (p.x >= 0 && p.x <= 1280 && p.y >= 0 && p.y <= 720) {
+                if (p.x >= 0 && p.x <= 1193 && p.y >= 0 && p.y <= 593) {
                     exportCats.push({ 
                         category_name: p.sym, 
                         x_position: p.x, 
