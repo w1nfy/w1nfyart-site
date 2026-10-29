@@ -160,18 +160,18 @@
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* === ФИНАЛЬНЫЙ ФИКС ПОРТРЕТОВ === */
+        /* === ИДЕАЛЬНЫЕ ПОРТРЕТЫ === */
         .hero-portrait {
-            /* Базовый размер 70.6 x 123.1, но он может сжиматься */
-            width: 70.6px;
-            height: 123.1px;
+            /* flex: 1 1 40px разрешает расти/сжиматься, но не ломает форму */
+            flex: 1 1 40px;
             
-            /* aspect-ratio гарантирует, что при сжатии он не сплющится */
-            aspect-ratio: 70.6 / 123.1;
+            /* Железобетонное сохранение пропорций (70.6 на 123.1) */
+            aspect-ratio: 70.6 / 123.1; 
             
-            /* flex-shrink: 1 позволяет сжиматься, если места мало. flex-grow: 0 ЗАПРЕЩАЕТ растягиваться. */
-            flex-shrink: 1; 
-            flex-grow: 0;
+            /* Ограничители, чтобы не вылезло за коробку */
+            max-width: 100%;
+            max-height: 100%; 
+            min-width: 20px;
             
             position: relative;
             border: 1px solid #111;
@@ -180,6 +180,7 @@
             background: #000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
+        
         .hero-portrait img { 
             width: 100%; 
             height: 100%; 
@@ -1496,37 +1497,60 @@
 
             try {
                 const data = JSON.parse(jsonText);
-                
-                let rawCategories = [];
-                if (data.configs && data.configs.length > 0 && data.configs[0].categories) {
-                    rawCategories = data.configs[0].categories;
-                } else if (data.categories) {
-                    rawCategories = data.categories; 
-                } else {
-                    throw new Error("Не найдены конфигурации (configs) в JSON.");
-                }
-
                 const newPoints = [];
                 const newCategories = [];
 
-                rawCategories.forEach(cat => {
-                    if (cat.hero_ids && cat.hero_ids.length > 0) {
-                        newCategories.push({
-                            name: cat.category_name || "",
-                            x: parseFloat(cat.x_position) || 0,
-                            y: parseFloat(cat.y_position) || 0,
-                            w: parseFloat(cat.width) || 200,
-                            h: parseFloat(cat.height) || 250,
-                            heroes: cat.hero_ids
-                        });
+                // ГЛАВНЫЙ ФИКС: Проверяем, откуда JSON (GridStudio или Dota 2)
+                if (data.app === "dota-grid-studio" && data.entities) {
+                    // Парсим нативный формат GridStudio
+                    data.entities.forEach(ent => {
+                        if (ent.type === "heroes") {
+                            newCategories.push({
+                                name: ent.name || "Без имени",
+                                x: parseFloat(ent.x) || 0,
+                                y: parseFloat(ent.y) || 0,
+                                w: parseFloat(ent.w) || 200,
+                                h: parseFloat(ent.h) || 250,
+                                heroes: ent.heroIds || []
+                            });
+                        } else if (ent.type === "text") {
+                            newPoints.push({
+                                x: parseFloat(ent.x) || 0,
+                                y: parseFloat(ent.y) || 0,
+                                sym: ent.text || "·"
+                            });
+                        }
+                    });
+                } else {
+                    // Парсим стандартный формат Dota 2 (на всякий случай)
+                    let rawCategories = [];
+                    if (data.configs && data.configs.length > 0 && data.configs[0].categories) {
+                        rawCategories = data.configs[0].categories;
+                    } else if (data.categories) {
+                        rawCategories = data.categories; 
                     } else {
-                        newPoints.push({
-                            x: parseFloat(cat.x_position) || 0,
-                            y: parseFloat(cat.y_position) || 0,
-                            sym: cat.category_name || "·"
-                        });
+                        throw new Error("Неизвестный формат JSON (нет ни entities, ни configs).");
                     }
-                });
+
+                    rawCategories.forEach(cat => {
+                        if (cat.hero_ids && cat.hero_ids.length > 0) {
+                            newCategories.push({
+                                name: cat.category_name || "",
+                                x: parseFloat(cat.x_position) || 0,
+                                y: parseFloat(cat.y_position) || 0,
+                                w: parseFloat(cat.width) || 200,
+                                h: parseFloat(cat.height) || 250,
+                                heroes: cat.hero_ids
+                            });
+                        } else {
+                            newPoints.push({
+                                x: parseFloat(cat.x_position) || 0,
+                                y: parseFloat(cat.y_position) || 0,
+                                sym: cat.category_name || "·"
+                            });
+                        }
+                    });
+                }
 
                 points = newPoints;
                 categories = newCategories;
