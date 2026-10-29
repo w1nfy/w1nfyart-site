@@ -880,7 +880,7 @@
                             image = image.startsWith('/') ? image : '/' + image;
                         }
 
-                        // Генерируем новую карточку
+                                                // Генерируем новую карточку
                         const cardHTML = `
                             <div class="card" data-type="grid" style="border: 1px solid #6A5ACD;">
                                 <span class="badge badge-grid">Сетка</span>
@@ -890,8 +890,8 @@
                                     <p>Сетка героев Dota 2</p>
                                     <div class="card-counter">Скачали: <span class="count-value" data-id="${id}">0</span></div>
                                     <div class="card-buttons">
-                                        <a href="${tgLink}" target="_blank" class="link-btn" style="margin-bottom: 10px; background-color: #6A5ACD;">Скачать в Telegram</a>
-                                        <a href="grid.html?id=${id}" class="link-btn">Подробнее</a>
+                                        <a href="grid.html?id=${id}" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                                        <a href="${tgLink}" target="_blank" class="link-btn">Скачать в Telegram</a>
                                     </div>
                                 </div>
                             </div>
