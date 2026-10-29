@@ -3,58 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гайд по установке | W1NFY CUSTOMS</title>
+    <title>W1NFY | Гайд по установке</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
+    
+    <style>
+        /* Дополнительные стили для страницы гайда */
+        html {
+            scroll-behavior: smooth; /* Плавный скролл по якорям */
+        }
+
+        .guide-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        /* Оглавление (Сайдбар) */
+        .guide-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background-color: #131318;
+            border: 1px solid #2a2a35;
+            border-radius: 20px;
+            padding: 25px;
+            position: sticky;
+            top: 100px; /* Чтобы меню ехало за тобой при скролле */
+        }
+
+        .guide-sidebar h3 {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #6A5ACD;
+            padding-bottom: 10px;
+        }
+
+        .toc-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toc-list a {
+            color: #a89bf5;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
+
+        .toc-list a:hover {
+            background-color: rgba(106, 90, 205, 0.15);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        /* Основной контент */
+        .guide-content {
+            flex-grow: 1;
+            min-width: 0; 
+        }
+
+        .guide-section {
+            background-color: #131318;
+            border: 1px solid #2a2a35;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            scroll-margin-top: 100px; /* Отступ при скролле к якорю */
+        }
+
+        .guide-section h2 {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guide-step {
+            margin-bottom: 30px;
+            background: rgba(10, 10, 15, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 3px solid #6A5ACD;
+        }
+
+        .guide-step h3 {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .guide-step p {
+            color: #bbb;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        .guide-step a {
+            color: #6A5ACD;
+            text-decoration: underline;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .guide-step a:hover {
+            color: #fff;
+        }
+
+        .guide-step code {
+            background-color: #000;
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: #a89bf5;
+            font-family: monospace;
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        /* Стили для FAQ (Спойлеров) */
+        details {
+            background: rgba(10, 10, 15, 0.5);
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            border-color: #6A5ACD;
+            background: rgba(106, 90, 205, 0.05);
+        }
+
+        summary {
+            padding: 20px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            list-style: none; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #6A5ACD;
+            transition: transform 0.3s ease;
+        }
+
+        details[open] summary::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px 20px 20px;
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        /* Адаптив под телефоны */
+        @media (max-width: 900px) {
+            .guide-layout {
+                flex-direction: column;
+            }
+            .guide-sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
+
     <header>
         <a href="index.html" class="logo">W1NFY<span>_CUSTOMS</span></a>
         <nav>
             <a href="index.html">← Назад</a>
+            <a href="https://t.me/w1nfyart" target="_blank" class="btn-social">Telegram</a>
+            <a href="https://discord.gg/86ZsPBGCS5" target="_blank" class="btn-social">Discord</a>
         </nav>
     </header>
 
-    <main class="theme-page">
-        <h1 class="theme-title">🛠 Полный гайд по установке</h1>
-        <p class="theme-desc">Инструкция для тех, кто впервые ставит темы и сетки.</p>
+    <main class="guide-layout">
+        
+        <!-- ОГЛАВЛЕНИЕ -->
+        <aside class="guide-sidebar">
+            <h3>📑 Оглавление</h3>
+            <ul class="toc-list">
+                <li><a href="#millennium">🛠 База (Millennium)</a></li>
+                <li><a href="#themes">🎨 Установка тем</a></li>
+                <li><a href="#grids">🎮 Установка сеток</a></li>
+                <li><a href="#faq">❓ Частые вопросы</a></li>
+            </ul>
+        </aside>
 
-        <div class="install-guide" style="margin-top: 40px;">
-            <div class="guide-step">
-                <h3>Шаг 1: Установка Millennium</h3>
-                <p>Скачай программу Millennium с официального сайта (<a href="https://steambrew.app" target="_blank" style="color:#6A5ACD;">steambrew.app</a>). Запусти установщик и следуй инструкциям. После установки Millennium автоматически перезапустит Steam.</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>Шаг 2: Установка Minimal Dark</h3>
-                <p><b>Это обязательно!</b> Все темы делаются на базе Minimal Dark. В меню Steam перейди в <code>Millennium -> Settings -> Themes</code>. Найди тему <b>Minimal Dark</b> и нажми «Install» (Установить). Включи её.</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>Шаг 3: Вставка кода (Quick CSS)</h3>
-                <p>В настройках Millennium перейди во вкладку <b>Quick CSS</b>. Нажми кнопку «Скачать файл темы» на странице понравившейся темы, открой скачанный файл блокнотом, скопируй оттуда весь код и вставь его в окно Quick CSS. Нажми <b>Save</b> (Сохранить).</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>Шаг 4: Установка кастомного фона (Баннера)</h3>
-                <p>Чтобы установить атмосферный фон, на странице темы нажми «скачать этот баннер». После скачивания зайди в библиотеку Steam, нажми <b>ПКМ (правой кнопкой мыши) по фону игры</b> (на пустом месте, где обычно баннер) -> выбери <b>«Установить свой фон»</b> и укажи только что скачанную картинку.</p>
-            </div>
-
-            <div class="guide-step">
-                <h3>Шаг 5: Как установить сетку героев?</h3>
-                <p>На странице сетки нажми кнопку <b>«Скачать файл сетки (.json)</b>. У тебя скачается файл <b>hero_grid_config.json</b>. Перекинь его в папку <code>Steam\userdata\ТВОЙ_ID\570\remote\cfg</code> с заменой старого. Зайди в Dota 2, открой «Герои» и выбери сетку в списке «Сортировка».</p>
-            </div>
+        <!-- КОНТЕНТ -->
+        <div class="guide-content">
             
-            <p style="margin-top: 20px; color: #a89bf5; font-weight: bold;">Если что-то пошло не так — зайди в наш Discord, там поможем!</p>
+            <!-- РАЗДЕЛ 1: БАЗА -->
+            <section id="millennium" class="guide-section">
+                <h2>🛠 Установка Millennium</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Это обязательный шаг для того, чтобы у тебя работали кастомные темы на Steam.</p>
+                
+                <div class="guide-step">
+                    <h3>Шаг 1: Скачивание</h3>
+                    <p>Скачай программу Millennium с официального сайта (или из их GitHub). Запусти установщик и следуй инструкциям на экране.</p>
+                </div>
+                
+                <div class="guide-step">
+                    <h3>Шаг 2: Запуск</h3>
+                    <p>После установки Millennium автоматически перезапустит Steam. В левом верхнем углу у тебя появится новая иконка (или меню в настройках), через которое ты будешь управлять темами.</p>
+                </div>
+            </section>
+
+            <!-- РАЗДЕЛ 2: ТЕМЫ -->
+            <section id="themes" class="guide-section">
+                <h2>🎨 Установка Steam Тем</h2>
+                
+                <div class="guide-step">
+                    <h3>Шаг 1: Установка Minimal Dark</h3>
+                    <p><b>Это обязательно!</b> Все мои темы делаются на базе Minimal Dark. В меню Steam перейди в <code>Millennium -> Settings -> Themes</code>. Найди тему <b>Minimal Dark</b> и нажми «Install» (Установить). Включи её.</p>
+                </div>
+
+                <div class="guide-step">
+                    <h3>Шаг 2: Вставка кода (Quick CSS)</h3>
+                    <p>В настройках Millennium перейди во вкладку <b>Quick CSS</b>. Нажми кнопку «Скачать файл темы» на странице темы на нашем сайте, открой скачанный файл блокнотом, скопируй оттуда весь код и вставь его в окно Quick CSS. Нажми <b>Save</b> (Сохранить).</p>
+                </div>
+
+                <div class="guide-step">
+                    <h3>Шаг 3: Установка кастомного фона (Баннера)</h3>
+                    <p>Чтобы установить атмосферный фон, скачай баннер на странице темы.</p>
+                    <p>После скачивания зайди в библиотеку Steam, нажми <b>ПКМ (правой кнопкой мыши) по фону игры</b> (на пустом месте, где обычно баннер) -> выбери <b>«Установить свой фон»</b> и укажи только что скачанную картинку.</p>
+                </div>
+            </section>
+
+            <!-- РАЗДЕЛ 3: СЕТКИ -->
+            <section id="grids" class="guide-section">
+                <h2>🎮 Установка Dota 2 Сеток</h2>
+                
+                <div class="guide-step">
+                    <h3>Шаг 1: Скачивание файла</h3>
+                    <p>На странице сетки нажми кнопку «Скачать файл сетки (.json)». У тебя скачается файл <b>hero_grid_config.json</b>.</p>
+                </div>
+
+                <div class="guide-step">
+                    <h3>Шаг 2: Поиск папки</h3>
+                    <p>Открой папку со Steam. Путь обычно выглядит так: <br>
+                    <code>C:\Program Files (x86)\Steam\userdata\ТВОЙ_ID\570\remote\cfg</code></p>
+                    <p><i>(Вместо <code>ТВОЙ_ID</code> у тебя будет набор цифр. Если папки <code>cfg</code> нет — создай её).</i></p>
+                </div>
+
+                <div class="guide-step">
+                    <h3>Шаг 3: Замена файла</h3>
+                    <p>Перекинь скачанный файл в эту папку с заменой старого. Если у тебя там уже были сетки, они затрутся (но ты можешь сохранить их, предварительно скопировав старый файл в другое место).</p>
+                </div>
+
+                <div class="guide-step">
+                    <h3>Шаг 4: Активация в игре</h3>
+                    <p>Запусти Dota 2. Зайди в меню «Герои», нажми на кнопку «Сортировка» (или иконку фильтра) и выбери свою новую сетку.</p>
+                </div>
+            </section>
+
+            <!-- РАЗДЕЛ 4: FAQ -->
+            <section id="faq" class="guide-section">
+                <h2>❓ Часто задаваемые вопросы</h2>
+                
+                <details>
+                    <summary>Почему не появляются картинки в теме?</summary>
+                    <div class="faq-answer">
+                        Скорее всего, у тебя не загружаются картинки с внешних серверов. Включи VPN и вставь код темы заново в Quick CSS.
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Сетка не появилась в игре. Что делать?</summary>
+                    <div class="faq-answer">
+                        Зайди в саму Dota 2, создай пустую сетку для списка (чтобы игра обновила конфиг), а затем скачай файл с сайта заново и перекинь в папку с заменой.
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Сетка вылетает. Что делать?</summary>
+                    <div class="faq-answer">
+                        Если игра вылетает при попытке редактирования сетки — это нормально (Valve такую функцию не поддерживает). В нашем <a href="https://t.me/w1nfyart/299" target="_blank">Telegram-канале есть гайд</a>, как поменять героев в сетке правильно.
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Не могу поставить сетку. В чём проблема?</summary>
+                    <div class="faq-answer">
+                        Если ставишь через команду — убедись, что ты открываешь обычный синий PowerShell, без х64 и прочих версий. <br><br>
+                        Если ставишь через файл — убедись, что в названии скачанного файла нет порядкового номера (например, <code>дотахирогрид (23582).json</code>). Переименуй файл, оставив только <code>hero_grid_config.json</code>.
+                    </div>
+                </details>
+            </section>
+
         </div>
     </main>
 
     <footer>
         <div class="footer-links">
             <a href="https://t.me/w1nfyart" target="_blank">Telegram</a>
+            <a href="https://www.tiktok.com/@w1nfyyyy" target="_blank">TikTok</a>
             <a href="https://discord.gg/86ZsPBGCS5" target="_blank">Discord</a>
         </div>
         <p>&copy; 2026 W1NFY. Сделано с душой.</p>
     </footer>
+
+    <script src="animations.js"></script>
 </body>
 </html>
