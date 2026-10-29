@@ -153,7 +153,7 @@
             }
         }
 
-        // Умный парсер YAML из админки
+        // УМНЫЙ ПАРСЕР YAML ДЛЯ КАРТИНОК
         async function fetchCMSGrid(id) {
             try {
                 const url = `https://raw.githubusercontent.com/w1nfy/w1nfyart-site/main/data/grids/${id}.md`;
@@ -165,8 +165,6 @@
                 if (!match) return null;
                 
                 const yaml = match[1];
-                
-                // Безопасное извлечение одиночных полей
                 const getField = (fieldName) => {
                     const regex = new RegExp(`${fieldName}:\\s*["']?([^"'\\n]+)["']?`);
                     const m = yaml.match(regex);
@@ -181,22 +179,28 @@
                 if (image && !image.startsWith('http')) image = image.startsWith('/') ? image : '/' + image;
                 if (gridFile && !gridFile.startsWith('http')) gridFile = gridFile.startsWith('/') ? gridFile : '/' + gridFile;
 
-                // Достаем доп картинки (парсим любые списки)
+                // Ищем блок с картинками (images:)
                 let images = [image];
-                const imagesSection = yaml.match(/images:\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
-                if (imagesSection) {
-                    const imgMatches = [...imagesSection[1].matchAll(/-\s*(?:image:\s*)?["']?([^"'\n]+)["']?/g)];
+                const imagesBlockMatch = yaml.match(/images:\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
+                if (imagesBlockMatch) {
+                    const block = imagesBlockMatch[1];
+                    // Вытаскиваем все пути из списка
+                    const imgMatches = [...block.matchAll(/-\s*(?:image:\s*)?["']?([^"'\n]+)["']?/g)];
                     if (imgMatches.length > 0) {
                         images = imgMatches.map(m => {
-                            let src = m[1].trim();
-                            if (!src.startsWith('http') && !src.startsWith('/')) src = '/' + src;
+                            let src = m[1].trim().replace(/^["']|["']$/g, '');
+                            if (src && !src.startsWith('http') && !src.startsWith('/')) src = '/' + src;
                             return src;
-                        });
+                        }).filter(src => src); // Убираем пустые
                     }
                 }
 
+                // Если массив картинок почему-то пустой, добавляем хотя бы главную
+                if (images.length === 0 && image) images.push(image);
+
                 return { title, tgLink, images, downloadUrl: gridFile || `grids/${id}.json` };
             } catch(e) {
+                console.error("Parse error:", e);
                 return null;
             }
         }
@@ -238,7 +242,6 @@
             const slider = document.getElementById('slider');
             slider.innerHTML = '';
             
-            // Отрисовка всех картинок
             data.images.forEach(imgSrc => {
                 if(!imgSrc) return;
                 const img = document.createElement('img');
