@@ -9,12 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W1NFY CUSTOMS | Steam & Dota 2</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Подключаем Nunito и Rubik Glitch -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
     
-    <!-- Иконка сайта (Favicon) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
     
-    <!-- ОГ-теги для красивого превью в Телеграме (ГЛАВНАЯ) -->
     <meta property="og:title" content="W1NFY CUSTOMS | Кастомные темы для Steam">
     <meta property="og:description" content="Атмосферные темы для Millennium и сетки героев для Dota 2.">
     <meta property="og:image" content="https://w1nfyart-site.layero.app/images/main-preview.jpg">
@@ -45,7 +44,6 @@
                 <input type="text" id="searchInput" placeholder="Поиск по темам и сеткам..." autocomplete="off">
                 <div id="searchDropdown" class="search-dropdown"></div>
             </div>
-            <!-- Кнопка РАНДОМ -->
             <button class="random-btn" onclick="randomPick()" title="Мне повезет!">🎲</button>
         </div>
     </section>
@@ -693,11 +691,10 @@
             "flowers": `/* Вставь сюда код темы flowers */`
         };
 
-        // Рандом теперь берет только ссылки на .html (игнорирует Telegram)
         function randomPick() {
             const links = Array.from(document.querySelectorAll('.card .link-btn'))
                 .map(a => a.href)
-                .filter(href => href.includes('.html')); // Отсеиваем t.me
+                .filter(href => href.includes('.html'));
             
             if (links.length > 0) {
                 window.location.href = links[Math.floor(Math.random() * links.length)];
@@ -720,7 +717,6 @@
             return array;
         }
 
-        // Сортировка карточек вынесена в отдельную функцию
         function shuffleCards() {
             const themesContainer = document.getElementById('themes-container');
             const themeCards = Array.from(themesContainer.querySelectorAll('.card'));
@@ -732,7 +728,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            shuffleCards(); // Сортируем при старте
+            shuffleCards();
         });
 
         function toggleSection(sectionId) {
@@ -742,7 +738,6 @@
             btn.innerText = container.classList.contains('collapsed') ? 'Показать все' : 'Скрыть';
         }
 
-        // Динамический поиск, который видит новые карточки из CMS
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
             const searchDropdown = document.getElementById('searchDropdown');
@@ -763,7 +758,6 @@
                 document.getElementById('themes-container').classList.remove('collapsed');
                 document.getElementById('dota-container').classList.remove('collapsed');
 
-                // Ищем прямо в HTML, чтобы захватить и новые карточки тоже
                 const results = [];
                 document.querySelectorAll('.card').forEach(card => {
                     const titleEl = card.querySelector('h3');
@@ -832,7 +826,6 @@
             }
         });
 
-        // ДИНАМИЧЕСКАЯ ПОДСВЕТКА
         document.addEventListener('mousemove', e => {
             const card = e.target.closest('.card');
             if (card) {
@@ -844,7 +837,6 @@
             }
         });
 
-        // АВТОЗАГРУЗКА СЕТОК ИЗ CMS
         async function loadCMSGrids() {
             const container = document.getElementById('dota-container');
             try {
@@ -874,7 +866,6 @@
                             return m ? m[1].trim() : '';
                         };
 
-                        // Берем ID из YAML. Если его нет - используем имя файла
                         const id = getField('id') || file.name.replace(/\.(md|yml)$/, '');
                         
                         if (existingIds.has(id)) continue;
