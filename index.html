@@ -720,7 +720,8 @@
             return array;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Сортировка карточек вынесена в отдельную функцию
+        function shuffleCards() {
             const themesContainer = document.getElementById('themes-container');
             const themeCards = Array.from(themesContainer.querySelectorAll('.card'));
             shuffleArray(themeCards).forEach(card => themesContainer.appendChild(card));
@@ -728,6 +729,10 @@
             const dotaContainer = document.getElementById('dota-container');
             const gridCards = Array.from(dotaContainer.querySelectorAll('.card'));
             shuffleArray(gridCards).forEach(card => dotaContainer.appendChild(card));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            shuffleCards(); // Сортируем при старте
         });
 
         function toggleSection(sectionId) {
@@ -900,6 +905,9 @@
                 }
             } catch (e) {
                 console.error("Ошибка загрузки CMS сеток:", e);
+            } finally {
+                // Главный фикс: Перемешиваем карточки ЕЩЕ РАЗ, когда все новые загрузились!
+                shuffleCards(); 
             }
         }
 
