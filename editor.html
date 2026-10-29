@@ -160,20 +160,19 @@
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* === САМОЕ ВАЖНОЕ: АДАПТИВНЫЕ ПОРТРЕТЫ === */
+        /* === ФИНАЛЬНЫЙ ФИКС ПОРТРЕТОВ === */
         .hero-portrait {
-            /* flex: 1 1 50px разрешает портрету расти и сжиматься вместе с коробкой */
-            flex: 1 1 50px; 
+            /* Базовый размер 70.6 x 123.1, но он может сжиматься */
+            width: 70.6px;
+            height: 123.1px;
             
-            /* aspect-ratio держит пропорции из GridStudio (70.6 / 123.1) */
-            aspect-ratio: 70.6 / 123.1; 
+            /* aspect-ratio гарантирует, что при сжатии он не сплющится */
+            aspect-ratio: 70.6 / 123.1;
             
-            /* Не даем портрету вылезти за пределы категории */
-            max-width: 100%;
-            max-height: calc(100% - 8px); 
+            /* flex-shrink: 1 позволяет сжиматься, если места мало. flex-grow: 0 ЗАПРЕЩАЕТ растягиваться. */
+            flex-shrink: 1; 
+            flex-grow: 0;
             
-            /* Минимальный размер */
-            min-width: 20px;
             position: relative;
             border: 1px solid #111;
             border-radius: 1px;
@@ -181,7 +180,6 @@
             background: #000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        
         .hero-portrait img { 
             width: 100%; 
             height: 100%; 
