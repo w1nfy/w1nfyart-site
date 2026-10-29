@@ -838,7 +838,7 @@
     <!-- АВТОЗАГРУЗКА СЕТОК ИЗ АДМИНКИ (CMS) -->
     <!-- ========================================== -->
     <script>
-        async function loadCMSGrids() {
+                async function loadCMSGrids() {
             const container = document.getElementById('dota-container');
             
             try {
@@ -867,7 +867,7 @@
                         const yaml = match[1];
                         const id = yaml.match(/id:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
                         
-                        // Если такая сетка уже есть в HTML (например, твои 36 штук), пропускаем
+                        // Если такая сетка уже есть в HTML, пропускаем
                         if (existingIds.has(id)) continue;
 
                         const title = yaml.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || 'Без названия';
@@ -906,5 +906,3 @@
         // Запускаем загрузку после того, как страница прогрузится
         document.addEventListener('DOMContentLoaded', loadCMSGrids);
     </script>
-</body>
-</html>
