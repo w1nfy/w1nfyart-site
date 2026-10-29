@@ -143,14 +143,13 @@
             cursor: move; border-bottom: 1px solid #333;
         }
         
-        /* Контейнер с героями */
         .category-zone .heroes-container {
             display: flex; 
             flex-wrap: wrap; 
-            gap: 2px; 
-            padding: 2px; 
+            gap: 4px; /* Отступ как в доте */
+            padding: 4px; 
             align-content: flex-start;
-            justify-content: flex-start;
+            justify-content: flex-start; /* Выравнивание влево */
             flex-grow: 1; 
             overflow-y: auto; 
             cursor: pointer;
@@ -160,17 +159,17 @@
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* ТОЧНЫЕ ПРОПОРЦИИ ИЗ GRIDSTUDIO (70.6 x 123.1) */
+        /* ЖЕСТКИЕ РАЗМЕРЫ ИЗ GRIDSTUDIO (70.6 x 123.1) */
         .hero-portrait {
-            /* Это заставит элемент всегда сохранять форму 70.6 на 123.1 */
-            aspect-ratio: 70.6 / 123.1; 
-            /* Он будет занимать всю доступную высоту */
-            height: 100%; 
-            /* Не позволяет растягиваться в ширину сверх меры */
-            max-width: 100%; 
-            /* Если героев много, они будут сжиматься */
-            flex: 0 1 auto; 
-            min-width: 0;
+            width: 70.6px;
+            height: 123.1px;
+            /* Эти параметры не дают герою вылезти за пределы категории, если она маленькая */
+            max-width: 100%;
+            max-height: 100%;
+            /* Железобетонное сохранение пропорций */
+            aspect-ratio: 70.6 / 123.1;
+            flex-shrink: 1; /* Разрешаем сжиматься, если категория слишком маленькая */
+            flex-grow: 0;   /* ЗАПРЕЩАЕМ растягиваться на всю ширину */
             position: relative;
             border: 1px solid #111;
             border-radius: 1px;
@@ -178,7 +177,6 @@
             background: #000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        
         .hero-portrait img { 
             width: 100%; 
             height: 100%; 
@@ -1253,7 +1251,8 @@
                     const hero = HEROES.find(x => x.id === hId);
                     if (!hero) return;
                     const portrait = document.createElement('div');
-                    // Всегда используем класс hero-portrait, без исключений для 1 героя
+                    
+                    // Убрали класс 'single', теперь у всех один стиль
                     portrait.className = 'hero-portrait'; 
                     portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
                     heroesContainer.appendChild(portrait);
