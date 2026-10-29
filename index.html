@@ -825,20 +825,21 @@
         // ==========================================
         // ДИНАМИЧЕСКАЯ ПОДСВЕТКА КАРТОЧЕК (SPOTLIGHT)
         // ==========================================
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('mousemove', e => {
+        document.addEventListener('mousemove', e => {
+            const card = e.target.closest('.card');
+            if (card) {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 card.style.setProperty('--mouse-x', `${x}px`);
                 card.style.setProperty('--mouse-y', `${y}px`);
-            });
+            }
         });
-            <!-- ========================================== -->
-    <!-- АВТОЗАГРУЗКА СЕТОК ИЗ АДМИНКИ (CMS) -->
-    <!-- ========================================== -->
-    <script>
-                async function loadCMSGrids() {
+
+        // ==========================================
+        // АВТОЗАГРУЗКА СЕТОК ИЗ АДМИНКИ (CMS)
+        // ==========================================
+        async function loadCMSGrids() {
             const container = document.getElementById('dota-container');
             
             try {
@@ -906,3 +907,5 @@
         // Запускаем загрузку после того, как страница прогрузится
         document.addEventListener('DOMContentLoaded', loadCMSGrids);
     </script>
+</body>
+</html>
