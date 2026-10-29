@@ -30,6 +30,7 @@ collections:
       - {label: "ID (короткое имя, напр. military)", name: "id", widget: "string"}
       - {label: "Название", name: "title", widget: "string"}
       - {label: "Описание", name: "desc", widget: "text"}
+      - {label: "Ссылка на пост в TG", name: "tgLink", widget: "string", required: false}
       - {label: "Превью темы", name: "image", widget: "image"}
       - {label: "Баннер для Steam", name: "banner", widget: "image", required: false}
       - {label: "CSS Код", name: "cssCode", widget: "code", default_language: "css", required: true}
