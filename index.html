@@ -693,8 +693,12 @@
             "flowers": `/* Вставь сюда код темы flowers */`
         };
 
+        // Рандом теперь берет только ссылки на .html (игнорирует Telegram)
         function randomPick() {
-            const links = Array.from(document.querySelectorAll('.card .link-btn')).map(a => a.href);
+            const links = Array.from(document.querySelectorAll('.card .link-btn'))
+                .map(a => a.href)
+                .filter(href => href.includes('.html')); // Отсеиваем t.me
+            
             if (links.length > 0) {
                 window.location.href = links[Math.floor(Math.random() * links.length)];
             }
@@ -733,18 +737,10 @@
             btn.innerText = container.classList.contains('collapsed') ? 'Показать все' : 'Скрыть';
         }
 
+        // Динамический поиск, который видит новые карточки из CMS
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchInput');
             const searchDropdown = document.getElementById('searchDropdown');
-            const allCards = document.querySelectorAll('.card');
-            let searchData = [];
-
-            allCards.forEach(card => {
-                const title = card.querySelector('h3').innerText;
-                const type = card.getAttribute('data-type') === 'theme' ? 'Тема' : 'Сетка';
-                const link = card.querySelector('.link-btn').getAttribute('href');
-                searchData.push({ title, type, link });
-            });
 
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
@@ -762,7 +758,16 @@
                 document.getElementById('themes-container').classList.remove('collapsed');
                 document.getElementById('dota-container').classList.remove('collapsed');
 
-                const results = searchData.filter(item => item.title.toLowerCase().includes(query));
+                // Ищем прямо в HTML, чтобы захватить и новые карточки тоже
+                const results = [];
+                document.querySelectorAll('.card').forEach(card => {
+                    const titleEl = card.querySelector('h3');
+                    if (titleEl && titleEl.innerText.toLowerCase().includes(query)) {
+                        const type = card.getAttribute('data-type') === 'theme' ? 'Тема' : 'Сетка';
+                        const link = card.querySelector('.link-btn').getAttribute('href');
+                        results.push({ title: titleEl.innerText, type, link });
+                    }
+                });
 
                 if (results.length > 0) {
                     results.forEach(item => {
@@ -822,9 +827,7 @@
             }
         });
 
-        // ==========================================
-        // ДИНАМИЧЕСКАЯ ПОДСВЕТКА КАРТОЧЕК (SPOTLIGHT)
-        // ==========================================
+        // ДИНАМИЧЕСКАЯ ПОДСВЕТКА
         document.addEventListener('mousemove', e => {
             const card = e.target.closest('.card');
             if (card) {
@@ -836,21 +839,16 @@
             }
         });
 
-        // ==========================================
-        // АВТОЗАГРУЗКА СЕТОК ИЗ АДМИНКИ (CMS)
-        // ==========================================
+        // АВТОЗАГРУЗКА СЕТОК ИЗ CMS
         async function loadCMSGrids() {
             const container = document.getElementById('dota-container');
-            
             try {
-                // Стучимся в GitHub, чтобы получить список файлов из папки data/grids
                 const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/grids');
                 if (!res.ok) throw new Error('API Error');
                 
                 const files = await res.json();
                 if (!Array.isArray(files) || files.length === 0) return;
 
-                // Собираем ID карточек, которые уже есть на странице, чтобы не дублировать их
                 const existingIds = new Set();
                 container.querySelectorAll('.count-value').forEach(el => {
                     existingIds.add(el.getAttribute('data-id'));
@@ -861,26 +859,27 @@
                         const contentRes = await fetch(file.download_url);
                         const content = await contentRes.text();
                         
-                        // Парсим данные из файла админки
                         const match = content.match(/^---\n([\s\S]+?)\n---/);
                         if (!match) continue;
                         
                         const yaml = match[1];
-                        const id = yaml.match(/id:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-                        
-                        // Если такая сетка уже есть в HTML, пропускаем
+                        const getField = (fieldName) => {
+                            const regex = new RegExp(`${fieldName}:\\s*["']?([^"'\\n]+)["']?`);
+                            const m = yaml.match(regex);
+                            return m ? m[1].trim() : '';
+                        };
+
+                        const id = getField('id');
                         if (existingIds.has(id)) continue;
 
-                        const title = yaml.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || 'Без названия';
-                        const tgLink = yaml.match(/tgLink:\s*["']?([^"'\n]+)["']?/)?.[1] || '#';
-                        let image = yaml.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                        const title = getField('title') || 'Без названия';
+                        const tgLink = getField('tgLink') || '#';
+                        let image = getField('image');
                         
-                        // Фикс пути картинки
                         if (image && !image.startsWith('http')) {
                             image = image.startsWith('/') ? image : '/' + image;
                         }
 
-                                                // Генерируем новую карточку
                         const cardHTML = `
                             <div class="card" data-type="grid" style="border: 1px solid #6A5ACD;">
                                 <span class="badge badge-grid">Сетка</span>
@@ -904,7 +903,6 @@
             }
         }
 
-        // Запускаем загрузку после того, как страница прогрузится
         document.addEventListener('DOMContentLoaded', loadCMSGrids);
     </script>
 </body>
