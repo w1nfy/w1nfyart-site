@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W1NFY CUSTOMS | Steam & Dota 2</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем Nunito и Rubik Glitch -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
@@ -64,7 +63,7 @@
                     <h3>Кажется, в аду прикольно но меня выгнали б утром</h3>
                     <p>Темно-бордовая тема с нежными розовыми акцентами.</p>
                     <div class="card-buttons">
-                        <a href="theme-hell.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="theme.html?id=hell" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
                         <button class="copy-btn" onclick="copyTheme('hell')">Скопировать CSS</button>
                     </div>
                 </div>
@@ -78,7 +77,7 @@
                     <h3>Как испортить вечеринку?</h3>
                     <p>Мрачный черно-белый гранж по обложке CUPSIZE.</p>
                     <div class="card-buttons">
-                        <a href="theme-party.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="theme.html?id=party" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
                         <button class="copy-btn" onclick="copyTheme('party')">Скопировать CSS</button>
                     </div>
                 </div>
@@ -92,7 +91,7 @@
                     <h3>В моих легких выросли цветы</h3>
                     <p>Атмосферная тема по обложке альбома CUPSIZE.</p>
                     <div class="card-buttons">
-                        <a href="theme-flowers.html" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                        <a href="theme.html?id=flowers" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
                         <button class="copy-btn" onclick="copyTheme('flowers')">Скопировать CSS</button>
                     </div>
                 </div>
@@ -694,18 +693,48 @@
         function randomPick() {
             const links = Array.from(document.querySelectorAll('.card .link-btn'))
                 .map(a => a.href)
-                .filter(href => href.includes('.html'));
+                .filter(href => href.includes('.html') || href.includes('theme.html') || href.includes('grid.html'));
             
             if (links.length > 0) {
                 window.location.href = links[Math.floor(Math.random() * links.length)];
             }
         }
 
-        function copyTheme(themeId) {
+        async function copyTheme(themeId) {
+            // Проверяем, есть ли в жестко заданных
             if(themeCodes[themeId]) {
                 navigator.clipboard.writeText(themeCodes[themeId]).then(() => {
-                    customAlert("Код темы успешно скопирован! Вставь его в Quick CSS.");
-                }).catch(err => customAlert("Ошибка копирования. Попробуй зайти на страницу темы и скачать файл."));
+                    customAlert("Код темы успешно скопирован!");
+                }).catch(err => customAlert("Ошибка копирования."));
+                return;
+            }
+
+            // Если нет, качаем из CMS
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/w1nfy/w1nfyart-site/main/data/themes/${themeId}.md`);
+                if (!res.ok) throw new Error('Not found');
+                
+                const text = await res.text();
+                const match = text.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+                if (!match) throw new Error('Bad format');
+                
+                const yaml = match[1];
+                let css = '';
+                const cssMatch = yaml.match(/cssCode:\s*\|?\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
+                if (cssMatch) {
+                    css = cssMatch[1].replace(/^  /gm, ''); 
+                } else {
+                    css = yaml.match(/cssCode:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                }
+
+                if (css) {
+                    await navigator.clipboard.writeText(css);
+                    customAlert("Код темы из CMS успешно скопирован!");
+                } else {
+                    customAlert("CSS код не найден в файле темы.");
+                }
+            } catch (e) {
+                customAlert("Ошибка: Не удалось скачать тему из CMS.");
             }
         }
 
@@ -837,6 +866,71 @@
             }
         });
 
+        // ЗАГРУЗКА ТЕМ ИЗ CMS
+        async function loadCMSThemes() {
+            const container = document.getElementById('themes-container');
+            try {
+                const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/themes');
+                if (!res.ok) return; // Папка пока может быть пустой
+                
+                const files = await res.json();
+                if (!Array.isArray(files) || files.length === 0) return;
+
+                const existingIds = new Set();
+                container.querySelectorAll('.card .link-btn').forEach(a => {
+                    const url = new URL(a.href);
+                    const id = url.searchParams.get('id');
+                    if (id) existingIds.add(id);
+                });
+
+                for (const file of files) {
+                    if (file.name.endsWith('.md') || file.name.endsWith('.yml')) {
+                        const contentRes = await fetch(file.download_url);
+                        const content = await contentRes.text();
+                        const match = content.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+                        if (!match) continue;
+                        
+                        const yaml = match[1];
+                        const getField = (fieldName) => {
+                            const regex = new RegExp(`${fieldName}:\\s*["']?([^"'\\n]+)["']?`);
+                            const m = yaml.match(regex);
+                            return m ? m[1].trim() : '';
+                        };
+
+                        const id = getField('id');
+                        if (existingIds.has(id)) continue;
+                        existingIds.add(id);
+
+                        const title = getField('title') || 'Без названия';
+                        const desc = getField('desc') || 'Кастомная тема';
+                        let image = getField('image');
+                        if (image && !image.startsWith('http')) image = image.startsWith('/') ? image : '/' + image;
+
+                        const cardHTML = `
+                            <div class="card" data-type="theme" style="border: 1px solid #ff4500;">
+                                <span class="badge badge-theme">Тема</span>
+                                <img src="${image}" alt="${title}">
+                                <div class="card-content">
+                                    <h3>${title}</h3>
+                                    <p>${desc}</p>
+                                    <div class="card-buttons">
+                                        <a href="theme.html?id=${encodeURIComponent(id)}" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                                        <button class="copy-btn" onclick="copyTheme('${id}')">Скопировать CSS</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', cardHTML);
+                    }
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки CMS тем:", e);
+            } finally {
+                shuffleCards();
+            }
+        }
+
+        // ЗАГРУЗКА СЕТОК ИЗ CMS
         async function loadCMSGrids() {
             const container = document.getElementById('dota-container');
             try {
@@ -904,7 +998,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadCMSGrids);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCMSGrids();
+            loadCMSThemes();
+        });
     </script>
 </body>
 </html>
