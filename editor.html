@@ -26,7 +26,7 @@
 
         /* ЦЕНТР */
         .center-panel { flex-grow: 1; flex-shrink: 1; display: flex; flex-direction: column; position: relative; background: #0a0a0c; overflow: hidden; min-width: 0; }
-        .top-bar { height: 60px; flex-shrink: 0; background: #111116; border-bottom: 1px solid #2a2a35; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 20; }
+        .top-bar { height: 60px; flex-shrink: 0; background: #111116; border-bottom: 1px solid #2a2a35; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 20; gap: 15px; }
         
         .canvas-wrapper { 
             flex-grow: 1; overflow: auto; position: relative;
@@ -143,12 +143,11 @@
             cursor: move; border-bottom: 1px solid #333;
         }
         
-        /* Контейнер с героями */
         .category-zone .heroes-container {
             display: flex; 
             flex-wrap: wrap; 
-            gap: 4px; 
-            padding: 4px; 
+            gap: 2px; 
+            padding: 2px; 
             align-content: flex-start;
             justify-content: flex-start;
             flex-grow: 1; 
@@ -160,19 +159,12 @@
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* === ИДЕАЛЬНЫЕ ПОРТРЕТЫ === */
         .hero-portrait {
-            /* flex: 1 1 40px разрешает расти/сжиматься, но не ломает форму */
             flex: 1 1 40px;
-            
-            /* Железобетонное сохранение пропорций (70.6 на 123.1) */
             aspect-ratio: 70.6 / 123.1; 
-            
-            /* Ограничители, чтобы не вылезло за коробку */
             max-width: 100%;
             max-height: 100%; 
             min-width: 20px;
-            
             position: relative;
             border: 1px solid #111;
             border-radius: 1px;
@@ -188,7 +180,6 @@
             display: block;
         }
 
-        /* Ручки ресайза по 4 углам */
         .cat-resize-handle {
             position: absolute; width: 10px; height: 10px; background: #6A5ACD;
             z-index: 10; border-radius: 2px;
@@ -198,7 +189,6 @@
         .cat-resize-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
         .cat-resize-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
 
-        /* --- ВЫДЕЛЕНИЕ --- */
         #selection-box {
             position: absolute; border: 1px dashed #6A5ACD; background: rgba(106, 90, 205, 0.15);
             display: none; z-index: 50; cursor: move;
@@ -232,6 +222,18 @@
         .btn-save:hover { background: #5849b0; }
         .top-btn { background: transparent; color: #ccc; border: 1px solid #333; padding: 8px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
         .top-btn:hover { border-color: #6A5ACD; color: #fff; }
+
+        /* СЕЛЕКТ ГРИДОВ */
+        .grid-selector-wrapper { display: flex; align-items: center; gap: 5px; }
+        .grid-selector-wrapper select {
+            background: #0a0a0c; border: 1px solid #444; color: #fff; padding: 8px 12px;
+            border-radius: 4px; font-family: inherit; font-size: 0.9rem; cursor: pointer; outline: none;
+        }
+        .grid-selector-wrapper button {
+            background: #333; border: 1px solid #444; color: #fff; width: 34px; height: 34px;
+            border-radius: 4px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+        }
+        .grid-selector-wrapper button:hover { background: #6A5ACD; border-color: #6A5ACD; }
 
         /* ЗУМ ПАНЕЛЬ */
         .zoom-panel {
@@ -337,8 +339,15 @@
             <div style="display:flex; gap: 15px; align-items:center;">
                 <a href="index.html" class="logo" style="text-decoration: none; color: #fff; font-family: 'Rubik Glitch', cursive; font-size: 20px;">W1NFY<span style="color: #6A5ACD;">_EDITOR</span></a>
                 <a href="studio.html" class="top-btn">← В Студию</a>
-                <span style="color:#fff; font-weight:bold;" id="project-title">Новая сетка</span>
             </div>
+            
+            <!-- Селектор сеток -->
+            <div class="grid-selector-wrapper">
+                <select id="grid-selector" onchange="switchGrid(this.value)"></select>
+                <button onclick="addNewGrid()" title="Создать новую сетку">+</button>
+                <button onclick="deleteCurrentGrid()" title="Удалить текущую сетку" style="color:#ff4444;">×</button>
+            </div>
+
             <div style="display: flex; gap: 10px; align-items:center;">
                 <button class="top-btn" id="btn-undo" onclick="undo()" title="Отменить (Ctrl+Z)">↩ Отмена</button>
                 <button class="top-btn" id="btn-redo" onclick="redo()" title="Повторить (Ctrl+Y)">↪ Повтор</button>
@@ -503,7 +512,7 @@
 
     <script>
         // ==========================================
-        // ИКОНКИ АТРИБУТОВ
+        // ИКОНКИ АТРИБУТОВ И БАЗА ГЕРОЕВ
         // ==========================================
         const ATTR_ICONS = {
             str: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png",
@@ -512,9 +521,6 @@
             uni: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png"
         };
 
-        // ==========================================
-        // БАЗА ДАННЫХ ГЕРОЕВ
-        // ==========================================
         const HEROES = [
             { id: 1, name: "Anti-Mage", attr: "agi", img: "antimage" },
             { id: 2, name: "Axe", attr: "str", img: "axe" },
@@ -643,9 +649,6 @@
             { id: 138, name: "Muerta", attr: "int", img: "muerta" }
         ].map(h => ({ ...h, img: `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${h.img}.png` }));
 
-        // ==========================================
-        // БАЗА СИМВОЛОВ
-        // ==========================================
         const SYMBOL_CATEGORIES = {
             "База": ['·', '•', '—', '|', '/', '\\', '+', '*', '#', '█', '▓', '▒', '░', ' '],
             "Стрелки": ['←', '→', '↑', '↓', '↔', '↕', '↖', '↗', '↘', '↙'],
@@ -654,6 +657,12 @@
             "Спец": ['!', '@', '$', '%', '^', '&', '?', '~', '©', '®', '§', '¶', '†', '‡'],
             "Математика": ['+', '-', '=', '×', '÷', '±', '∞', '√', '∑', '∏', '∫', '≈']
         };
+
+        // ==========================================
+        // СОСТОЯНИЕ ГРИДОВ (МУЛЬТИ-КОНФИГ)
+        // ==========================================
+        let configs = [{ name: "Новая сетка", points: [], categories: [] }];
+        let activeConfigIndex = 0;
 
         // ==========================================
         // КАСТОМНЫЕ МОДАЛКИ
@@ -672,10 +681,7 @@
         }
         function promptCancel() {
             closeModal('modal-prompt');
-            if (window._resolvePrompt) {
-                window._resolvePrompt(null);
-                window._resolvePrompt = null;
-            }
+            if (window._resolvePrompt) { window._resolvePrompt(null); window._resolvePrompt = null; }
         }
         function customAlert(text) { document.getElementById('alert-text').innerText = text; document.getElementById('modal-alert').classList.add('active'); }
         function customConfirm(text) { return new Promise((resolve) => { document.getElementById('confirm-text').innerText = text; document.getElementById('modal-confirm').classList.add('active'); window._resolveConfirm = resolve; }); }
@@ -683,7 +689,7 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         // ==========================================
-        // ЛОГИКА РЕДАКТОРА
+        // ЭЛЕМЕНТЫ И ПЕРЕМЕННЫЕ
         // ==========================================
         const artboard = document.getElementById('artboard');
         const pointsLayer = document.getElementById('points-layer');
@@ -694,6 +700,7 @@
         const selGhost = document.getElementById('selection-ghost');
         const zoomContainer = document.getElementById('zoom-container');
         const canvasWrapper = document.getElementById('canvas-wrapper');
+        const gridSelector = document.getElementById('grid-selector');
         
         let currentTool = 'brush';
         let activeSym = SYMBOL_CATEGORIES["База"][0];
@@ -713,8 +720,8 @@
         let dragStartMouseX = 0, dragStartMouseY = 0;
         let originalBoxX = 0, originalBoxY = 0;
         
-        let points = []; 
-        let categories = []; 
+        let points = configs[0].points; 
+        let categories = configs[0].categories; 
         
         let activeCategoryIndex = -1;
         let selectedHeroesForCategory = new Set();
@@ -728,16 +735,82 @@
         let initialPointsForScale = [];
         let scaleDir = null;
 
-        // История (Undo/Redo)
         let history = [];
         let historyIndex = -1;
 
+        // ==========================================
+        // ЛОГИКА СЕТОК
+        // ==========================================
+        function updateGridSelector() {
+            gridSelector.innerHTML = '';
+            configs.forEach((cfg, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.innerText = cfg.name || `Сетка ${idx + 1}`;
+                if (idx === activeConfigIndex) opt.selected = true;
+                gridSelector.appendChild(opt);
+            });
+        }
+
+        function switchGrid(index) {
+            index = parseInt(index);
+            if (index === activeConfigIndex) return;
+
+            // Сохраняем текущую
+            configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
+            configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
+
+            // Загружаем новую
+            activeConfigIndex = index;
+            points = JSON.parse(JSON.stringify(configs[activeConfigIndex].points));
+            categories = JSON.parse(JSON.stringify(configs[activeConfigIndex].categories));
+
+            // Очищаем историю и рендерим
+            history = [];
+            historyIndex = -1;
+            renderAll();
+            saveState();
+        }
+
+        async function addNewGrid() {
+            let name = await customPrompt("Название новой сетки", `Сетка ${configs.length + 1}`);
+            if (!name) return;
+            
+            configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
+            configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
+            
+            configs.push({ name: name, points: [], categories: [] });
+            updateGridSelector();
+            switchGrid(configs.length - 1);
+        }
+
+        async function deleteCurrentGrid() {
+            if (configs.length <= 1) {
+                customAlert("Нельзя удалить последнюю сетку.");
+                return;
+            }
+            const conf = await customConfirm("Удалить текущую сетку?");
+            if (!conf) return;
+
+            configs.splice(activeConfigIndex, 1);
+            activeConfigIndex = Math.max(0, activeConfigIndex - 1);
+            
+            points = JSON.parse(JSON.stringify(configs[activeConfigIndex].points));
+            categories = JSON.parse(JSON.stringify(configs[activeConfigIndex].categories));
+            
+            updateGridSelector();
+            history = [];
+            historyIndex = -1;
+            renderAll();
+            saveState();
+        }
+
+        // ==========================================
+        // UNDO / REDO
+        // ==========================================
         function saveState() {
             history = history.slice(0, historyIndex + 1);
-            const state = {
-                points: JSON.parse(JSON.stringify(points)),
-                categories: JSON.parse(JSON.stringify(categories))
-            };
+            const state = { points: JSON.parse(JSON.stringify(points)), categories: JSON.parse(JSON.stringify(categories)) };
             history.push(state);
             historyIndex++;
             updateHistoryButtons();
@@ -770,9 +843,12 @@
             document.getElementById('btn-redo').style.opacity = historyIndex < history.length - 1 ? '1' : '0.5';
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
+        // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ И ЗУМ
+        // ==========================================
         function init() {
             renderSymbols();
+            updateGridSelector();
             saveState();
             
             setTimeout(() => {
@@ -780,16 +856,11 @@
                 canvasWrapper.scrollTop = (canvasWrapper.scrollHeight - canvasWrapper.offsetHeight) / 2;
             }, 100);
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (id) loadProject(id);
-
             renderAll();
             updateHistoryButtons();
             setZoom(100);
         }
 
-        // --- ЗУМ И ПАН ---
         let zoom = 100;
         const zoomSlider = document.getElementById('zoom-slider');
         const zoomVal = document.getElementById('zoom-val');
@@ -810,9 +881,7 @@
             if (oldZoom !== zoom) {
                 const oldCenterX = canvasWrapper.scrollLeft + canvasWrapper.offsetWidth / 2;
                 const oldCenterY = canvasWrapper.scrollTop + canvasWrapper.offsetHeight / 2;
-                
                 const scaleDiff = scale / (oldZoom / 100);
-                
                 setTimeout(() => {
                     canvasWrapper.scrollLeft = oldCenterX * scaleDiff - canvasWrapper.offsetWidth / 2;
                     canvasWrapper.scrollTop = oldCenterY * scaleDiff - canvasWrapper.offsetHeight / 2;
@@ -820,14 +889,12 @@
             }
         }
 
-        function stepZoom(delta) {
-            setZoom(zoom + delta);
-        }
+        function stepZoom(delta) { setZoom(zoom + delta); }
+        zoomSlider.addEventListener('input', (e) => setZoom(parseInt(e.target.value)));
 
-        zoomSlider.addEventListener('input', (e) => {
-            setZoom(parseInt(e.target.value));
-        });
-
+        // ==========================================
+        // МЫШЬ И РИСОВАНИЕ
+        // ==========================================
         let isPanning = false;
         let panStartX = 0, panStartY = 0;
         let scrollLeftStart = 0, scrollTopStart = 0;
@@ -840,87 +907,54 @@
                 e.preventDefault();
                 isPanning = true;
                 canvasWrapper.classList.add('panning');
-                panStartX = e.clientX;
-                panStartY = e.clientY;
-                scrollLeftStart = canvasWrapper.scrollLeft;
-                scrollTopStart = canvasWrapper.scrollTop;
+                panStartX = e.clientX; panStartY = e.clientY;
+                scrollLeftStart = canvasWrapper.scrollLeft; scrollTopStart = canvasWrapper.scrollTop;
                 return;
             }
             
             if (e.button !== 0 && e.button !== 2) return; 
-            
             const coords = getCanvasCoords(e);
             
-            if (e.button === 2) {
-                eraseAt(coords.x, coords.y);
-                return;
-            }
+            if (e.button === 2) { eraseAt(coords.x, coords.y); return; }
 
             if (currentTool === 'brush') {
-                isDrawing = true;
-                lastX = -1000; lastY = -1000; 
-                drawAt(coords.x, coords.y);
+                isDrawing = true; lastX = -1000; lastY = -1000; drawAt(coords.x, coords.y);
             } else if (currentTool === 'eraser') {
-                isDrawing = true;
-                eraseAt(coords.x, coords.y);
+                isDrawing = true; eraseAt(coords.x, coords.y);
             } else if (currentTool === 'category') {
                 isDraggingCategory = true;
-                catStartX = coords.x;
-                catStartY = coords.y;
-                catEndX = catStartX;
-                catEndY = catStartY;
+                catStartX = coords.x; catStartY = coords.y; catEndX = catStartX; catEndY = catStartY;
             } else if (currentTool === 'lasso') {
                 isSelecting = true;
-                selStartX = coords.x;
-                selStartY = coords.y;
-                
+                selStartX = coords.x; selStartY = coords.y;
                 selBox.style.display = 'block';
-                selBox.style.left = selStartX + 'px';
-                selBox.style.top = selStartY + 'px';
-                selBox.style.width = '0px';
-                selBox.style.height = '0px';
+                selBox.style.left = selStartX + 'px'; selBox.style.top = selStartY + 'px';
+                selBox.style.width = '0px'; selBox.style.height = '0px';
             }
         });
 
         selBox.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('sel-handle')) {
-                isScalingLasso = true;
-                scaleDir = e.target.dataset.dir;
-                
-                dragStartMouseX = e.clientX;
-                dragStartMouseY = e.clientY;
-                originalBoxX = parseFloat(selBox.style.left);
-                originalBoxY = parseFloat(selBox.style.top);
-                scaleStartW = parseFloat(selBox.style.width);
-                scaleStartH = parseFloat(selBox.style.height);
-                
+                isScalingLasso = true; scaleDir = e.target.dataset.dir;
+                dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
+                originalBoxX = parseFloat(selBox.style.left); originalBoxY = parseFloat(selBox.style.top);
+                scaleStartW = parseFloat(selBox.style.width); scaleStartH = parseFloat(selBox.style.height);
                 initialPointsForScale = activeSelection.map(p => ({ x: p.x, y: p.y, sym: p.sym }));
-                e.stopPropagation();
-                return;
+                e.stopPropagation(); return;
             }
-            
             isDraggingLasso = true;
-            
-            dragStartMouseX = e.clientX;
-            dragStartMouseY = e.clientY;
-            originalBoxX = parseFloat(selBox.style.left);
-            originalBoxY = parseFloat(selBox.style.top);
-            
+            dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
+            originalBoxX = parseFloat(selBox.style.left); originalBoxY = parseFloat(selBox.style.top);
             selGhost.style.display = 'block';
-            selGhost.style.left = originalBoxX + 'px';
-            selGhost.style.top = originalBoxY + 'px';
-            selGhost.style.width = selBox.style.width;
-            selGhost.style.height = selBox.style.height;
-            
+            selGhost.style.left = originalBoxX + 'px'; selGhost.style.top = originalBoxY + 'px';
+            selGhost.style.width = selBox.style.width; selGhost.style.height = selBox.style.height;
             e.stopPropagation();
         });
 
         document.addEventListener('mousemove', (e) => {
             if (isPanning) {
-                const walkX = e.clientX - panStartX;
-                const walkY = e.clientY - panStartY;
-                canvasWrapper.scrollLeft = scrollLeftStart - walkX;
-                canvasWrapper.scrollTop = scrollTopStart - walkY;
+                canvasWrapper.scrollLeft = scrollLeftStart - (e.clientX - panStartX);
+                canvasWrapper.scrollTop = scrollTopStart - (e.clientY - panStartY);
                 return;
             }
 
@@ -938,69 +972,36 @@
                 updateRefStyle();
             }
             if (isResizingRef) {
-                const dx = (e.clientX - refStartMouseX) / scale;
-                const dy = (e.clientY - refStartMouseY) / scale;
-                
+                const dx = (e.clientX - refStartMouseX) / scale; const dy = (e.clientY - refStartMouseY) / scale;
                 if (currentRefDir.includes('e')) refW = Math.max(50, refStartW + dx);
                 if (currentRefDir.includes('s')) refH = Math.max(50, refStartH + dy);
-                if (currentRefDir.includes('w')) {
-                    const newW = Math.max(50, refStartW - dx);
-                    if (newW > 50) { refX = refStartX + dx; refW = newW; }
-                }
-                if (currentRefDir.includes('n')) {
-                    const newH = Math.max(50, refStartH - dy);
-                    if (newH > 50) { refY = refStartY + dy; refH = newH; }
-                }
+                if (currentRefDir.includes('w')) { const newW = Math.max(50, refStartW - dx); if (newW > 50) { refX = refStartX + dx; refW = newW; } }
+                if (currentRefDir.includes('n')) { const newH = Math.max(50, refStartH - dy); if (newH > 50) { refY = refStartY + dy; refH = newH; } }
                 updateRefStyle();
             }
 
             if (isSelecting) {
-                const minX = Math.min(selStartX, coords.x);
-                const maxX = Math.max(selStartX, coords.x);
-                const minY = Math.min(selStartY, coords.y);
-                const maxY = Math.max(selStartY, coords.y);
-                
-                selBox.style.left = minX + 'px';
-                selBox.style.top = minY + 'px';
-                selBox.style.width = (maxX - minX) + 'px';
-                selBox.style.height = (maxY - minY) + 'px';
+                const minX = Math.min(selStartX, coords.x); const maxX = Math.max(selStartX, coords.x);
+                const minY = Math.min(selStartY, coords.y); const maxY = Math.max(selStartY, coords.y);
+                selBox.style.left = minX + 'px'; selBox.style.top = minY + 'px';
+                selBox.style.width = (maxX - minX) + 'px'; selBox.style.height = (maxY - minY) + 'px';
             }
             
             if (isDraggingLasso) {
-                const dx = (e.clientX - dragStartMouseX) / scale;
-                const dy = (e.clientY - dragStartMouseY) / scale;
-                selGhost.style.left = (originalBoxX + dx) + 'px';
-                selGhost.style.top = (originalBoxY + dy) + 'px';
+                const dx = (e.clientX - dragStartMouseX) / scale; const dy = (e.clientY - dragStartMouseY) / scale;
+                selGhost.style.left = (originalBoxX + dx) + 'px'; selGhost.style.top = (originalBoxY + dy) + 'px';
             }
 
             if (isScalingLasso) {
-                const dx = (e.clientX - dragStartMouseX) / scale;
-                const dy = (e.clientY - dragStartMouseY) / scale;
-                
-                let newX = originalBoxX;
-                let newY = originalBoxY;
-                let newW = scaleStartW;
-                let newH = scaleStartH;
-
+                const dx = (e.clientX - dragStartMouseX) / scale; const dy = (e.clientY - dragStartMouseY) / scale;
+                let newX = originalBoxX; let newY = originalBoxY; let newW = scaleStartW; let newH = scaleStartH;
                 if (scaleDir.includes('e')) newW = Math.max(10, scaleStartW + dx);
                 if (scaleDir.includes('s')) newH = Math.max(10, scaleStartH + dy);
-                if (scaleDir.includes('w')) {
-                    const possibleW = Math.max(10, scaleStartW - dx);
-                    if (possibleW > 10) { newX = originalBoxX + dx; newW = possibleW; }
-                }
-                if (scaleDir.includes('n')) {
-                    const possibleH = Math.max(10, scaleStartH - dy);
-                    if (possibleH > 10) { newY = originalBoxY + dy; newH = possibleH; }
-                }
-
-                selBox.style.left = newX + 'px';
-                selBox.style.top = newY + 'px';
-                selBox.style.width = newW + 'px';
-                selBox.style.height = newH + 'px';
-
-                const scaleX = newW / scaleStartW;
-                const scaleY = newH / scaleStartH;
-
+                if (scaleDir.includes('w')) { const possibleW = Math.max(10, scaleStartW - dx); if (possibleW > 10) { newX = originalBoxX + dx; newW = possibleW; } }
+                if (scaleDir.includes('n')) { const possibleH = Math.max(10, scaleStartH - dy); if (possibleH > 10) { newY = originalBoxY + dy; newH = possibleH; } }
+                selBox.style.left = newX + 'px'; selBox.style.top = newY + 'px';
+                selBox.style.width = newW + 'px'; selBox.style.height = newH + 'px';
+                const scaleX = newW / scaleStartW; const scaleY = newH / scaleStartH;
                 activeSelection.forEach((p, i) => {
                     const orig = initialPointsForScale[i];
                     p.x = newX + (orig.x - originalBoxX) * scaleX;
@@ -1009,167 +1010,87 @@
                 renderPoints();
             }
 
-            if (isDraggingCategory) {
-                catEndX = coords.x;
-                catEndY = coords.y;
-            }
+            if (isDraggingCategory) { catEndX = coords.x; catEndY = coords.y; }
             
             if (isDraggingCategoryPos && dragCatIndex !== -1) {
                 const cat = categories[dragCatIndex];
-                const dx = (e.clientX - dragStartMouseX) / scale;
-                const dy = (e.clientY - dragStartMouseY) / scale;
-                cat.x = catStartX + dx;
-                cat.y = catStartY + dy;
+                cat.x = catStartX + (e.clientX - dragStartMouseX) / scale;
+                cat.y = catStartY + (e.clientY - dragStartMouseY) / scale;
                 renderCategories();
             }
 
             if (isResizingCategory && activeResizeCat !== -1) {
                 const cat = categories[activeResizeCat];
-                const dx = (e.clientX - dragStartMouseX) / scale;
-                const dy = (e.clientY - dragStartMouseY) / scale;
-                
-                let newX = catStartX;
-                let newY = catStartY;
-                let newW = catStartW;
-                let newH = catStartH;
-
+                const dx = (e.clientX - dragStartMouseX) / scale; const dy = (e.clientY - dragStartMouseY) / scale;
+                let newX = catStartX; let newY = catStartY; let newW = catStartW; let newH = catStartH;
                 if (isResizingCatDir.includes('e')) newW = Math.max(55, catStartW + dx);
                 if (isResizingCatDir.includes('s')) newH = Math.max(85, catStartH + dy);
-                if (isResizingCatDir.includes('w')) {
-                    const possibleW = Math.max(55, catStartW - dx);
-                    if (possibleW > 55) { newX = catStartX + dx; newW = possibleW; }
-                }
-                if (isResizingCatDir.includes('n')) {
-                    const possibleH = Math.max(85, catStartH - dy);
-                    if (possibleH > 85) { newY = catStartY + dy; newH = possibleH; }
-                }
-
-                cat.x = newX;
-                cat.y = newY;
-                cat.w = newW;
-                cat.h = newH;
+                if (isResizingCatDir.includes('w')) { const possibleW = Math.max(55, catStartW - dx); if (possibleW > 55) { newX = catStartX + dx; newW = possibleW; } }
+                if (isResizingCatDir.includes('n')) { const possibleH = Math.max(85, catStartH - dy); if (possibleH > 85) { newY = catStartY + dy; newH = possibleH; } }
+                cat.x = newX; cat.y = newY; cat.w = newW; cat.h = newH;
                 renderCategories();
             }
         });
 
         document.addEventListener('mouseup', (e) => { 
-            if (isPanning) {
-                isPanning = false;
-                canvasWrapper.classList.remove('panning');
-                return;
-            }
+            if (isPanning) { isPanning = false; canvasWrapper.classList.remove('panning'); return; }
 
             if (isDrawing) { saveState(); }
-            isDrawing = false; 
-            isDraggingRef = false;
-            isResizingRef = false;
+            isDrawing = false; isDraggingRef = false; isResizingRef = false;
             
             if (isSelecting) {
                 isSelecting = false;
                 if (parseFloat(selBox.style.width) < 5 || parseFloat(selBox.style.height) < 5) {
-                    selBox.style.display = 'none';
-                    activeSelection = [];
+                    selBox.style.display = 'none'; activeSelection = [];
                 } else {
-                    const selLeft = parseFloat(selBox.style.left);
-                    const selTop = parseFloat(selBox.style.top);
-                    const selW = parseFloat(selBox.style.width);
-                    const selH = parseFloat(selBox.style.height);
-
-                    activeSelection = points.filter(p => 
-                        p.x >= selLeft && p.x <= selLeft + selW && 
-                        p.y >= selTop && p.y <= selTop + selH
-                    );
+                    const selLeft = parseFloat(selBox.style.left); const selTop = parseFloat(selBox.style.top);
+                    const selW = parseFloat(selBox.style.width); const selH = parseFloat(selBox.style.height);
+                    activeSelection = points.filter(p => p.x >= selLeft && p.x <= selLeft + selW && p.y >= selTop && p.y <= selTop + selH);
                 }
             }
 
             if (isDraggingLasso) {
-                isDraggingLasso = false;
-                selGhost.style.display = 'none';
-                
-                const scale = zoom / 100;
-                const dx = (e.clientX - dragStartMouseX) / scale;
-                const dy = (e.clientY - dragStartMouseY) / scale;
-                
+                isDraggingLasso = false; selGhost.style.display = 'none';
+                const scale = zoom / 100; const dx = (e.clientX - dragStartMouseX) / scale; const dy = (e.clientY - dragStartMouseY) / scale;
                 if (dx !== 0 || dy !== 0) {
-                    activeSelection.forEach(p => {
-                        p.x += dx;
-                        p.y += dy;
-                    });
-                    
-                    selBox.style.left = (originalBoxX + dx) + 'px';
-                    selBox.style.top = (originalBoxY + dy) + 'px';
-                    
-                    renderPoints();
-                    saveState();
+                    activeSelection.forEach(p => { p.x += dx; p.y += dy; });
+                    selBox.style.left = (originalBoxX + dx) + 'px'; selBox.style.top = (originalBoxY + dy) + 'px';
+                    renderPoints(); saveState();
                 }
             }
 
-            if (isScalingLasso) {
-                isScalingLasso = false;
-                saveState();
-            }
-
-            if (isDraggingCategoryPos) {
-                isDraggingCategoryPos = false;
-                dragCatIndex = -1;
-                saveState();
-            }
-
-            if (isResizingCategory) {
-                isResizingCategory = false;
-                saveState();
-            }
+            if (isScalingLasso) { isScalingLasso = false; saveState(); }
+            if (isDraggingCategoryPos) { isDraggingCategoryPos = false; dragCatIndex = -1; saveState(); }
+            if (isResizingCategory) { isResizingCategory = false; saveState(); }
 
             if (isDraggingCategory) {
                 isDraggingCategory = false;
-                let minX = Math.min(catStartX, catEndX);
-                let maxX = Math.max(catStartX, catEndX);
-                let minY = Math.min(catStartY, catEndY);
-                let maxY = Math.max(catStartY, catEndY);
-                
+                let minX = Math.min(catStartX, catEndX); let maxX = Math.max(catStartX, catEndX);
+                let minY = Math.min(catStartY, catEndY); let maxY = Math.max(catStartY, catEndY);
                 if (maxX - minX < 20 || maxY - minY < 20) {
-                    minX = catStartX - 30;
-                    minY = catStartY - 45;
-                    maxX = catStartX + 30;
-                    maxY = catStartY + 45;
+                    minX = catStartX - 30; minY = catStartY - 45; maxX = catStartX + 30; maxY = catStartY + 45;
                 }
-
                 customPrompt("Название категории (можно оставить пустым)", "Керри").then(name => {
                     if (name === null) return; 
-                    categories.push({
-                        name: name, 
-                        x: minX,
-                        y: minY,
-                        w: maxX - minX,
-                        h: maxY - minY,
-                        heroes: []
-                    });
+                    categories.push({ name: name, x: minX, y: minY, w: maxX - minX, h: maxY - minY, heroes: [] });
                     renderCategories();
                     openHeroPicker(categories.length - 1);
-                    setTool('brush');
-                    saveState();
+                    setTool('brush'); saveState();
                 });
             }
         });
 
         function drawAt(x, y) {
             const density = parseInt(document.getElementById('brush-density').value);
-            const dist = Math.hypot(x - lastX, y - lastY);
-            
-            if (dist >= density) {
+            if (Math.hypot(x - lastX, y - lastY) >= density) {
                 points.push({ x: x, y: y, sym: activeSym });
-                lastX = x;
-                lastY = y;
-                renderPoints();
+                lastX = x; lastY = y; renderPoints();
             }
         }
 
         function eraseAt(x, y) {
             const eraserSize = parseInt(document.getElementById('eraser-size').value);
-            points = points.filter(p => {
-                const dist = Math.hypot(x - p.x, y - p.y);
-                return dist > eraserSize / 2;
-            });
+            points = points.filter(p => Math.hypot(x - p.x, y - p.y) > eraserSize / 2);
             renderPoints();
         }
 
@@ -1177,14 +1098,15 @@
             document.getElementById('density-val').innerText = e.target.value + ' px';
         });
 
-        // --- РЕНДЕР ---
+        // ==========================================
+        // РЕНДЕР
+        // ==========================================
         function renderPoints() {
             pointsLayer.innerHTML = '';
             points.forEach(p => {
                 const span = document.createElement('div');
                 span.className = 'point';
-                span.style.left = p.x + 'px';
-                span.style.top = p.y + 'px';
+                span.style.left = p.x + 'px'; span.style.top = p.y + 'px';
                 span.innerText = p.sym;
                 pointsLayer.appendChild(span);
             });
@@ -1197,65 +1119,43 @@
             categories.forEach((cat, i) => {
                 const zone = document.createElement('div');
                 zone.className = 'category-zone';
-                zone.style.left = cat.x + 'px';
-                zone.style.top = cat.y + 'px';
-                zone.style.width = cat.w + 'px';
-                zone.style.height = cat.h + 'px';
+                zone.style.left = cat.x + 'px'; zone.style.top = cat.y + 'px';
+                zone.style.width = cat.w + 'px'; zone.style.height = cat.h + 'px';
                 zone.dataset.index = i;
                 
                 const header = document.createElement('div');
                 header.className = 'cat-header';
-                
                 const displayName = cat.name ? cat.name : '⚙️';
                 header.innerHTML = `<span style="flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${displayName}</span> <span>${cat.heroes.length}</span>`;
                 
                 let isDraggingHeader = false;
-                
                 header.onmousedown = (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    isDraggingHeader = true;
-                    isDraggingCategoryPos = true;
-                    dragCatIndex = i;
-                    dragStartMouseX = e.clientX;
-                    dragStartMouseY = e.clientY;
-                    catStartX = cat.x;
-                    catStartY = cat.y;
+                    e.stopPropagation(); e.preventDefault();
+                    isDraggingHeader = true; isDraggingCategoryPos = true; dragCatIndex = i;
+                    dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
+                    catStartX = cat.x; catStartY = cat.y;
                 };
-                
                 header.onmouseup = (e) => {
                     e.stopPropagation();
                     if (isDraggingHeader) {
-                        isDraggingHeader = false;
-                        isDraggingCategoryPos = false;
-                        dragCatIndex = -1;
+                        isDraggingHeader = false; isDraggingCategoryPos = false; dragCatIndex = -1;
                         if (Math.abs(e.clientX - dragStartMouseX) < 5 && Math.abs(e.clientY - dragStartMouseY) < 5) {
                             customPrompt("Название категории (очистите для удаления)", cat.name).then(newName => {
-                                if (newName !== null) {
-                                    cat.name = newName;
-                                    renderCategories();
-                                    saveState();
-                                }
+                                if (newName !== null) { cat.name = newName; renderCategories(); saveState(); }
                             });
                         }
                     }
                 };
-                
                 zone.appendChild(header);
 
                 const heroesContainer = document.createElement('div');
                 heroesContainer.className = 'heroes-container';
-                
-                heroesContainer.onclick = (e) => {
-                    e.stopPropagation();
-                    openHeroPicker(i);
-                };
+                heroesContainer.onclick = (e) => { e.stopPropagation(); openHeroPicker(i); };
                 
                 cat.heroes.forEach(hId => {
                     const hero = HEROES.find(x => x.id === hId);
                     if (!hero) return;
                     const portrait = document.createElement('div');
-                    
                     portrait.className = 'hero-portrait'; 
                     portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
                     heroesContainer.appendChild(portrait);
@@ -1266,37 +1166,25 @@
                     const handle = document.createElement('div');
                     handle.className = `cat-resize-handle ${dir}`;
                     handle.onmousedown = (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        isResizingCategory = true;
-                        isResizingCatDir = dir;
-                        activeResizeCat = i;
-                        dragStartMouseX = e.clientX;
-                        dragStartMouseY = e.clientY;
-                        catStartX = cat.x;
-                        catStartY = cat.y;
-                        catStartW = cat.w;
-                        catStartH = cat.h;
+                        e.stopPropagation(); e.preventDefault();
+                        isResizingCategory = true; isResizingCatDir = dir; activeResizeCat = i;
+                        dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
+                        catStartX = cat.x; catStartY = cat.y; catStartW = cat.w; catStartH = cat.h;
                     };
                     zone.appendChild(handle);
                 });
-                
                 categoriesLayer.appendChild(zone);
             });
         }
 
-        function renderAll() {
-            renderPoints();
-            renderCategories();
-        }
+        function renderAll() { renderPoints(); renderCategories(); }
 
         function renderSymbols() {
             const symPanel = document.getElementById('sym-panel');
             symPanel.innerHTML = '';
             for (const [catName, symbols] of Object.entries(SYMBOL_CATEGORIES)) {
                 const title = document.createElement('div');
-                title.className = 'cat-title';
-                title.innerText = catName;
+                title.className = 'cat-title'; title.innerText = catName;
                 symPanel.appendChild(title);
                 const grid = document.createElement('div');
                 grid.className = 'sym-grid';
@@ -1306,9 +1194,7 @@
                     btn.innerText = sym;
                     btn.onclick = () => {
                         document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        activeSym = sym;
-                        setTool('brush');
+                        btn.classList.add('active'); activeSym = sym; setTool('brush');
                     };
                     grid.appendChild(btn);
                 });
@@ -1324,32 +1210,21 @@
             document.getElementById('tool-ref').classList.toggle('active', tool === 'ref');
             document.getElementById('tool-eraser').classList.toggle('active', tool === 'eraser');
             
-            if (tool === 'ref') {
-                document.body.classList.add('tool-ref-active');
-                selBox.style.display = 'none';
-            } else {
-                document.body.classList.remove('tool-ref-active');
-            }
-
-            if (tool !== 'lasso') {
-                selBox.style.display = 'none';
-                activeSelection = [];
-            }
+            if (tool === 'ref') { document.body.classList.add('tool-ref-active'); selBox.style.display = 'none'; } else { document.body.classList.remove('tool-ref-active'); }
+            if (tool !== 'lasso') { selBox.style.display = 'none'; activeSelection = []; }
         }
 
         function getCanvasCoords(e) {
             const rect = artboard.getBoundingClientRect();
             const scale = zoom / 100;
-            return {
-                x: (e.clientX - rect.left) / scale,
-                y: (e.clientY - rect.top) / scale
-            };
+            return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
         }
 
-        // --- РЕФЕРЕНС ---
+        // ==========================================
+        // РЕФЕРЕНС
+        // ==========================================
         let refX = 0, refY = 0, refW = 1193, refH = 593;
-        let isDraggingRef = false;
-        let isResizingRef = false;
+        let isDraggingRef = false, isResizingRef = false;
         let refStartX, refStartY, refStartW, refStartH, refStartMouseX, refStartMouseY;
         let currentRefDir = '';
 
@@ -1361,59 +1236,44 @@
                     refImg.src = event.target.result;
                     refContainer.style.display = 'block';
                     document.getElementById('ref-hide').checked = true;
-                    refX = 0; refY = 0; refW = 1193; refH = 593;
-                    updateRefStyle();
+                    refX = 0; refY = 0; refW = 1193; refH = 593; updateRefStyle();
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        document.getElementById('ref-opacity').addEventListener('input', function(e) {
-            refImg.style.opacity = e.target.value;
-        });
-
+        document.getElementById('ref-opacity').addEventListener('input', function(e) { refImg.style.opacity = e.target.value; });
         document.getElementById('ref-hide').addEventListener('change', function(e) {
             if (refImg.src) {
                 refContainer.style.opacity = e.target.checked ? '1' : '0';
-                if (!e.target.checked && currentTool === 'ref') {
-                    setTool('brush');
-                }
+                if (!e.target.checked && currentTool === 'ref') setTool('brush');
             }
         });
 
         function updateRefStyle() {
-            refContainer.style.left = refX + 'px';
-            refContainer.style.top = refY + 'px';
-            refContainer.style.width = refW + 'px';
-            refContainer.style.height = refH + 'px';
+            refContainer.style.left = refX + 'px'; refContainer.style.top = refY + 'px';
+            refContainer.style.width = refW + 'px'; refContainer.style.height = refH + 'px';
         }
 
         refContainer.addEventListener('mousedown', (e) => {
-            if (currentTool !== 'ref') return;
-            if (e.target.classList.contains('ref-handle')) return;
-            isDraggingRef = true;
-            refStartX = refX;
-            refStartY = refY;
-            refStartMouseX = e.clientX;
-            refStartMouseY = e.clientY;
-            e.preventDefault();
+            if (currentTool !== 'ref' || e.target.classList.contains('ref-handle')) return;
+            isDraggingRef = true; refStartX = refX; refStartY = refY;
+            refStartMouseX = e.clientX; refStartMouseY = e.clientY; e.preventDefault();
         });
 
         document.querySelectorAll('.ref-handle').forEach(handle => {
             handle.addEventListener('mousedown', (e) => {
                 if (currentTool !== 'ref') return;
-                isResizingRef = true;
-                currentRefDir = handle.dataset.dir;
-                refStartMouseX = e.clientX;
-                refStartMouseY = e.clientY;
-                refStartX = refX; refStartY = refY;
-                refStartW = refW; refStartH = refH;
-                e.stopPropagation();
-                e.preventDefault();
+                isResizingRef = true; currentRefDir = handle.dataset.dir;
+                refStartMouseX = e.clientX; refStartMouseY = e.clientY;
+                refStartX = refX; refStartY = refY; refStartW = refW; refStartH = refH;
+                e.stopPropagation(); e.preventDefault();
             });
         });
 
-        // --- ВЫБОР ГЕРОЕВ ---
+        // ==========================================
+        // ВЫБОР ГЕРОЕВ
+        // ==========================================
         function openHeroPicker(catIndex) {
             activeCategoryIndex = catIndex;
             selectedHeroesForCategory = new Set(categories[catIndex].heroes);
@@ -1427,33 +1287,19 @@
             const grid = document.getElementById('hero-grid');
             grid.innerHTML = '';
             const query = document.getElementById('hero-search').value.toLowerCase();
-            
-            const filtered = HEROES.filter(h => {
-                const matchName = h.name.toLowerCase().includes(query);
-                const matchAttr = currentFilter === 'all' || h.attr === currentFilter;
-                return matchName && matchAttr;
-            });
+            const filtered = HEROES.filter(h => h.name.toLowerCase().includes(query) && (currentFilter === 'all' || h.attr === currentFilter));
 
             filtered.forEach(h => {
                 const card = document.createElement('div');
                 card.className = 'hero-card' + (selectedHeroesForCategory.has(h.id) ? ' selected' : '');
                 card.innerHTML = `
-                    <div class="portrait-container">
-                        <img src="${h.img}" title="${h.name}">
-                    </div>
-                    <div class="hero-name">
-                        ${h.name} <img src="${ATTR_ICONS[h.attr]}" class="attr-icon">
-                    </div>
+                    <div class="portrait-container"><img src="${h.img}" title="${h.name}"></div>
+                    <div class="hero-name">${h.name} <img src="${ATTR_ICONS[h.attr]}" class="attr-icon"></div>
                     <div class="hero-check">✓</div>
                 `;
                 card.onclick = () => {
-                    if (selectedHeroesForCategory.has(h.id)) {
-                        selectedHeroesForCategory.delete(h.id);
-                        card.classList.remove('selected');
-                    } else {
-                        selectedHeroesForCategory.add(h.id);
-                        card.classList.add('selected');
-                    }
+                    if (selectedHeroesForCategory.has(h.id)) { selectedHeroesForCategory.delete(h.id); card.classList.remove('selected'); }
+                    else { selectedHeroesForCategory.add(h.id); card.classList.add('selected'); }
                 };
                 grid.appendChild(card);
             });
@@ -1470,95 +1316,89 @@
         function saveHeroesToCategory() {
             if (activeCategoryIndex !== -1) {
                 categories[activeCategoryIndex].heroes = Array.from(selectedHeroesForCategory);
-                renderCategories();
-                saveState();
+                renderCategories(); saveState();
             }
             closeModal('modal-heroes');
         }
 
-        // --- ИМПОРТ JSON ---
+        // ==========================================
+        // ИМПОРТ / ЭКСПОРТ (С МУЛЬТИ-СЕТКАМИ)
+        // ==========================================
         document.getElementById('import-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('import-text').value = event.target.result;
-                };
+                reader.onload = function(event) { document.getElementById('import-text').value = event.target.result; };
                 reader.readAsText(file);
             }
         });
 
         function processImport() {
             const jsonText = document.getElementById('import-text').value.trim();
-            if (!jsonText) {
-                customAlert("Пожалуйста, вставьте JSON или выберите файл.");
-                return;
-            }
+            if (!jsonText) { customAlert("Пожалуйста, вставьте JSON или выберите файл."); return; }
 
             try {
                 const data = JSON.parse(jsonText);
-                const newPoints = [];
-                const newCategories = [];
+                let newConfigs = [];
 
-                // ГЛАВНЫЙ ФИКС: Проверяем, откуда JSON (GridStudio или Dota 2)
+                // Если это GridStudio
                 if (data.app === "dota-grid-studio" && data.entities) {
-                    // Парсим нативный формат GridStudio
+                    const pts = [], cats = [];
                     data.entities.forEach(ent => {
                         if (ent.type === "heroes") {
-                            newCategories.push({
-                                name: ent.name || "Без имени",
-                                x: parseFloat(ent.x) || 0,
-                                y: parseFloat(ent.y) || 0,
-                                w: parseFloat(ent.w) || 200,
-                                h: parseFloat(ent.h) || 250,
-                                heroes: ent.heroIds || []
-                            });
+                            cats.push({ name: ent.name || "", x: ent.x, y: ent.y, w: ent.w, h: ent.h, heroes: ent.heroIds || [] });
                         } else if (ent.type === "text") {
-                            newPoints.push({
-                                x: parseFloat(ent.x) || 0,
-                                y: parseFloat(ent.y) || 0,
-                                sym: ent.text || "·"
-                            });
+                            pts.push({ x: ent.x, y: ent.y, sym: ent.text || "·" });
                         }
                     });
-                } else {
-                    // Парсим стандартный формат Dota 2 (на всякий случай)
-                    let rawCategories = [];
-                    if (data.configs && data.configs.length > 0 && data.configs[0].categories) {
-                        rawCategories = data.configs[0].categories;
-                    } else if (data.categories) {
-                        rawCategories = data.categories; 
-                    } else {
-                        throw new Error("Неизвестный формат JSON (нет ни entities, ни configs).");
-                    }
-
-                    rawCategories.forEach(cat => {
+                    newConfigs.push({ name: data.name || "Сетка 1", points: pts, categories: cats });
+                } 
+                // Если стандартный формат Dota 2 (много конфигов)
+                else if (data.configs && Array.isArray(data.configs)) {
+                    data.configs.forEach((cfg, idx) => {
+                        const pts = [], cats = [];
+                        if (cfg.categories) {
+                            cfg.categories.forEach(cat => {
+                                if (cat.hero_ids && cat.hero_ids.length > 0) {
+                                    cats.push({ name: cat.category_name || "", x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, heroes: cat.hero_ids });
+                                } else {
+                                    pts.push({ x: cat.x_position, y: cat.y_position, sym: cat.category_name || "·" });
+                                }
+                            });
+                        }
+                        newConfigs.push({ name: cfg.config_name || `Сетка ${idx + 1}`, points: pts, categories: cats });
+                    });
+                } 
+                // Если это просто одиночная сетка
+                else if (data.categories) {
+                    const pts = [], cats = [];
+                    data.categories.forEach(cat => {
                         if (cat.hero_ids && cat.hero_ids.length > 0) {
-                            newCategories.push({
-                                name: cat.category_name || "",
-                                x: parseFloat(cat.x_position) || 0,
-                                y: parseFloat(cat.y_position) || 0,
-                                w: parseFloat(cat.width) || 200,
-                                h: parseFloat(cat.height) || 250,
-                                heroes: cat.hero_ids
-                            });
+                            cats.push({ name: cat.category_name || "", x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, heroes: cat.hero_ids });
                         } else {
-                            newPoints.push({
-                                x: parseFloat(cat.x_position) || 0,
-                                y: parseFloat(cat.y_position) || 0,
-                                sym: cat.category_name || "·"
-                            });
+                            pts.push({ x: cat.x_position, y: cat.y_position, sym: cat.category_name || "·" });
                         }
                     });
+                    newConfigs.push({ name: data.config_name || "Импортированная сетка", points: pts, categories: cats });
+                } else {
+                    throw new Error("Неизвестный формат файла.");
                 }
 
-                points = newPoints;
-                categories = newCategories;
-                
-                renderAll();
-                saveState();
+                if (newConfigs.length === 0) throw new Error("В файле не найдено ни одной сетки.");
+
+                configs = newConfigs;
+                // Выбираем первую непустую сетку для старта
+                activeConfigIndex = configs.findIndex(c => c.categories.length > 0 || c.points.length > 0);
+                if (activeConfigIndex === -1) activeConfigIndex = 0;
+
+                points = JSON.parse(JSON.stringify(configs[activeConfigIndex].points));
+                categories = JSON.parse(JSON.stringify(configs[activeConfigIndex].categories));
+
+                updateGridSelector();
+                history = []; historyIndex = -1;
+                renderAll(); saveState();
                 closeModal('modal-import');
-                customAlert(`Успешно импортировано! Точек: ${points.length}, Категорий: ${categories.length}`);
+                customAlert(`Успешно импортировано! Сеток в файле: ${configs.length}`);
                 
             } catch (error) {
                 console.error(error);
@@ -1566,85 +1406,55 @@
             }
         }
 
-        // --- ЭКСПОРТ И СОХРАНЕНИЕ ---
         function exportJSON() {
-            const exportCats = [];
-            
-            points.forEach(p => {
-                if (p.x >= 0 && p.x <= 1193 && p.y >= 0 && p.y <= 593) {
-                    exportCats.push({ 
-                        category_name: p.sym, 
-                        x_position: p.x, 
-                        y_position: p.y, 
-                        width: 30, 
-                        height: 30, 
-                        hero_ids: [] 
-                    });
-                }
-            });
+            // Сохраняем текущую активную сетку
+            configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
+            configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
 
-            categories.forEach(cat => {
-                exportCats.push({ 
-                    category_name: cat.name, 
-                    x_position: cat.x, 
-                    y_position: cat.y, 
-                    width: cat.w, 
-                    height: cat.h, 
-                    hero_ids: cat.heroes 
+            const exportConfigs = configs.map(cfg => {
+                const exportCats = [];
+                cfg.points.forEach(p => {
+                    if (p.x >= 0 && p.x <= 1193 && p.y >= 0 && p.y <= 593) {
+                        exportCats.push({ category_name: p.sym, x_position: p.x, y_position: p.y, width: 30, height: 30, hero_ids: [] });
+                    }
                 });
+                cfg.categories.forEach(cat => {
+                    exportCats.push({ category_name: cat.name, x_position: cat.x, y_position: cat.y, width: cat.w, height: cat.h, hero_ids: cat.heroes });
+                });
+                return { config_name: cfg.name, categories: exportCats };
             });
 
-            if (exportCats.length === 0) { customAlert("Сначала нарисуй что-нибудь!"); return; }
-
-            const config = { "_comment": "Сетка создана на W1NFY CUSTOMS", "version": 3, "configs": [{ "config_name": "W1NFY Grid", "categories": exportCats }] };
+            const config = { "_comment": "Сетка создана на W1NFY CUSTOMS", "version": 3, "configs": exportConfigs };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
             const a = document.createElement('a');
             a.href = dataStr; a.download = "hero_grid_config.json"; a.click();
         }
 
         async function saveToStudio() {
-            let name = document.getElementById('project-title').innerText;
-            if (name === 'Новая сетка' || !name) { name = await customPrompt("Название проекта", "Моя сетка"); if (!name) return; }
+            configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
+            configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
+            
             const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
             const id = Date.now().toString();
-            projects.push({ id: id, name: name, date: new Date().toLocaleDateString('ru-RU'), points: points, categories: categories });
+            // Сохраняем всю пачку конфигов
+            projects.push({ id: id, name: configs[0].name || "Проект", date: new Date().toLocaleDateString('ru-RU'), configs: configs });
             localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
             customAlert("Проект сохранен!");
             setTimeout(() => window.location.href = 'studio.html', 1000);
         }
 
         function clearCanvas() {
-            customConfirm("Очистить холст?").then(res => {
+            customConfirm("Очистить текущую сетку?").then(res => {
                 if (res) {
                     points = []; categories = [];
-                    renderAll();
-                    refContainer.style.display = 'none';
-                    saveState();
+                    renderAll(); refContainer.style.display = 'none'; saveState();
                 }
             });
         }
 
-        function loadProject(id) {
-            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
-            const p = projects.find(x => x.id === id);
-            if (p) {
-                document.getElementById('project-title').innerText = p.name;
-                points = p.points || [];
-                categories = p.categories || [];
-                renderAll();
-                saveState();
-            }
-        }
-
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
-                e.preventDefault();
-                undo();
-            }
-            if (e.ctrlKey && e.key.toLowerCase() === 'y') {
-                e.preventDefault();
-                redo();
-            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
         });
 
         init();
