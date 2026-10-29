@@ -17,7 +17,9 @@ collections:
       - {label: "ID (номер поста в TG)", name: "id", widget: "string"}
       - {label: "Название", name: "title", widget: "string"}
       - {label: "Ссылка на пост в TG", name: "tgLink", widget: "string"}
-      - {label: "Превью", name: "image", widget: "image"}
+      - {label: "Главное превью", name: "image", widget: "image"}
+      - {label: "Файл сетки (.json)", name: "gridFile", widget: "file", required: false}
+      - {label: "Дополнительные картинки (для слайдера)", name: "images", widget: "list", required: false, field: {label: "Картинка", name: "image", widget: "image"}}
 
   - name: "themes"
     label: "Steam Темы"
