@@ -661,6 +661,11 @@
             Всего файлов скачано: <span id="global-downloads" style="font-weight: bold; font-size: 1.1em;">...</span>
         </p>
 
+        <!-- НОВЫЙ СЧЁТЧИК ПОСЕЩЕНИЙ -->
+        <p style="margin-bottom: 10px; color: #a89bf5;">
+            Посещений сайта: <span id="visit-counter" style="font-weight: bold; font-size: 1.1em;">...</span>
+        </p>
+
         <p>&copy; 2026 W1NFY. Сделано с душой.</p>
     </footer>
 
@@ -701,7 +706,6 @@
         }
 
         async function copyTheme(themeId) {
-            // Проверяем, есть ли в жестко заданных
             if(themeCodes[themeId]) {
                 navigator.clipboard.writeText(themeCodes[themeId]).then(() => {
                     customAlert("Код темы успешно скопирован!");
@@ -709,7 +713,6 @@
                 return;
             }
 
-            // Если нет, качаем из CMS
             try {
                 const res = await fetch(`https://raw.githubusercontent.com/w1nfy/w1nfyart-site/main/data/themes/${themeId}.md`);
                 if (!res.ok) throw new Error('Not found');
@@ -821,6 +824,7 @@
         });
 
         window.addEventListener('load', () => {
+            // СЧЁТЧИК СКАЧИВАНИЙ
             fetch('https://abacus.jasoncameron.dev/get/w1nfy-customs/total')
                 .then(res => res.json()).then(data => { document.getElementById('global-downloads').innerText = data.value || 0; })
                 .catch(() => { document.getElementById('global-downloads').innerText = "0"; });
@@ -853,6 +857,24 @@
                         }).catch(() => { el.innerText = "0"; });
                 });
             }
+
+            // СЧЁТЧИК ПОСЕЩЕНИЙ (НОВЫЙ)
+            const visitCounter = document.getElementById('visit-counter');
+            const visitKey = 'w1nfy_has_visited';
+            if (!localStorage.getItem(visitKey)) {
+                fetch('https://abacus.jasoncameron.dev/hit/w1nfy-customs/visits')
+                    .then(res => res.json())
+                    .then(data => {
+                        visitCounter.innerText = data.value || 0;
+                        localStorage.setItem(visitKey, 'true');
+                    })
+                    .catch(() => { visitCounter.innerText = '0'; });
+            } else {
+                fetch('https://abacus.jasoncameron.dev/get/w1nfy-customs/visits')
+                    .then(res => res.json())
+                    .then(data => { visitCounter.innerText = data.value || 0; })
+                    .catch(() => { visitCounter.innerText = '0'; });
+            }
         });
 
         document.addEventListener('mousemove', e => {
@@ -871,7 +893,7 @@
             const container = document.getElementById('themes-container');
             try {
                 const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/themes');
-                if (!res.ok) return; // Папка пока может быть пустой
+                if (!res.ok) return; 
                 
                 const files = await res.json();
                 if (!Array.isArray(files) || files.length === 0) return;
