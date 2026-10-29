@@ -1091,7 +1091,7 @@
                 span.className = 'point';
                 
                 if (p.w && p.h) {
-                    // Импортированная точка из GridStudio (с жесткой коробкой 30х30)
+                    // Импортированная точка из GridStudio
                     span.style.left = p.x + 'px';
                     span.style.top = p.y + 'px';
                     span.style.width = p.w + 'px';
@@ -1099,8 +1099,9 @@
                     span.style.display = 'flex';
                     span.style.alignItems = 'center';
                     span.style.justifyContent = 'center';
-                    span.style.transform = 'none'; // Убираем центрирование
-                    span.style.fontSize = '10px';  // Уменьшаем шрифт, чтобы влез в коробку
+                    span.style.transform = 'none'; 
+                    span.style.fontSize = '8px'; // Уменьшаем шрифт, чтобы влез в коробку
+                    span.style.letterSpacing = '-1px'; // Убираем лишний зазор
                 } else {
                     // Ручное рисование
                     span.style.left = p.x + 'px';
