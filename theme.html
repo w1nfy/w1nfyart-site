@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W1NFY | Просмотр темы</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Подключаем Nunito и Rubik Glitch -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%236A5ACD%22>W</text></svg>">
     
-    <!-- ЕДИНАЯ ПРЕВЬЮШКА ДЛЯ ТЕМ -->
     <meta property="og:title" content="W1NFY | Кастомная тема для Steam">
     <meta property="og:description" content="Скачай кастомную тему для Steam Millennium от W1NFY.">
     <meta property="og:image" content="https://w1nfyart-site.layero.app/images/theme-hell.jpg">
@@ -39,7 +37,6 @@
                 📋 Скопировать код
             </button>
             
-            <!-- КНОПКА СКОПИРОВАТЬ ССЫЛКУ -->
             <button id="share-btn" class="share-btn" style="width: 100%; max-width: 300px;">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
                 Скопировать ссылку
@@ -76,7 +73,6 @@
 
     <footer><p>&copy; 2026 W1NFY.</p></footer>
 
-    <!-- МОДАЛКА ALERT -->
     <div class="w1-modal-overlay" id="modal-alert">
         <div class="w1-modal">
             <h2>Уведомление</h2>
@@ -96,7 +92,8 @@
             document.getElementById(id).classList.remove('active');
         }
 
-        const themesData = {
+        // Старые жестко заданные темы (для обратной совместимости)
+        const staticThemesData = {
             "hell": {
                 title: "Кажется, в аду прикольно но меня выгнали б утром",
                 desc: "Темно-бордовая тема с нежными розовыми акцентами.",
@@ -121,13 +118,84 @@
         };
 
         let currentThemeId = "";
+        let currentThemeData = null;
+
+        // Функция загрузки темы из CMS
+        async function fetchCMSTheme(id) {
+            try {
+                const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/themes');
+                if (!res.ok) return null;
+                
+                const files = await res.json();
+                let targetFile = files.find(f => f.name === `${id}.md` || f.name === `${id}.yml`);
+                
+                if (!targetFile) {
+                    for (const file of files) {
+                        if (file.name.endsWith('.md') || file.name.endsWith('.yml')) {
+                            const contentRes = await fetch(file.download_url);
+                            const text = await contentRes.text();
+                            if (text.includes(`id: ${id}`) || text.includes(`id: "${id}"`) || text.includes(`id: '${id}'`)) {
+                                targetFile = file;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!targetFile) return null;
+
+                // Получаем чистый контент через API, чтобы обойти кэш
+                const contentRes = await fetch(targetFile.url, { headers: { Accept: 'application/vnd.github.v3.raw' } });
+                const text = await contentRes.text();
+                
+                const match = text.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+                if (!match) return null;
+                
+                const yaml = match[1];
+                const getField = (fieldName) => {
+                    const regex = new RegExp(`${fieldName}:\\s*["']?([^"'\\n]+)["']?`);
+                    const m = yaml.match(regex);
+                    return m ? m[1].trim() : '';
+                };
+
+                const title = getField('title') || 'Без названия';
+                const desc = getField('desc') || '';
+                let image = getField('image');
+                let banner = getField('banner');
+
+                if (image && !image.startsWith('http')) image = image.startsWith('/') ? image : '/' + image;
+                if (banner && !banner.startsWith('http')) banner = banner.startsWith('/') ? banner : '/' + banner;
+
+                // Извлекаем CSS код (как многострочный, так и однострочный)
+                let cssCode = '';
+                const cssMatch = yaml.match(/cssCode:\s*\|?\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
+                if (cssMatch) {
+                    cssCode = cssMatch[1].replace(/^  /gm, ''); 
+                } else {
+                    cssCode = yaml.match(/cssCode:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                }
+
+                return { title, desc, image, banner: banner || image, css: cssCode };
+            } catch(e) {
+                console.error(e);
+                return null;
+            }
+        }
 
         async function downloadTheme() {
-            if (!currentThemeId) return;
-            const data = themesData[currentThemeId];
+            if (!currentThemeId || !currentThemeData) return;
+            
             try {
-                const response = await fetch(data.file);
-                const blob = await response.blob();
+                let blob;
+                if (currentThemeData.css) {
+                    // Тема из CMS (генерируем файл на лету)
+                    blob = new Blob([currentThemeData.css], { type: 'text/css' });
+                } else {
+                    // Старая тема (качаем файл)
+                    const response = await fetch(currentThemeData.file);
+                    blob = await response.blob();
+                }
+
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.style.display = 'none';
@@ -143,25 +211,37 @@
         }
 
         async function copyCode() {
-            if (!currentThemeId) return;
-            const data = themesData[currentThemeId];
+            if (!currentThemeId || !currentThemeData) return;
             try {
-                const response = await fetch(data.file);
-                const text = await response.text();
+                let text = '';
+                if (currentThemeData.css) {
+                    text = currentThemeData.css;
+                } else {
+                    const response = await fetch(currentThemeData.file);
+                    text = await response.text();
+                }
                 await navigator.clipboard.writeText(text);
                 customAlert("Код темы успешно скопирован в буфер обмена!"); 
             } catch (error) {
-                customAlert("Ошибка чтения файла."); 
+                customAlert("Ошибка копирования кода."); 
             }
         }
 
-        window.onload = function() {
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             currentThemeId = urlParams.get('id');
 
-            if (currentThemeId && themesData[currentThemeId]) {
-                const data = themesData[currentThemeId];
-                
+            if (!currentThemeId) { showError(); return; }
+
+            // Проверяем, есть ли тема в старом списке
+            if (staticThemesData[currentThemeId]) {
+                currentThemeData = staticThemesData[currentThemeId];
+            } else {
+                // Если нет, стучимся в CMS
+                currentThemeData = await fetchCMSTheme(currentThemeId);
+            }
+
+            if (currentThemeData) {
                 // === КОПИРОВАНИЕ ССЫЛКИ ===
                 document.getElementById('share-btn').onclick = () => {
                     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -172,22 +252,31 @@
                 };
 
                 // === ЗАПОЛНЕНИЕ СТРАНИЦЫ ===
-                document.getElementById('theme-title').innerText = data.title;
-                document.title = "Тема: " + data.title + " | W1NFY";
-                document.getElementById('theme-desc').innerText = data.desc;
-                document.getElementById('theme-image').src = data.image;
+                document.getElementById('theme-title').innerText = currentThemeData.title;
+                document.title = "Тема: " + currentThemeData.title + " | W1NFY";
+                document.getElementById('theme-desc').innerText = currentThemeData.desc;
+                document.getElementById('theme-image').src = currentThemeData.image;
                 
                 const dlLink = document.getElementById('banner-dl-link');
-                dlLink.href = data.banner;
-                dlLink.download = `banner-${currentThemeId}.jpg`;
+                if (currentThemeData.banner) {
+                    dlLink.href = currentThemeData.banner;
+                    dlLink.download = `banner-${currentThemeId}.jpg`;
+                    dlLink.style.display = 'inline';
+                } else {
+                    dlLink.style.display = 'none'; // Скрываем, если баннера нет
+                }
             } else {
-                document.getElementById('theme-title').innerText = "Тема не найдена :(";
-                document.getElementById('theme-desc').style.display = 'none';
-                document.getElementById('theme-image').style.display = 'none';
-                document.querySelector('.theme-actions').style.display = 'none';
-                document.querySelector('.install-guide').style.display = 'none';
+                showError();
             }
         };
+
+        function showError() {
+            document.getElementById('theme-title').innerText = "Тема не найдена :(";
+            document.getElementById('theme-desc').style.display = 'none';
+            document.getElementById('theme-image').style.display = 'none';
+            document.querySelector('.theme-actions').style.display = 'none';
+            document.querySelector('.install-guide').style.display = 'none';
+        }
     </script>
     <script src="animations.js"></script>
 </body>
