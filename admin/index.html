@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
   <title>W1NFY CMS</title>
-  <!-- Подключение самого движка админки -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <!-- Decap CMS сам вставит сюда интерфейс, когда загрузится -->
+  <!-- Контейнер, в который Decap CMS вставит интерфейс -->
+  <div id="nc-root"></div>
+
+  <!-- Скрипт загружается с атрибутом defer и находится в конце body, чтобы DOM был готов -->
+  <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </body>
 </html>
