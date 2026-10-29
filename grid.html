@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>W1NFY | Просмотр сетки</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Подключаем Nunito и Rubik Glitch -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik+Glitch&display=swap" rel="stylesheet">
     
     <meta property="og:title" content="W1NFY | Кастомная сетка героев">
     <meta property="og:description" content="Скачай сетку героев для Dota 2 от W1NFY.">
@@ -153,7 +154,6 @@
             }
         }
 
-        // ИЩЕМ ФАЙЛ ЧЕРЕЗ API GITHUB (БЕЗ ЗАДЕРЖЕК КЭША)
         async function fetchCMSGrid(id) {
             try {
                 const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/grids');
@@ -162,7 +162,6 @@
                 const files = await res.json();
                 let targetFile = files.find(f => f.name === `${id}.md` || f.name === `${id}.yml`);
                 
-                // Если по имени не нашли, проверяем содержимое каждого файла
                 if (!targetFile) {
                     for (const file of files) {
                         if (file.name.endsWith('.md') || file.name.endsWith('.yml')) {
@@ -178,7 +177,6 @@
 
                 if (!targetFile) return null;
 
-                // Берем контент напрямую через API, чтобы обойти кэш
                 const contentRes = await fetch(targetFile.url, { headers: { Accept: 'application/vnd.github.v3.raw' } });
                 const text = await contentRes.text();
                 
