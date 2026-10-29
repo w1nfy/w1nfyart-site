@@ -834,6 +834,77 @@
                 card.style.setProperty('--mouse-y', `${y}px`);
             });
         });
+            <!-- ========================================== -->
+    <!-- АВТОЗАГРУЗКА СЕТОК ИЗ АДМИНКИ (CMS) -->
+    <!-- ========================================== -->
+    <script>
+        async function loadCMSGrids() {
+            const container = document.getElementById('dota-container');
+            
+            try {
+                // Стучимся в GitHub, чтобы получить список файлов из папки data/grids
+                const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/grids');
+                if (!res.ok) throw new Error('API Error');
+                
+                const files = await res.json();
+                if (!Array.isArray(files) || files.length === 0) return;
+
+                // Собираем ID карточек, которые уже есть на странице, чтобы не дублировать их
+                const existingIds = new Set();
+                container.querySelectorAll('.count-value').forEach(el => {
+                    existingIds.add(el.getAttribute('data-id'));
+                });
+
+                for (const file of files) {
+                    if (file.name.endsWith('.md') || file.name.endsWith('.yml')) {
+                        const contentRes = await fetch(file.download_url);
+                        const content = await contentRes.text();
+                        
+                        // Парсим данные из файла админки
+                        const match = content.match(/^---\n([\s\S]+?)\n---/);
+                        if (!match) continue;
+                        
+                        const yaml = match[1];
+                        const id = yaml.match(/id:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                        
+                        // Если такая сетка уже есть в HTML (например, твои 36 штук), пропускаем
+                        if (existingIds.has(id)) continue;
+
+                        const title = yaml.match(/title:\s*["']?([^"'\n]+)["']?/)?.[1] || 'Без названия';
+                        const tgLink = yaml.match(/tgLink:\s*["']?([^"'\n]+)["']?/)?.[1] || '#';
+                        let image = yaml.match(/image:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                        
+                        // Фикс пути картинки
+                        if (image && !image.startsWith('http')) {
+                            image = image.startsWith('/') ? image : '/' + image;
+                        }
+
+                        // Генерируем новую карточку
+                        const cardHTML = `
+                            <div class="card" data-type="grid" style="border: 1px solid #6A5ACD;">
+                                <span class="badge badge-grid">Сетка</span>
+                                <img src="${image}" alt="${title}">
+                                <div class="card-content">
+                                    <h3>${title}</h3>
+                                    <p>Сетка героев Dota 2</p>
+                                    <div class="card-counter">Скачали: <span class="count-value" data-id="${id}">0</span></div>
+                                    <div class="card-buttons">
+                                        <a href="${tgLink}" target="_blank" class="link-btn" style="margin-bottom: 10px; background-color: #6A5ACD;">Скачать в Telegram</a>
+                                        <a href="grid.html?id=${id}" class="link-btn">Подробнее</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', cardHTML);
+                    }
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки CMS сеток:", e);
+            }
+        }
+
+        // Запускаем загрузку после того, как страница прогрузится
+        document.addEventListener('DOMContentLoaded', loadCMSGrids);
     </script>
 </body>
 </html>
