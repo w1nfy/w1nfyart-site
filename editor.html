@@ -143,30 +143,49 @@
             cursor: move; border-bottom: 1px solid #333;
         }
         
+        /* Контейнер с героями */
         .category-zone .heroes-container {
-            display: flex; flex-wrap: wrap; gap: 3px; padding: 3px; align-content: flex-start;
-            flex-grow: 1; overflow-y: auto; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 2px; 
+            padding: 2px; 
+            align-content: flex-start;
+            flex-grow: 1; 
+            overflow-y: auto; 
             cursor: pointer;
             box-sizing: border-box;
+            height: calc(100% - 20px); /* Вычитаем высоту заголовка */
         }
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* Портрет по умолчанию (для нескольких героев) */
+        /* ТОЧНЫЕ ПРОПОРЦИИ ИЗ GRIDSTUDIO (70.6 x 123.1) */
         .hero-portrait {
-            width: 44px; height: 58px; 
-            border: 1px solid #111; border-radius: 1px;
-            overflow: hidden; background: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            flex-shrink: 0; position: relative;
+            flex: 1 1 auto;          
+            aspect-ratio: 70.6 / 123.1; /* Точная пропорция из их кода */
+            min-width: 20px;         
+            max-height: 100%;        
+            position: relative;
+            border: 1px solid #111;
+            border-radius: 1px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        .hero-portrait img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-portrait img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block;
+        }
 
-        /* АДАПТИВНЫЙ ПОРТРЕТ (Если герой один) */
+        /* Если герой один, он растягивается на всю доступную область, сохраняя пропорции */
         .hero-portrait.single {
-            width: 100%; height: 100%; border: none; border-radius: 0;
-        }
-        .heroes-container.single-container {
-            padding: 0; gap: 0;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: auto; /* Снимаем ограничение пропорций, чтобы заполнить категорию */
+            border: none;
+            border-radius: 0;
         }
 
         /* Ручки ресайза по 4 углам */
@@ -187,7 +206,6 @@
             pointer-events: auto;
         }
         
-        /* 4 ручки для выделения */
         .sel-handle {
             position: absolute; width: 10px; height: 10px; background: #6A5ACD;
             border: 1px solid #fff; border-radius: 2px; z-index: 51;
@@ -686,7 +704,7 @@
         let isResizingCatDir = null;
         let isSelecting = false;
         let isDraggingLasso = false;
-        let isScalingLasso = false; // НОВОЕ: Масштабирование выделения
+        let isScalingLasso = false;
         
         let catStartX = 0, catStartY = 0, catEndX = 0, catEndY = 0;
         let activeResizeCat = -1;
@@ -706,7 +724,6 @@
         let lastX = -1000, lastY = -1000;
         let dragCatIndex = -1; 
         
-        // Переменные для масштабирования точек
         let scaleStartX = 0, scaleStartY = 0, scaleStartW = 0, scaleStartH = 0;
         let initialPointsForScale = [];
         let scaleDir = null;
@@ -865,9 +882,7 @@
             }
         });
 
-        // --- РАБОТА С РАМКОЙ ВЫДЕЛЕНИЯ ---
         selBox.addEventListener('mousedown', (e) => {
-            // Если кликнули на ручку масштабирования
             if (e.target.classList.contains('sel-handle')) {
                 isScalingLasso = true;
                 scaleDir = e.target.dataset.dir;
@@ -879,13 +894,11 @@
                 scaleStartW = parseFloat(selBox.style.width);
                 scaleStartH = parseFloat(selBox.style.height);
                 
-                // Запоминаем изначальные координаты точек ДО масштабирования
                 initialPointsForScale = activeSelection.map(p => ({ x: p.x, y: p.y, sym: p.sym }));
                 e.stopPropagation();
                 return;
             }
             
-            // Иначе это перетаскивание рамки
             isDraggingLasso = true;
             
             dragStartMouseX = e.clientX;
@@ -902,7 +915,6 @@
             e.stopPropagation();
         });
 
-        // --- ДВИЖЕНИЕ МЫШИ ---
         document.addEventListener('mousemove', (e) => {
             if (isPanning) {
                 const walkX = e.clientX - panStartX;
@@ -961,7 +973,6 @@
                 selGhost.style.top = (originalBoxY + dy) + 'px';
             }
 
-            // МАСШТАБИРОВАНИЕ ВЫДЕЛЕНИЯ
             if (isScalingLasso) {
                 const dx = (e.clientX - dragStartMouseX) / scale;
                 const dy = (e.clientY - dragStartMouseY) / scale;
@@ -982,20 +993,16 @@
                     if (possibleH > 10) { newY = originalBoxY + dy; newH = possibleH; }
                 }
 
-                // Применяем рамку
                 selBox.style.left = newX + 'px';
                 selBox.style.top = newY + 'px';
                 selBox.style.width = newW + 'px';
                 selBox.style.height = newH + 'px';
 
-                // Пересчитываем координаты точек
                 const scaleX = newW / scaleStartW;
                 const scaleY = newH / scaleStartH;
 
                 activeSelection.forEach((p, i) => {
-                    // Берем изначальную точку, чтобы избежать накопления ошибки
                     const orig = initialPointsForScale[i];
-                    // Масштабируем относительно левого верхнего угла изначальной рамки
                     p.x = newX + (orig.x - originalBoxX) * scaleX;
                     p.y = newY + (orig.y - originalBoxY) * scaleY;
                 });
@@ -1007,7 +1014,6 @@
                 catEndY = coords.y;
             }
             
-            // ДВИЖЕНИЕ КАТЕГОРИИ
             if (isDraggingCategoryPos && dragCatIndex !== -1) {
                 const cat = categories[dragCatIndex];
                 const dx = (e.clientX - dragStartMouseX) / scale;
@@ -1017,7 +1023,6 @@
                 renderCategories();
             }
 
-            // РЕСАЙЗ КАТЕГОРИИ
             if (isResizingCategory && activeResizeCat !== -1) {
                 const cat = categories[activeResizeCat];
                 const dx = (e.clientX - dragStartMouseX) / scale;
@@ -1101,7 +1106,7 @@
 
             if (isScalingLasso) {
                 isScalingLasso = false;
-                saveState(); // Сохраняем в историю, когда отпустили мышь
+                saveState();
             }
 
             if (isDraggingCategoryPos) {
@@ -1185,7 +1190,7 @@
             });
         }
 
-        let catStartW = 0, catStartH = 0; // Для ресайза
+        let catStartW = 0, catStartH = 0;
 
         function renderCategories() {
             categoriesLayer.innerHTML = '';
@@ -1198,7 +1203,6 @@
                 zone.style.height = cat.h + 'px';
                 zone.dataset.index = i;
                 
-                // Заголовок (двигает и редактирует имя)
                 const header = document.createElement('div');
                 header.className = 'cat-header';
                 
@@ -1225,7 +1229,6 @@
                         isDraggingHeader = false;
                         isDraggingCategoryPos = false;
                         dragCatIndex = -1;
-                        // Если сдвинули меньше 5px, считаем это кликом
                         if (Math.abs(e.clientX - dragStartMouseX) < 5 && Math.abs(e.clientY - dragStartMouseY) < 5) {
                             customPrompt("Название категории (очистите для удаления)", cat.name).then(newName => {
                                 if (newName !== null) {
@@ -1240,14 +1243,8 @@
                 
                 zone.appendChild(header);
 
-                // Контейнер с героями (клик открывает выбор)
                 const heroesContainer = document.createElement('div');
                 heroesContainer.className = 'heroes-container';
-                
-                // Если герой один, делаем контейнер без паддингов, а портрет адаптивным
-                if (cat.heroes.length === 1) {
-                    heroesContainer.classList.add('single-container');
-                }
                 
                 heroesContainer.onclick = (e) => {
                     e.stopPropagation();
@@ -1258,13 +1255,19 @@
                     const hero = HEROES.find(x => x.id === hId);
                     if (!hero) return;
                     const portrait = document.createElement('div');
-                    portrait.className = 'hero-portrait' + (cat.heroes.length === 1 ? ' single' : '');
+                    
+                    // Если герой один, даем ему класс 'single' для растягивания
+                    let portraitClass = 'hero-portrait';
+                    if (cat.heroes.length === 1) {
+                        portraitClass += ' single';
+                    }
+                    
+                    portrait.className = portraitClass;
                     portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
                     heroesContainer.appendChild(portrait);
                 });
                 zone.appendChild(heroesContainer);
                 
-                // 4 угловые ручки для ресайза
                 ['nw', 'ne', 'sw', 'se'].forEach(dir => {
                     const handle = document.createElement('div');
                     handle.className = `cat-resize-handle ${dir}`;
