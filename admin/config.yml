@@ -19,7 +19,7 @@ collections:
       - {label: "Ссылка на пост в TG", name: "tgLink", widget: "string"}
       - {label: "Главное превью", name: "image", widget: "image"}
       - {label: "Файл сетки (.json)", name: "gridFile", widget: "file", required: false}
-      - {label: "Дополнительные картинки (для слайдера)", name: "images", widget: "list", required: false, field: {label: "Картинка", name: "image", widget: "image"}}
+      - {label: "Дополнительные картинки", name: "images", widget: "list", required: false, field: {label: "Картинка", name: "image", widget: "image"}}
 
   - name: "themes"
     label: "Steam Темы"
@@ -27,7 +27,9 @@ collections:
     create: true
     slug: "{{id}}"
     fields:
-      - {label: "ID", name: "id", widget: "string"}
+      - {label: "ID (короткое имя, напр. military)", name: "id", widget: "string"}
       - {label: "Название", name: "title", widget: "string"}
-      - {label: "Описание", name: "desc", widget: "string"}
-      - {label: "Превью", name: "image", widget: "image"}
+      - {label: "Описание", name: "desc", widget: "text"}
+      - {label: "Превью темы", name: "image", widget: "image"}
+      - {label: "Баннер для Steam", name: "banner", widget: "image", required: false}
+      - {label: "CSS Код", name: "cssCode", widget: "code", default_language: "css", required: true}
