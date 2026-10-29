@@ -864,7 +864,7 @@
                         const contentRes = await fetch(file.download_url);
                         const content = await contentRes.text();
                         
-                        const match = content.match(/^---\n([\s\S]+?)\n---/);
+                        const match = content.match(/^---\r?\n([\s\S]+?)\r?\n---/);
                         if (!match) continue;
                         
                         const yaml = match[1];
@@ -874,8 +874,11 @@
                             return m ? m[1].trim() : '';
                         };
 
-                        const id = getField('id');
+                        // Берем ID из YAML. Если его нет - используем имя файла
+                        const id = getField('id') || file.name.replace(/\.(md|yml)$/, '');
+                        
                         if (existingIds.has(id)) continue;
+                        existingIds.add(id);
 
                         const title = getField('title') || 'Без названия';
                         const tgLink = getField('tgLink') || '#';
@@ -894,7 +897,7 @@
                                     <p>Сетка героев Dota 2</p>
                                     <div class="card-counter">Скачали: <span class="count-value" data-id="${id}">0</span></div>
                                     <div class="card-buttons">
-                                        <a href="grid.html?id=${id}" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
+                                        <a href="grid.html?id=${encodeURIComponent(id)}" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
                                         <a href="${tgLink}" target="_blank" class="link-btn">Скачать в Telegram</a>
                                     </div>
                                 </div>
@@ -906,7 +909,6 @@
             } catch (e) {
                 console.error("Ошибка загрузки CMS сеток:", e);
             } finally {
-                // Главный фикс: Перемешиваем карточки ЕЩЕ РАЗ, когда все новые загрузились!
                 shuffleCards(); 
             }
         }
