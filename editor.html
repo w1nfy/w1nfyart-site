@@ -97,19 +97,13 @@
         .ref-handle[data-dir="sw"] { bottom: -6px; left: -6px; cursor: nesw-resize; }
         .ref-handle[data-dir="se"] { bottom: -6px; right: -6px; cursor: nwse-resize; }
 
-        #points-layer {
+        /* === КАНВАС ДЛЯ ТОЧЕК === */
+        #points-canvas {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none;
             z-index: 3;
-        }
-        
-        .point {
-            position: absolute;
-            line-height: 1;
-            color: #fff;
-            white-space: pre;
         }
 
         #categories-layer {
@@ -371,8 +365,8 @@
                     <!-- Визуальная сетка -->
                     <div class="grid-visual" id="grid-visual"></div>
                     
-                    <!-- Точки -->
-                    <div id="points-layer"></div>
+                    <!-- Слой точек (ТЕПЕРЬ CANVAS) -->
+                    <canvas id="points-canvas" width="1193" height="593"></canvas>
                     
                     <!-- Категории -->
                     <div id="categories-layer"></div>
@@ -690,7 +684,8 @@
         // ЭЛЕМЕНТЫ И ПЕРЕМЕННЫЕ
         // ==========================================
         const artboard = document.getElementById('artboard');
-        const pointsLayer = document.getElementById('points-layer');
+        const pointsCanvas = document.getElementById('points-canvas');
+        const ctx = pointsCanvas.getContext('2d');
         const categoriesLayer = document.getElementById('categories-layer');
         const refContainer = document.getElementById('ref-container');
         const refImg = document.getElementById('ref-img');
@@ -735,6 +730,24 @@
 
         let history = [];
         let historyIndex = -1;
+
+        // ==========================================
+        // АВТОСОХРАНЕНИЕ
+        // ==========================================
+        let autoSaveTimeout = null;
+        
+        function triggerAutoSave() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Сохраняем текущую сетку в память
+                configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
+                configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
+                
+                // Записываем все конфиги в автосохранение
+                localStorage.setItem('w1nfy_autosave', JSON.stringify(configs));
+                console.log('💾 Автосохранение прошло успешно');
+            }, 500); // Небольшая задержка, чтобы не спамить localStorage, если пользователь быстро двигает мышку
+        }
 
         // ==========================================
         // ЛОГИКА СЕТОК
@@ -805,14 +818,15 @@
             history.push(state);
             historyIndex++;
             updateHistoryButtons();
+            triggerAutoSave(); // Вызываем автосохранение при каждом изменении
         }
 
         function undo() {
-            if (historyIndex > 0) { historyIndex--; loadState(history[historyIndex]); updateHistoryButtons(); }
+            if (historyIndex > 0) { historyIndex--; loadState(history[historyIndex]); updateHistoryButtons(); triggerAutoSave(); }
         }
 
         function redo() {
-            if (historyIndex < history.length - 1) { historyIndex++; loadState(history[historyIndex]); updateHistoryButtons(); }
+            if (historyIndex < history.length - 1) { historyIndex++; loadState(history[historyIndex]); updateHistoryButtons(); triggerAutoSave(); }
         }
 
         function loadState(state) {
@@ -832,6 +846,22 @@
         function init() {
             renderSymbols();
             updateGridSelector();
+            
+            // Проверяем автосохранение при загрузке
+            const saved = localStorage.getItem('w1nfy_autosave');
+            if (saved) {
+                try {
+                    configs = JSON.parse(saved);
+                    activeConfigIndex = 0; // При загрузке выбираем первую сетку
+                    points = JSON.parse(JSON.stringify(configs[0].points));
+                    categories = JSON.parse(JSON.stringify(configs[0].categories));
+                    updateGridSelector();
+                    customAlert("Найдено автосохранение. Работа восстановлена!");
+                } catch(e) { console.error("Ошибка восстановления", e); }
+            }
+
+            history = [];
+            historyIndex = -1;
             saveState();
             
             setTimeout(() => {
@@ -1018,7 +1048,7 @@
         document.addEventListener('mouseup', (e) => { 
             if (isPanning) { isPanning = false; canvasWrapper.classList.remove('panning'); return; }
 
-            if (isDrawing) { saveState(); }
+            if (isDrawing) { saveState(); triggerAutoSave(); }
             isDrawing = false; isDraggingRef = false; isResizingRef = false;
             
             if (isSelecting) {
@@ -1038,13 +1068,13 @@
                 if (dx !== 0 || dy !== 0) {
                     activeSelection.forEach(p => { p.x += dx; p.y += dy; });
                     selBox.style.left = (originalBoxX + dx) + 'px'; selBox.style.top = (originalBoxY + dy) + 'px';
-                    renderPoints(); saveState();
+                    renderPoints(); saveState(); triggerAutoSave();
                 }
             }
 
-            if (isScalingLasso) { isScalingLasso = false; saveState(); }
-            if (isDraggingCategoryPos) { isDraggingCategoryPos = false; dragCatIndex = -1; saveState(); }
-            if (isResizingCategory) { isResizingCategory = false; saveState(); }
+            if (isScalingLasso) { isScalingLasso = false; saveState(); triggerAutoSave(); }
+            if (isDraggingCategoryPos) { isDraggingCategoryPos = false; dragCatIndex = -1; saveState(); triggerAutoSave(); }
+            if (isResizingCategory) { isResizingCategory = false; saveState(); triggerAutoSave(); }
 
             if (isDraggingCategory) {
                 isDraggingCategory = false;
@@ -1058,7 +1088,7 @@
                     categories.push({ name: name, x: minX, y: minY, w: maxX - minX, h: maxY - minY, heroes: [] });
                     renderCategories();
                     openHeroPicker(categories.length - 1);
-                    setTool('brush'); saveState();
+                    setTool('brush'); saveState(); triggerAutoSave();
                 });
             }
         });
@@ -1082,36 +1112,25 @@
         });
 
         // ==========================================
-        // РЕНДЕР
+        // РЕНДЕР (CANVAS)
         // ==========================================
         function renderPoints() {
-            pointsLayer.innerHTML = '';
+            // Очищаем холст
+            ctx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
             points.forEach(p => {
-                const span = document.createElement('div');
-                span.className = 'point';
-                
                 if (p.w && p.h) {
-                    // Импортированная точка из GridStudio
-                    span.style.left = p.x + 'px';
-                    span.style.top = p.y + 'px';
-                    span.style.width = p.w + 'px';
-                    span.style.height = p.h + 'px';
-                    span.style.display = 'flex';
-                    span.style.alignItems = 'center';
-                    span.style.justifyContent = 'center';
-                    span.style.transform = 'none'; 
-                    span.style.fontSize = '8px'; // Уменьшаем шрифт, чтобы влез в коробку
-                    span.style.letterSpacing = '-1px'; // Убираем лишний зазор
+                    // Импортированная точка из GridStudio (точно как в канвасе)
+                    ctx.font = '10px "Roboto Mono", monospace'; // Шрифт поменьше
+                    ctx.fillText(p.sym, p.x + p.w / 2, p.y + p.h / 2);
                 } else {
                     // Ручное рисование
-                    span.style.left = p.x + 'px';
-                    span.style.top = p.y + 'px';
-                    span.style.transform = 'translate(-50%, -50%)';
-                    span.style.fontSize = '14px';
+                    ctx.font = '14px "Roboto Mono", monospace';
+                    ctx.fillText(p.sym, p.x, p.y);
                 }
-                
-                span.innerText = p.sym;
-                pointsLayer.appendChild(span);
             });
         }
 
@@ -1144,7 +1163,7 @@
                         isDraggingHeader = false; isDraggingCategoryPos = false; dragCatIndex = -1;
                         if (Math.abs(e.clientX - dragStartMouseX) < 5 && Math.abs(e.clientY - dragStartMouseY) < 5) {
                             customPrompt("Название категории (очистите для удаления)", cat.name).then(newName => {
-                                if (newName !== null) { cat.name = newName; renderCategories(); saveState(); }
+                                if (newName !== null) { cat.name = newName; renderCategories(); saveState(); triggerAutoSave(); }
                             });
                         }
                     }
@@ -1319,7 +1338,7 @@
         function saveHeroesToCategory() {
             if (activeCategoryIndex !== -1) {
                 categories[activeCategoryIndex].heroes = Array.from(selectedHeroesForCategory);
-                renderCategories(); saveState();
+                renderCategories(); saveState(); triggerAutoSave();
             }
             closeModal('modal-heroes');
         }
@@ -1444,7 +1463,7 @@
             customConfirm("Очистить текущую сетку?").then(res => {
                 if (res) {
                     points = []; categories = [];
-                    renderAll(); refContainer.style.display = 'none'; saveState();
+                    renderAll(); refContainer.style.display = 'none'; saveState(); triggerAutoSave();
                 }
             });
         }
