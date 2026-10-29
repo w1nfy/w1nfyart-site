@@ -107,10 +107,8 @@
         
         .point {
             position: absolute;
-            font-size: 14px;
             line-height: 1;
             color: #fff;
-            transform: translate(-50%, -50%);
             white-space: pre;
         }
 
@@ -756,16 +754,13 @@
             index = parseInt(index);
             if (index === activeConfigIndex) return;
 
-            // Сохраняем текущую
             configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
             configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
 
-            // Загружаем новую
             activeConfigIndex = index;
             points = JSON.parse(JSON.stringify(configs[activeConfigIndex].points));
             categories = JSON.parse(JSON.stringify(configs[activeConfigIndex].categories));
 
-            // Очищаем историю и рендерим
             history = [];
             historyIndex = -1;
             renderAll();
@@ -785,10 +780,7 @@
         }
 
         async function deleteCurrentGrid() {
-            if (configs.length <= 1) {
-                customAlert("Нельзя удалить последнюю сетку.");
-                return;
-            }
+            if (configs.length <= 1) { customAlert("Нельзя удалить последнюю сетку."); return; }
             const conf = await customConfirm("Удалить текущую сетку?");
             if (!conf) return;
 
@@ -799,8 +791,7 @@
             categories = JSON.parse(JSON.stringify(configs[activeConfigIndex].categories));
             
             updateGridSelector();
-            history = [];
-            historyIndex = -1;
+            history = []; historyIndex = -1;
             renderAll();
             saveState();
         }
@@ -817,19 +808,11 @@
         }
 
         function undo() {
-            if (historyIndex > 0) {
-                historyIndex--;
-                loadState(history[historyIndex]);
-                updateHistoryButtons();
-            }
+            if (historyIndex > 0) { historyIndex--; loadState(history[historyIndex]); updateHistoryButtons(); }
         }
 
         function redo() {
-            if (historyIndex < history.length - 1) {
-                historyIndex++;
-                loadState(history[historyIndex]);
-                updateHistoryButtons();
-            }
+            if (historyIndex < history.length - 1) { historyIndex++; loadState(history[historyIndex]); updateHistoryButtons(); }
         }
 
         function loadState(state) {
@@ -939,7 +922,7 @@
                 dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
                 originalBoxX = parseFloat(selBox.style.left); originalBoxY = parseFloat(selBox.style.top);
                 scaleStartW = parseFloat(selBox.style.width); scaleStartH = parseFloat(selBox.style.height);
-                initialPointsForScale = activeSelection.map(p => ({ x: p.x, y: p.y, sym: p.sym }));
+                initialPointsForScale = activeSelection.map(p => ({ x: p.x, y: p.y, sym: p.sym, w: p.w, h: p.h }));
                 e.stopPropagation(); return;
             }
             isDraggingLasso = true;
@@ -1106,7 +1089,26 @@
             points.forEach(p => {
                 const span = document.createElement('div');
                 span.className = 'point';
-                span.style.left = p.x + 'px'; span.style.top = p.y + 'px';
+                
+                if (p.w && p.h) {
+                    // Импортированная точка из GridStudio (с жесткой коробкой 30х30)
+                    span.style.left = p.x + 'px';
+                    span.style.top = p.y + 'px';
+                    span.style.width = p.w + 'px';
+                    span.style.height = p.h + 'px';
+                    span.style.display = 'flex';
+                    span.style.alignItems = 'center';
+                    span.style.justifyContent = 'center';
+                    span.style.transform = 'none'; // Убираем центрирование
+                    span.style.fontSize = '10px';  // Уменьшаем шрифт, чтобы влез в коробку
+                } else {
+                    // Ручное рисование
+                    span.style.left = p.x + 'px';
+                    span.style.top = p.y + 'px';
+                    span.style.transform = 'translate(-50%, -50%)';
+                    span.style.fontSize = '14px';
+                }
+                
                 span.innerText = p.sym;
                 pointsLayer.appendChild(span);
             });
@@ -1341,19 +1343,17 @@
                 const data = JSON.parse(jsonText);
                 let newConfigs = [];
 
-                // Если это GridStudio
                 if (data.app === "dota-grid-studio" && data.entities) {
                     const pts = [], cats = [];
                     data.entities.forEach(ent => {
                         if (ent.type === "heroes") {
                             cats.push({ name: ent.name || "", x: ent.x, y: ent.y, w: ent.w, h: ent.h, heroes: ent.heroIds || [] });
                         } else if (ent.type === "text") {
-                            pts.push({ x: ent.x, y: ent.y, sym: ent.text || "·" });
+                            pts.push({ x: ent.x, y: ent.y, w: ent.w, h: ent.h, sym: ent.text || "·" });
                         }
                     });
                     newConfigs.push({ name: data.name || "Сетка 1", points: pts, categories: cats });
                 } 
-                // Если стандартный формат Dota 2 (много конфигов)
                 else if (data.configs && Array.isArray(data.configs)) {
                     data.configs.forEach((cfg, idx) => {
                         const pts = [], cats = [];
@@ -1362,21 +1362,20 @@
                                 if (cat.hero_ids && cat.hero_ids.length > 0) {
                                     cats.push({ name: cat.category_name || "", x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, heroes: cat.hero_ids });
                                 } else {
-                                    pts.push({ x: cat.x_position, y: cat.y_position, sym: cat.category_name || "·" });
+                                    pts.push({ x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, sym: cat.category_name || "·" });
                                 }
                             });
                         }
                         newConfigs.push({ name: cfg.config_name || `Сетка ${idx + 1}`, points: pts, categories: cats });
                     });
                 } 
-                // Если это просто одиночная сетка
                 else if (data.categories) {
                     const pts = [], cats = [];
                     data.categories.forEach(cat => {
                         if (cat.hero_ids && cat.hero_ids.length > 0) {
                             cats.push({ name: cat.category_name || "", x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, heroes: cat.hero_ids });
                         } else {
-                            pts.push({ x: cat.x_position, y: cat.y_position, sym: cat.category_name || "·" });
+                            pts.push({ x: cat.x_position, y: cat.y_position, w: cat.width, h: cat.height, sym: cat.category_name || "·" });
                         }
                     });
                     newConfigs.push({ name: data.config_name || "Импортированная сетка", points: pts, categories: cats });
@@ -1387,7 +1386,6 @@
                 if (newConfigs.length === 0) throw new Error("В файле не найдено ни одной сетки.");
 
                 configs = newConfigs;
-                // Выбираем первую непустую сетку для старта
                 activeConfigIndex = configs.findIndex(c => c.categories.length > 0 || c.points.length > 0);
                 if (activeConfigIndex === -1) activeConfigIndex = 0;
 
@@ -1407,7 +1405,6 @@
         }
 
         function exportJSON() {
-            // Сохраняем текущую активную сетку
             configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
             configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
 
@@ -1415,7 +1412,7 @@
                 const exportCats = [];
                 cfg.points.forEach(p => {
                     if (p.x >= 0 && p.x <= 1193 && p.y >= 0 && p.y <= 593) {
-                        exportCats.push({ category_name: p.sym, x_position: p.x, y_position: p.y, width: 30, height: 30, hero_ids: [] });
+                        exportCats.push({ category_name: p.sym, x_position: p.x, y_position: p.y, width: p.w || 30, height: p.h || 30, hero_ids: [] });
                     }
                 });
                 cfg.categories.forEach(cat => {
@@ -1433,10 +1430,9 @@
         async function saveToStudio() {
             configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
             configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
-            
+
             const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
             const id = Date.now().toString();
-            // Сохраняем всю пачку конфигов
             projects.push({ id: id, name: configs[0].name || "Проект", date: new Date().toLocaleDateString('ru-RU'), configs: configs });
             localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
             customAlert("Проект сохранен!");
@@ -1450,6 +1446,28 @@
                     renderAll(); refContainer.style.display = 'none'; saveState();
                 }
             });
+        }
+
+        function loadProject(id) {
+            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+            const p = projects.find(x => x.id === id);
+            if (p) {
+                if (p.configs) {
+                    configs = p.configs;
+                    activeConfigIndex = 0;
+                    points = JSON.parse(JSON.stringify(configs[0].points));
+                    categories = JSON.parse(JSON.stringify(configs[0].categories));
+                    updateGridSelector();
+                } else {
+                    configs = [{ name: p.name || "Загруженная сетка", points: p.points || [], categories: p.categories || [] }];
+                    activeConfigIndex = 0;
+                    points = JSON.parse(JSON.stringify(configs[0].points));
+                    categories = JSON.parse(JSON.stringify(configs[0].categories));
+                    updateGridSelector();
+                }
+                history = []; historyIndex = -1;
+                renderAll(); saveState();
+            }
         }
 
         document.addEventListener('keydown', (e) => {
