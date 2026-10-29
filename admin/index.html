@@ -4,13 +4,28 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
+  
+  <!-- Эта строчка разрешает всплывающему окну передать токен обратно в админку -->
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
+  
   <title>W1NFY CMS</title>
 </head>
 <body>
-  <!-- Контейнер, в который Decap CMS вставит интерфейс -->
   <div id="nc-root"></div>
 
-  <!-- Скрипт загружается с атрибутом defer и находится в конце body, чтобы DOM был готов -->
-  <script defer src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <!-- Включаем ручной режим инициализации -->
+  <script>window.CMS_MANUAL_INIT = true;</script>
+  
+  <!-- Загружаем сам движок Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+  <!-- Принудительно запускаем CMS и указываем путь к конфигу -->
+  <script>
+    window.CMS.init({
+      config: {
+        load_config_file: false
+      }
+    });
+  </script>
 </body>
 </html>
