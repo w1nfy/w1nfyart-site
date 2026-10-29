@@ -11,21 +11,10 @@
   <title>W1NFY CMS</title>
 </head>
 <body>
+  <!-- Контейнер, куда CMS вставит интерфейс -->
   <div id="nc-root"></div>
 
-  <!-- Включаем ручной режим инициализации -->
-  <script>window.CMS_MANUAL_INIT = true;</script>
-  
-  <!-- Загружаем сам движок Decap CMS -->
+  <!-- Загружаем движок. Он сам найдет config.yml в этой же папке -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-  <!-- Принудительно запускаем CMS и указываем путь к конфигу -->
-  <script>
-    window.CMS.init({
-      config: {
-        load_config_file: false
-      }
-    });
-  </script>
 </body>
 </html>
