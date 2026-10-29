@@ -153,15 +153,36 @@
             }
         }
 
-        // УМНЫЙ ПАРСЕР YAML ДЛЯ КАРТИНОК
+        // ИЩЕМ ФАЙЛ ЧЕРЕЗ API GITHUB (БЕЗ ЗАДЕРЖЕК КЭША)
         async function fetchCMSGrid(id) {
             try {
-                const url = `https://raw.githubusercontent.com/w1nfy/w1nfyart-site/main/data/grids/${id}.md`;
-                const res = await fetch(url);
+                const res = await fetch('https://api.github.com/repos/w1nfy/w1nfyart-site/contents/data/grids');
                 if (!res.ok) return null;
                 
-                const text = await res.text();
-                const match = text.match(/^---\n([\s\S]+?)\n---/);
+                const files = await res.json();
+                let targetFile = files.find(f => f.name === `${id}.md` || f.name === `${id}.yml`);
+                
+                // Если по имени не нашли, проверяем содержимое каждого файла
+                if (!targetFile) {
+                    for (const file of files) {
+                        if (file.name.endsWith('.md') || file.name.endsWith('.yml')) {
+                            const contentRes = await fetch(file.download_url);
+                            const text = await contentRes.text();
+                            if (text.includes(`id: ${id}`) || text.includes(`id: "${id}"`) || text.includes(`id: '${id}'`)) {
+                                targetFile = file;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!targetFile) return null;
+
+                // Берем контент напрямую через API, чтобы обойти кэш
+                const contentRes = await fetch(targetFile.url, { headers: { Accept: 'application/vnd.github.v3.raw' } });
+                const text = await contentRes.text();
+                
+                const match = text.match(/^---\r?\n([\s\S]+?)\r?\n---/);
                 if (!match) return null;
                 
                 const yaml = match[1];
@@ -179,23 +200,20 @@
                 if (image && !image.startsWith('http')) image = image.startsWith('/') ? image : '/' + image;
                 if (gridFile && !gridFile.startsWith('http')) gridFile = gridFile.startsWith('/') ? gridFile : '/' + gridFile;
 
-                // Ищем блок с картинками (images:)
                 let images = [image];
                 const imagesBlockMatch = yaml.match(/images:\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
                 if (imagesBlockMatch) {
                     const block = imagesBlockMatch[1];
-                    // Вытаскиваем все пути из списка
                     const imgMatches = [...block.matchAll(/-\s*(?:image:\s*)?["']?([^"'\n]+)["']?/g)];
                     if (imgMatches.length > 0) {
                         images = imgMatches.map(m => {
                             let src = m[1].trim().replace(/^["']|["']$/g, '');
                             if (src && !src.startsWith('http') && !src.startsWith('/')) src = '/' + src;
                             return src;
-                        }).filter(src => src); // Убираем пустые
+                        }).filter(src => src);
                     }
                 }
 
-                // Если массив картинок почему-то пустой, добавляем хотя бы главную
                 if (images.length === 0 && image) images.push(image);
 
                 return { title, tgLink, images, downloadUrl: gridFile || `grids/${id}.json` };
