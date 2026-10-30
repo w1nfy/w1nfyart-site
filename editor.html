@@ -655,6 +655,7 @@
         // ==========================================
         let configs = [{ name: "Новая сетка", points: [], categories: [] }];
         let activeConfigIndex = 0;
+        let currentProjectId = ""; // ID текущего проекта
 
         // ==========================================
         // КАСТОМНЫЕ МОДАЛКИ
@@ -732,21 +733,21 @@
         let historyIndex = -1;
 
         // ==========================================
-        // АВТОСОХРАНЕНИЕ
+        // АВТОСОХРАНЕНИЕ (ПРИВЯЗАНО К ID)
         // ==========================================
         let autoSaveTimeout = null;
         
         function triggerAutoSave() {
             if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
             autoSaveTimeout = setTimeout(() => {
-                // Сохраняем текущую сетку в память
                 configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
                 configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
                 
-                // Записываем все конфиги в автосохранение
-                localStorage.setItem('w1nfy_autosave', JSON.stringify(configs));
-                console.log('💾 Автосохранение прошло успешно');
-            }, 500); // Небольшая задержка, чтобы не спамить localStorage, если пользователь быстро двигает мышку
+                if (currentProjectId) {
+                    localStorage.setItem('w1nfy_autosave_' + currentProjectId, JSON.stringify(configs));
+                    console.log('💾 Автосохранение прошло успешно для проекта: ' + currentProjectId);
+                }
+            }, 500);
         }
 
         // ==========================================
@@ -818,7 +819,7 @@
             history.push(state);
             historyIndex++;
             updateHistoryButtons();
-            triggerAutoSave(); // Вызываем автосохранение при каждом изменении
+            triggerAutoSave();
         }
 
         function undo() {
@@ -846,18 +847,30 @@
         function init() {
             renderSymbols();
             updateGridSelector();
-            
-            // Проверяем автосохранение при загрузке
-            const saved = localStorage.getItem('w1nfy_autosave');
-            if (saved) {
-                try {
-                    configs = JSON.parse(saved);
-                    activeConfigIndex = 0; // При загрузке выбираем первую сетку
-                    points = JSON.parse(JSON.stringify(configs[0].points));
-                    categories = JSON.parse(JSON.stringify(configs[0].categories));
-                    updateGridSelector();
-                    customAlert("Найдено автосохранение. Работа восстановлена!");
-                } catch(e) { console.error("Ошибка восстановления", e); }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProjectId = urlParams.get('id');
+
+            if (!currentProjectId) {
+                // Новый проект (создаем уникальный ID)
+                currentProjectId = Date.now().toString();
+                window.history.replaceState(null, '', `?id=${currentProjectId}`);
+            } else {
+                // Ищем автосохранение именно для этого ID
+                const saved = localStorage.getItem('w1nfy_autosave_' + currentProjectId);
+                if (saved) {
+                    try {
+                        configs = JSON.parse(saved);
+                        activeConfigIndex = 0;
+                        points = JSON.parse(JSON.stringify(configs[0].points));
+                        categories = JSON.parse(JSON.stringify(configs[0].categories));
+                        updateGridSelector();
+                        customAlert("Найдено автосохранение для этого проекта. Работа восстановлена!");
+                    } catch(e) { console.error("Ошибка восстановления", e); }
+                } else {
+                    // Если автосейва нет, грузим сохраненный проект
+                    loadProjectFromStudio(currentProjectId);
+                }
             }
 
             history = [];
@@ -872,6 +885,22 @@
             renderAll();
             updateHistoryButtons();
             setZoom(100);
+        }
+
+        function loadProjectFromStudio(id) {
+            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+            const p = projects.find(x => x.id === id);
+            if (p) {
+                if (p.configs) {
+                    configs = p.configs;
+                } else {
+                    configs = [{ name: p.name || "Загруженная сетка", points: p.points || [], categories: p.categories || [] }];
+                }
+                activeConfigIndex = 0;
+                points = JSON.parse(JSON.stringify(configs[0].points));
+                categories = JSON.parse(JSON.stringify(configs[0].categories));
+                updateGridSelector();
+            }
         }
 
         let zoom = 100;
@@ -1115,7 +1144,6 @@
         // РЕНДЕР (CANVAS)
         // ==========================================
         function renderPoints() {
-            // Очищаем холст
             ctx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
             ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
@@ -1123,11 +1151,9 @@
 
             points.forEach(p => {
                 if (p.w && p.h) {
-                    // Импортированная точка из GridStudio (точно как в канвасе)
-                    ctx.font = '10px "Roboto Mono", monospace'; // Шрифт поменьше
+                    ctx.font = '10px "Roboto Mono", monospace';
                     ctx.fillText(p.sym, p.x + p.w / 2, p.y + p.h / 2);
                 } else {
-                    // Ручное рисование
                     ctx.font = '14px "Roboto Mono", monospace';
                     ctx.fillText(p.sym, p.x, p.y);
                 }
@@ -1451,11 +1477,27 @@
             configs[activeConfigIndex].points = JSON.parse(JSON.stringify(points));
             configs[activeConfigIndex].categories = JSON.parse(JSON.stringify(categories));
 
-            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
-            const id = Date.now().toString();
-            projects.push({ id: id, name: configs[0].name || "Проект", date: new Date().toLocaleDateString('ru-RU'), configs: configs });
+            let projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
+            
+            const existingIndex = projects.findIndex(p => p.id === currentProjectId);
+            
+            const projectData = {
+                id: currentProjectId,
+                name: configs[0].name || "Проект " + new Date().toLocaleDateString('ru-RU'),
+                date: new Date().toLocaleDateString('ru-RU'),
+                configs: configs
+            };
+
+            if (existingIndex !== -1) {
+                projects[existingIndex] = projectData;
+            } else {
+                projects.push(projectData);
+            }
+
             localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
-            customAlert("Проект сохранен!");
+            localStorage.removeItem('w1nfy_autosave_' + currentProjectId); // Очищаем автосейв
+            
+            customAlert("Проект сохранен в Студию!");
             setTimeout(() => window.location.href = 'studio.html', 1000);
         }
 
@@ -1466,28 +1508,6 @@
                     renderAll(); refContainer.style.display = 'none'; saveState(); triggerAutoSave();
                 }
             });
-        }
-
-        function loadProject(id) {
-            const projects = JSON.parse(localStorage.getItem('w1nfy_projects') || '[]');
-            const p = projects.find(x => x.id === id);
-            if (p) {
-                if (p.configs) {
-                    configs = p.configs;
-                    activeConfigIndex = 0;
-                    points = JSON.parse(JSON.stringify(configs[0].points));
-                    categories = JSON.parse(JSON.stringify(configs[0].categories));
-                    updateGridSelector();
-                } else {
-                    configs = [{ name: p.name || "Загруженная сетка", points: p.points || [], categories: p.categories || [] }];
-                    activeConfigIndex = 0;
-                    points = JSON.parse(JSON.stringify(configs[0].points));
-                    categories = JSON.parse(JSON.stringify(configs[0].categories));
-                    updateGridSelector();
-                }
-                history = []; historyIndex = -1;
-                renderAll(); saveState();
-            }
         }
 
         document.addEventListener('keydown', (e) => {
