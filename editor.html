@@ -128,6 +128,7 @@
             min-height: 85px;
         }
         .category-zone:hover { border-color: #6A5ACD; box-shadow: 0 0 15px rgba(106, 90, 205, 0.4); }
+        .category-zone.active { border-color: #B026FF; box-shadow: 0 0 20px rgba(176, 38, 255, 0.6); }
         
         .category-zone .cat-header {
             background: #1a1a1f; color: #aaa; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
@@ -204,7 +205,7 @@
         }
 
         /* ПРАВАЯ ПАНЕЛЬ */
-        .right-panel { width: 220px; flex-shrink: 0; background-color: #111116; border-left: 1px solid #2a2a35; padding: 15px; display: flex; flex-direction: column; gap: 15px; z-index: 10; }
+        .right-panel { width: 240px; flex-shrink: 0; background-color: #111116; border-left: 1px solid #2a2a35; padding: 15px; display: flex; flex-direction: column; gap: 15px; z-index: 10; }
         .prop-group { display: flex; flex-direction: column; gap: 5px; }
         .prop-group label { font-size: 0.8rem; color: #888; display: flex; justify-content: space-between; }
         .prop-group input, .prop-group select { background: #0a0a0c; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; font-family: inherit; }
@@ -227,12 +228,26 @@
         }
         .grid-selector-wrapper button:hover { background: #6A5ACD; border-color: #6A5ACD; }
 
-        /* ЗУМ ПАНЕЛЬ */
+        /* СВОЙСТВА ОБЪЕКТА */
+        #object-properties { display: none; background: #1a1a1f; border: 1px solid #333; padding: 10px; border-radius: 6px; margin-top: 10px; }
+        #object-properties h4 { margin: 0 0 10px 0; font-size: 0.9rem; color: #a89bf5; text-transform: uppercase; }
+        .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .prop-item { display: flex; flex-direction: column; gap: 3px; }
+        .prop-item label { font-size: 0.7rem; color: #666; }
+        .prop-item input { width: 100%; padding: 5px; font-size: 0.85rem; }
+
+        /* ЗУМ ПАНЕЛЬ И СЧЕТЧИК */
+        .bottom-panel {
+            position: absolute; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 15px; z-index: 50;
+        }
+        .sym-counter {
+            background: #111116; border: 1px solid #333; border-radius: 6px; padding: 8px 15px; font-size: 0.9rem; color: #aaa; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .sym-counter span { color: #fff; font-weight: bold; }
+        
         .zoom-panel {
-            position: absolute; bottom: 20px; right: 20px;
             background: #111116; border: 1px solid #333; border-radius: 6px;
-            padding: 5px 10px; display: flex; align-items: center; gap: 10px;
-            z-index: 50; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            padding: 5px 10px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .zoom-btn {
             background: #222; border: 1px solid #444; color: #fff; width: 24px; height: 24px;
@@ -240,7 +255,7 @@
             font-weight: bold; font-size: 16px; transition: 0.2s;
         }
         .zoom-btn:hover { background: #6A5ACD; border-color: #6A5ACD; }
-        .zoom-panel input { width: 100px; accent-color: #6A5ACD; cursor: pointer; }
+        .zoom-panel input { width: 80px; accent-color: #6A5ACD; cursor: pointer; }
         .zoom-panel span { font-size: 0.9rem; color: #ccc; width: 45px; text-align: right; }
 
         /* === МОДАЛЬНЫЕ ОКНА === */
@@ -267,6 +282,15 @@
         .w1-btn-primary:hover { background: #5849b0; }
         .w1-btn-secondary { background: #333; color: #fff; }
         .w1-btn-secondary:hover { background: #444; }
+
+        /* === МОДАЛКА ОПТИМИЗАЦИИ === */
+        .opt-stats { display: flex; justify-content: space-between; background: #0a0a0c; padding: 15px; border-radius: 6px; border: 1px solid #333; }
+        .opt-stat-box { text-align: center; }
+        .opt-stat-box h3 { margin: 0; font-size: 1.5rem; color: #fff; }
+        .opt-stat-box p { margin: 0; font-size: 0.8rem; color: #888; }
+        .opt-stat-arrow { font-size: 1.5rem; color: #6A5ACD; align-self: center; }
+        .opt-options label { display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 0.95rem; cursor: pointer; margin-bottom: 10px; }
+        .opt-options input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6A5ACD; }
 
         /* === МОДАЛКА ВЫБОРА ГЕРОЕВ === */
         .hero-picker-modal { width: 850px; max-width: 90vw; max-height: 85vh; }
@@ -309,9 +333,6 @@
             align-items: center; justify-content: center; font-weight: bold; z-index: 5;
         }
         .hero-card.selected .hero-check { display: flex; }
-
-        /* Стиль для активной умной кисти */
-        .tool-btn.smart-brush.active { background: #B026FF; } /* Яркий фиолетовый для выделения */
     </style>
 </head>
 <body>
@@ -340,6 +361,7 @@
             <!-- Селектор сеток -->
             <div class="grid-selector-wrapper">
                 <select id="grid-selector" onchange="switchGrid(this.value)"></select>
+                <button onclick="renameCurrentGrid()" title="Переименовать">✏️</button>
                 <button onclick="addNewGrid()" title="Создать новую сетку">+</button>
                 <button onclick="deleteCurrentGrid()" title="Удалить текущую сетку" style="color:#ff4444;">×</button>
             </div>
@@ -349,6 +371,7 @@
                 <button class="top-btn" id="btn-redo" onclick="redo()" title="Повторить (Ctrl+Y)">↪ Повтор</button>
                 <div style="width: 1px; height: 20px; background: #333; margin: 0 5px;"></div>
                 <button class="top-btn" onclick="document.getElementById('modal-import').classList.add('active')">📥 Импорт</button>
+                <button class="btn-save" onclick="openOptimizeModal()" style="width:auto; margin:0; background:#B026FF;">⚡ Оптимизация</button>
                 <button class="btn-save" onclick="exportJSON()" style="width:auto; margin:0; background:#333;">💾 Экспорт</button>
                 <button class="btn-save" onclick="saveToStudio()" style="width:auto; margin:0;">💾 Сохранить</button>
             </div>
@@ -387,18 +410,47 @@
             </div>
         </div>
 
-        <!-- Зум панель -->
-        <div class="zoom-panel">
-            <button class="zoom-btn" onclick="stepZoom(-10)">-</button>
-            <input type="range" id="zoom-slider" min="10" max="800" value="100">
-            <button class="zoom-btn" onclick="stepZoom(10)">+</button>
-            <span id="zoom-val">100%</span>
+        <!-- НИЖНЯЯ ПАНЕЛЬ -->
+        <div class="bottom-panel">
+            <div class="sym-counter">
+                Символов: <span id="sym-count">0</span>
+            </div>
+            <div class="zoom-panel">
+                <button class="zoom-btn" onclick="stepZoom(-10)">-</button>
+                <input type="range" id="zoom-slider" min="10" max="800" value="100">
+                <button class="zoom-btn" onclick="stepZoom(10)">+</button>
+                <span id="zoom-val">100%</span>
+            </div>
         </div>
     </div>
 
     <!-- ПРАВАЯ ПАНЕЛЬ -->
     <div class="right-panel">
         <h3 style="color:#fff; margin:0;">Свойства</h3>
+        
+        <!-- ИНСПЕКТОР ОБЪЕКТА -->
+        <div id="object-properties">
+            <h4 id="prop-title">Объект</h4>
+            <div class="prop-grid">
+                <div class="prop-item">
+                    <label>X</label>
+                    <input type="number" id="prop-x" onchange="updatePropFromInput('x', this.value)">
+                </div>
+                <div class="prop-item">
+                    <label>Y</label>
+                    <input type="number" id="prop-y" onchange="updatePropFromInput('y', this.value)">
+                </div>
+                <div class="prop-item" id="prop-w-group">
+                    <label>Ширина (W)</label>
+                    <input type="number" id="prop-w" onchange="updatePropFromInput('w', this.value)">
+                </div>
+                <div class="prop-item" id="prop-h-group">
+                    <label>Высота (H)</label>
+                    <input type="number" id="prop-h" onchange="updatePropFromInput('h', this.value)">
+                </div>
+            </div>
+        </div>
+
         <div class="prop-group">
             <label>Плотность кисти</label>
             <input type="range" id="brush-density" min="2" max="20" value="5">
@@ -463,6 +515,38 @@
             <div class="w1-modal-buttons">
                 <button class="w1-btn w1-btn-secondary" onclick="resolveConfirm(false)">Отмена</button>
                 <button class="w1-btn w1-btn-primary" onclick="resolveConfirm(true)">Да</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ОПТИМИЗАЦИИ -->
+    <div class="w1-modal-overlay" id="modal-optimize">
+        <div class="w1-modal" style="min-width: 600px;">
+            <h2>⚡ Оптимизация</h2>
+            <p style="color: #aaa; margin: 0;">Объединение символов в строки помогает снизить нагрузку на Dota 2 и избежать лагов.</p>
+            
+            <div class="opt-stats">
+                <div class="opt-stat-box">
+                    <h3 id="opt-before">0</h3>
+                    <p>Сейчас</p>
+                </div>
+                <div class="opt-stat-arrow">➔</div>
+                <div class="opt-stat-box">
+                    <h3 id="opt-after" style="color: #B026FF;">0</h3>
+                    <p>После</p>
+                </div>
+            </div>
+
+            <div class="opt-options">
+                <label>
+                    <input type="checkbox" id="opt-merge" checked>
+                    Упаковать точки в строки (рекомендуется)
+                </label>
+            </div>
+
+            <div class="w1-modal-buttons">
+                <button class="w1-btn w1-btn-secondary" onclick="closeModal('modal-optimize')">Отмена</button>
+                <button class="w1-btn w1-btn-primary" onclick="applyOptimization()" style="background: #B026FF;">Применить</button>
             </div>
         </div>
     </div>
@@ -737,7 +821,7 @@
         let historyIndex = -1;
 
         // ==========================================
-        // АВТОСОХРАНЕНИЕ (ПРИВЯЗАНО К ID)
+        // АВТОСОХРАНЕНИЕ
         // ==========================================
         let autoSaveTimeout = null;
         
@@ -766,6 +850,15 @@
                 if (idx === activeConfigIndex) opt.selected = true;
                 gridSelector.appendChild(opt);
             });
+        }
+
+        async function renameCurrentGrid() {
+            const newName = await customPrompt("Новое название сетки", configs[activeConfigIndex].name);
+            if (newName) {
+                configs[activeConfigIndex].name = newName;
+                updateGridSelector();
+                triggerAutoSave();
+            }
         }
 
         function switchGrid(index) {
@@ -943,7 +1036,7 @@
         let scrollLeftStart = 0, scrollTopStart = 0;
 
         canvasWrapper.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.left-panel') || e.target.closest('.right-panel') || e.target.closest('.top-bar') || e.target.closest('.zoom-panel')) return;
+            if (e.target.closest('.left-panel') || e.target.closest('.right-panel') || e.target.closest('.top-bar') || e.target.closest('.zoom-panel') || e.target.closest('.bottom-panel')) return;
             if (e.target.closest('.category-zone') || e.target.closest('#selection-box') || e.target.closest('#ref-container') || e.target.closest('.ref-handle')) return;
 
             if (e.button === 1) {
@@ -960,6 +1053,11 @@
             
             if (e.button === 2) { eraseAt(coords.x, coords.y); return; }
 
+            // Сброс выделения при клике на пустое место
+            if (currentTool === 'brush' || currentTool === 'smart-brush' || currentTool === 'eraser') {
+                deselectAll();
+            }
+
             if (currentTool === 'brush' || currentTool === 'smart-brush') {
                 isDrawing = true; lastX = -1000; lastY = -1000; drawAt(coords.x, coords.y);
             } else if (currentTool === 'eraser') {
@@ -975,6 +1073,14 @@
                 selBox.style.width = '0px'; selBox.style.height = '0px';
             }
         });
+
+        function deselectAll() {
+            activeCategoryIndex = -1;
+            activeSelection = [];
+            selBox.style.display = 'none';
+            document.getElementById('object-properties').style.display = 'none';
+            renderCategories(); // Убираем подсветку
+        }
 
         selBox.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('sel-handle')) {
@@ -1061,6 +1167,7 @@
                 cat.x = catStartX + (e.clientX - dragStartMouseX) / scale;
                 cat.y = catStartY + (e.clientY - dragStartMouseY) / scale;
                 renderCategories();
+                updateProperties();
             }
 
             if (isResizingCategory && activeResizeCat !== -1) {
@@ -1073,6 +1180,7 @@
                 if (isResizingCatDir.includes('n')) { const possibleH = Math.max(85, catStartH - dy); if (possibleH > 85) { newY = catStartY + dy; newH = possibleH; } }
                 cat.x = newX; cat.y = newY; cat.w = newW; cat.h = newH;
                 renderCategories();
+                updateProperties();
             }
         });
 
@@ -1090,6 +1198,7 @@
                     const selLeft = parseFloat(selBox.style.left); const selTop = parseFloat(selBox.style.top);
                     const selW = parseFloat(selBox.style.width); const selH = parseFloat(selBox.style.height);
                     activeSelection = points.filter(p => p.x >= selLeft && p.x <= selLeft + selW && p.y >= selTop && p.y <= selTop + selH);
+                    updateProperties();
                 }
             }
 
@@ -1100,10 +1209,11 @@
                     activeSelection.forEach(p => { p.x += dx; p.y += dy; });
                     selBox.style.left = (originalBoxX + dx) + 'px'; selBox.style.top = (originalBoxY + dy) + 'px';
                     renderPoints(); saveState(); triggerAutoSave();
+                    updateProperties();
                 }
             }
 
-            if (isScalingLasso) { isScalingLasso = false; saveState(); triggerAutoSave(); }
+            if (isScalingLasso) { isScalingLasso = false; saveState(); triggerAutoSave(); updateProperties(); }
             if (isDraggingCategoryPos) { isDraggingCategoryPos = false; dragCatIndex = -1; saveState(); triggerAutoSave(); }
             if (isResizingCategory) { isResizingCategory = false; saveState(); triggerAutoSave(); }
 
@@ -1132,43 +1242,30 @@
             }
         }
 
-        // ==========================================
-        // ЛОГИКА УМНОЙ КИСТИ
-        // ==========================================
         function drawSmartAt(x, y) {
             const density = parseInt(document.getElementById('brush-density').value);
             if (Math.hypot(x - lastX, y - lastY) >= density) {
-                let symToDraw = activeSym; // По умолчанию используем выбранный символ
-
+                let symToDraw = activeSym;
                 if (lastX !== -1000 && lastY !== -1000) {
                     const dx = x - lastX;
                     const dy = y - lastY;
-                    const angle = Math.atan2(dy, dx) * 180 / Math.PI; // Угол в градусах
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
                     const distance = Math.hypot(dx, dy);
 
-                    // Если движение очень короткое, ставим точку
                     if (distance < density * 1.5) {
-                        symToDraw = '·'; // Или другой символ для точки
+                        symToDraw = '·';
                     } else {
-                        // Определяем направление по углу
-                        if (angle >= -45 && angle <= 45) {
-                            symToDraw = '—'; // Вправо
-                        } else if (angle > 45 && angle <= 135) {
-                            symToDraw = '|'; // Вниз
-                        } else if (angle > 135 || angle <= -135) {
-                            symToDraw = '—'; // Влево
-                        } else if (angle < -45 && angle >= -135) {
-                            symToDraw = '|'; // Вверх
-                        }
-                        // Для диагоналей можно добавить более точное определение
-                        // Например, если угол близок к 45, ставим '/', если к -45, ставим '\'
+                        if (angle >= -45 && angle <= 45) symToDraw = '—';
+                        else if (angle > 45 && angle <= 135) symToDraw = '|';
+                        else if (angle > 135 || angle <= -135) symToDraw = '—';
+                        else if (angle < -45 && angle >= -135) symToDraw = '|';
+                        
                         if (angle > 30 && angle < 60) symToDraw = '/';
                         if (angle < -30 && angle > -60) symToDraw = '\\';
                         if (angle > 120 && angle < 150) symToDraw = '/';
                         if (angle < -120 && angle > -150) symToDraw = '\\';
                     }
                 }
-
                 points.push({ x: x, y: y, sym: symToDraw });
                 lastX = x; lastY = y; renderPoints();
             }
@@ -1182,6 +1279,111 @@
 
         document.getElementById('brush-density').addEventListener('input', function(e) {
             document.getElementById('density-val').innerText = e.target.value + ' px';
+        });
+
+        // ==========================================
+        // ИНСПЕКТОР (СВОЙСТВА)
+        // ==========================================
+        function updateProperties() {
+            const panel = document.getElementById('object-properties');
+            
+            if (activeCategoryIndex !== -1) {
+                const cat = categories[activeCategoryIndex];
+                panel.style.display = 'block';
+                document.getElementById('prop-title').innerText = 'Категория: ' + (cat.name || 'Без имени');
+                document.getElementById('prop-x').value = Math.round(cat.x);
+                document.getElementById('prop-y').value = Math.round(cat.y);
+                document.getElementById('prop-w').value = Math.round(cat.w);
+                document.getElementById('prop-h').value = Math.round(cat.h);
+                document.getElementById('prop-w-group').style.display = 'flex';
+                document.getElementById('prop-h-group').style.display = 'flex';
+            } else if (activeSelection.length > 0) {
+                panel.style.display = 'block';
+                document.getElementById('prop-title').innerText = 'Выделено символов: ' + activeSelection.length;
+                
+                // Считаем bounding box
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                activeSelection.forEach(p => {
+                    if(p.x < minX) minX = p.x; if(p.x > maxX) maxX = p.x;
+                    if(p.y < minY) minY = p.y; if(p.y > maxY) maxY = p.y;
+                });
+                
+                document.getElementById('prop-x').value = Math.round(minX);
+                document.getElementById('prop-y').value = Math.round(minY);
+                document.getElementById('prop-w').value = Math.round(maxX - minX);
+                document.getElementById('prop-h').value = Math.round(maxY - minY);
+                document.getElementById('prop-w-group').style.display = 'flex';
+                document.getElementById('prop-h-group').style.display = 'flex';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function updatePropFromInput(prop, val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return;
+
+            if (activeCategoryIndex !== -1) {
+                const cat = categories[activeCategoryIndex];
+                if (prop === 'x') cat.x = num;
+                if (prop === 'y') cat.y = num;
+                if (prop === 'w') cat.w = Math.max(55, num);
+                if (prop === 'h') cat.h = Math.max(85, num);
+                renderCategories();
+                updateProperties();
+                saveState();
+            } else if (activeSelection.length > 0) {
+                // Перемещаем всю выделенную группу
+                let currentX = Infinity, currentY = Infinity;
+                activeSelection.forEach(p => {
+                    if(p.x < currentX) currentX = p.x; if(p.y < currentY) currentY = p.y;
+                });
+                
+                if (prop === 'x') {
+                    const dx = num - currentX;
+                    activeSelection.forEach(p => p.x += dx);
+                } else if (prop === 'y') {
+                    const dy = num - currentY;
+                    activeSelection.forEach(p => p.y += dy);
+                }
+                
+                // Масштабирование выделенного (упрощенное)
+                if (prop === 'w' || prop === 'h') {
+                    // TODO: Сложная логика масштабирования. Пока просто игнорируем ввод W/H для выделения.
+                    customAlert("Изменение размера для выделенных символов пока не поддерживается. Используйте мышь.");
+                }
+
+                renderPoints();
+                updateProperties();
+                saveState();
+            }
+        }
+
+        // ==========================================
+        // УДАЛЕНИЕ НА DELETE
+        // ==========================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                    if (activeCategoryIndex !== -1) {
+                        categories.splice(activeCategoryIndex, 1);
+                        activeCategoryIndex = -1;
+                        renderCategories();
+                        updateProperties();
+                        saveState();
+                    } else if (activeSelection.length > 0) {
+                        points = points.filter(p => !activeSelection.includes(p));
+                        activeSelection = [];
+                        selBox.style.display = 'none';
+                        renderPoints();
+                        updateProperties();
+                        saveState();
+                    }
+                }
+            }
+            
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
         });
 
         // ==========================================
@@ -1202,6 +1404,8 @@
                     ctx.fillText(p.sym, p.x, p.y);
                 }
             });
+            
+            document.getElementById('sym-count').innerText = points.length;
         }
 
         let catStartW = 0, catStartH = 0;
@@ -1210,11 +1414,22 @@
             categoriesLayer.innerHTML = '';
             categories.forEach((cat, i) => {
                 const zone = document.createElement('div');
-                zone.className = 'category-zone';
+                zone.className = 'category-zone' + (activeCategoryIndex === i ? ' active' : '');
                 zone.style.left = cat.x + 'px'; zone.style.top = cat.y + 'px';
                 zone.style.width = cat.w + 'px'; zone.style.height = cat.h + 'px';
                 zone.dataset.index = i;
                 
+                // Клик по категории для выделения
+                zone.onmousedown = (e) => {
+                    if (currentTool === 'lasso' || currentTool === 'brush' || currentTool === 'smart-brush') return;
+                    e.stopPropagation();
+                    activeCategoryIndex = i;
+                    activeSelection = [];
+                    selBox.style.display = 'none';
+                    renderCategories();
+                    updateProperties();
+                };
+
                 const header = document.createElement('div');
                 header.className = 'cat-header';
                 const displayName = cat.name ? cat.name : '⚙️';
@@ -1226,6 +1441,8 @@
                     isDraggingHeader = true; isDraggingCategoryPos = true; dragCatIndex = i;
                     dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
                     catStartX = cat.x; catStartY = cat.y;
+                    activeCategoryIndex = i; // Выделяем при перетаскивании
+                    updateProperties();
                 };
                 header.onmouseup = (e) => {
                     e.stopPropagation();
@@ -1233,7 +1450,7 @@
                         isDraggingHeader = false; isDraggingCategoryPos = false; dragCatIndex = -1;
                         if (Math.abs(e.clientX - dragStartMouseX) < 5 && Math.abs(e.clientY - dragStartMouseY) < 5) {
                             customPrompt("Название категории (очистите для удаления)", cat.name).then(newName => {
-                                if (newName !== null) { cat.name = newName; renderCategories(); saveState(); triggerAutoSave(); }
+                                if (newName !== null) { cat.name = newName; renderCategories(); updateProperties(); saveState(); triggerAutoSave(); }
                             });
                         }
                     }
@@ -1262,6 +1479,8 @@
                         isResizingCategory = true; isResizingCatDir = dir; activeResizeCat = i;
                         dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
                         catStartX = cat.x; catStartY = cat.y; catStartW = cat.w; catStartH = cat.h;
+                        activeCategoryIndex = i;
+                        updateProperties();
                     };
                     zone.appendChild(handle);
                 });
@@ -1304,13 +1523,87 @@
             document.getElementById('tool-eraser').classList.toggle('active', tool === 'eraser');
             
             if (tool === 'ref') { document.body.classList.add('tool-ref-active'); selBox.style.display = 'none'; } else { document.body.classList.remove('tool-ref-active'); }
-            if (tool !== 'lasso') { selBox.style.display = 'none'; activeSelection = []; }
+            if (tool !== 'lasso') { selBox.style.display = 'none'; activeSelection = []; updateProperties(); }
         }
 
         function getCanvasCoords(e) {
             const rect = artboard.getBoundingClientRect();
             const scale = zoom / 100;
             return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
+        }
+
+        // ==========================================
+        // ОПТИМИЗАЦИЯ
+        // ==========================================
+        function openOptimizeModal() {
+            document.getElementById('opt-before').innerText = points.length;
+            // Рассчитываем, сколько получится после (очень грубая оценка)
+            let estimated = Math.round(points.length * 0.6); // Предполагаем сокращение на 40%
+            if (points.length < 100) estimated = points.length; 
+            document.getElementById('opt-after').innerText = estimated;
+            
+            document.getElementById('modal-optimize').classList.add('active');
+        }
+
+        function applyOptimization() {
+            const shouldMerge = document.getElementById('opt-merge').checked;
+            
+            if (shouldMerge) {
+                // Простой алгоритм: группируем точки по Y, сортируем по X, объединяем близкие
+                const optimizedPoints = [];
+                const rows = {};
+
+                // Группировка по Y с допуском (например, 3 пикселя)
+                points.forEach(p => {
+                    const yKey = Math.round(p.y / 3) * 3;
+                    if (!rows[yKey]) rows[yKey] = [];
+                    rows[yKey].push(p);
+                });
+
+                // Обработка каждой строки
+                for (const yKey in rows) {
+                    const row = rows[yKey].sort((a, b) => a.x - b.x);
+                    
+                    let currentString = "";
+                    let startX = -1;
+                    let lastX = -1;
+                    let baseSym = "";
+
+                    row.forEach((p, index) => {
+                        // Если символы разные, объединять нельзя (или можно, но выглядит странно)
+                        // Для простоты объединяем только если символы одинаковые или если это точки.
+                        // В GridStudio объединяют всё подряд в одну строку, просто меняя X.
+                        // Давай попробуем объединять всё, что близко.
+                        
+                        if (startX === -1) {
+                            startX = p.x;
+                            currentString = p.sym;
+                            lastX = p.x;
+                        } else {
+                            // Если расстояние между точками меньше 12 пикселей (ширина символа)
+                            if (p.x - lastX < 12) {
+                                currentString += p.sym;
+                            } else {
+                                // Разрыв слишком большой, сохраняем текущую строку
+                                optimizedPoints.push({ x: startX, y: parseFloat(yKey), sym: currentString, w: currentString.length * 10, h: 20 });
+                                startX = p.x;
+                                currentString = p.sym;
+                            }
+                            lastX = p.x;
+                        }
+                    });
+                    
+                    if (currentString) {
+                        optimizedPoints.push({ x: startX, y: parseFloat(yKey), sym: currentString, w: currentString.length * 10, h: 20 });
+                    }
+                }
+
+                points = optimizedPoints;
+                renderPoints();
+                saveState();
+                closeModal('modal-optimize');
+                customAlert("Оптимизация завершена! Символов: " + points.length);
+            }
         }
 
         // ==========================================
@@ -1410,6 +1703,7 @@
             if (activeCategoryIndex !== -1) {
                 categories[activeCategoryIndex].heroes = Array.from(selectedHeroesForCategory);
                 renderCategories(); saveState(); triggerAutoSave();
+                updateProperties();
             }
             closeModal('modal-heroes');
         }
@@ -1551,14 +1845,10 @@
                 if (res) {
                     points = []; categories = [];
                     renderAll(); refContainer.style.display = 'none'; saveState(); triggerAutoSave();
+                    deselectAll();
                 }
             });
         }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
-            if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
-        });
 
         init();
     </script>
