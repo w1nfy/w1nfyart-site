@@ -309,6 +309,9 @@
             align-items: center; justify-content: center; font-weight: bold; z-index: 5;
         }
         .hero-card.selected .hero-check { display: flex; }
+
+        /* Стиль для активной умной кисти */
+        .tool-btn.smart-brush.active { background: #B026FF; } /* Яркий фиолетовый для выделения */
     </style>
 </head>
 <body>
@@ -317,6 +320,7 @@
     <div class="left-panel">
         <div class="tool-box">
             <div class="tool-btn active" onclick="setTool('brush')" id="tool-brush">🖌 Кисть</div>
+            <div class="tool-btn" onclick="setTool('smart-brush')" id="tool-smart-brush">🧠 Умная кисть</div>
             <div class="tool-btn" onclick="setTool('category')" id="tool-category">⬚ Категория героев</div>
             <div class="tool-btn" onclick="setTool('lasso')" id="tool-lasso">🔲 Выделение</div>
             <div class="tool-btn" onclick="setTool('ref')" id="tool-ref">🖼 Референс</div>
@@ -655,7 +659,7 @@
         // ==========================================
         let configs = [{ name: "Новая сетка", points: [], categories: [] }];
         let activeConfigIndex = 0;
-        let currentProjectId = ""; // ID текущего проекта
+        let currentProjectId = "";
 
         // ==========================================
         // КАСТОМНЫЕ МОДАЛКИ
@@ -852,11 +856,9 @@
             currentProjectId = urlParams.get('id');
 
             if (!currentProjectId) {
-                // Новый проект (создаем уникальный ID)
                 currentProjectId = Date.now().toString();
                 window.history.replaceState(null, '', `?id=${currentProjectId}`);
             } else {
-                // Ищем автосохранение именно для этого ID
                 const saved = localStorage.getItem('w1nfy_autosave_' + currentProjectId);
                 if (saved) {
                     try {
@@ -868,7 +870,6 @@
                         customAlert("Найдено автосохранение для этого проекта. Работа восстановлена!");
                     } catch(e) { console.error("Ошибка восстановления", e); }
                 } else {
-                    // Если автосейва нет, грузим сохраненный проект
                     loadProjectFromStudio(currentProjectId);
                 }
             }
@@ -959,7 +960,7 @@
             
             if (e.button === 2) { eraseAt(coords.x, coords.y); return; }
 
-            if (currentTool === 'brush') {
+            if (currentTool === 'brush' || currentTool === 'smart-brush') {
                 isDrawing = true; lastX = -1000; lastY = -1000; drawAt(coords.x, coords.y);
             } else if (currentTool === 'eraser') {
                 isDrawing = true; eraseAt(coords.x, coords.y);
@@ -1005,6 +1006,7 @@
 
             if (isDrawing) {
                 if (currentTool === 'brush') drawAt(coords.x, coords.y);
+                if (currentTool === 'smart-brush') drawSmartAt(coords.x, coords.y);
                 if (currentTool === 'eraser') eraseAt(coords.x, coords.y);
             }
 
@@ -1126,6 +1128,48 @@
             const density = parseInt(document.getElementById('brush-density').value);
             if (Math.hypot(x - lastX, y - lastY) >= density) {
                 points.push({ x: x, y: y, sym: activeSym });
+                lastX = x; lastY = y; renderPoints();
+            }
+        }
+
+        // ==========================================
+        // ЛОГИКА УМНОЙ КИСТИ
+        // ==========================================
+        function drawSmartAt(x, y) {
+            const density = parseInt(document.getElementById('brush-density').value);
+            if (Math.hypot(x - lastX, y - lastY) >= density) {
+                let symToDraw = activeSym; // По умолчанию используем выбранный символ
+
+                if (lastX !== -1000 && lastY !== -1000) {
+                    const dx = x - lastX;
+                    const dy = y - lastY;
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI; // Угол в градусах
+                    const distance = Math.hypot(dx, dy);
+
+                    // Если движение очень короткое, ставим точку
+                    if (distance < density * 1.5) {
+                        symToDraw = '·'; // Или другой символ для точки
+                    } else {
+                        // Определяем направление по углу
+                        if (angle >= -45 && angle <= 45) {
+                            symToDraw = '—'; // Вправо
+                        } else if (angle > 45 && angle <= 135) {
+                            symToDraw = '|'; // Вниз
+                        } else if (angle > 135 || angle <= -135) {
+                            symToDraw = '—'; // Влево
+                        } else if (angle < -45 && angle >= -135) {
+                            symToDraw = '|'; // Вверх
+                        }
+                        // Для диагоналей можно добавить более точное определение
+                        // Например, если угол близок к 45, ставим '/', если к -45, ставим '\'
+                        if (angle > 30 && angle < 60) symToDraw = '/';
+                        if (angle < -30 && angle > -60) symToDraw = '\\';
+                        if (angle > 120 && angle < 150) symToDraw = '/';
+                        if (angle < -120 && angle > -150) symToDraw = '\\';
+                    }
+                }
+
+                points.push({ x: x, y: y, sym: symToDraw });
                 lastX = x; lastY = y; renderPoints();
             }
         }
@@ -1253,6 +1297,7 @@
         function setTool(tool) {
             currentTool = tool;
             document.getElementById('tool-brush').classList.toggle('active', tool === 'brush');
+            document.getElementById('tool-smart-brush').classList.toggle('active', tool === 'smart-brush');
             document.getElementById('tool-category').classList.toggle('active', tool === 'category');
             document.getElementById('tool-lasso').classList.toggle('active', tool === 'lasso');
             document.getElementById('tool-ref').classList.toggle('active', tool === 'ref');
@@ -1495,7 +1540,7 @@
             }
 
             localStorage.setItem('w1nfy_projects', JSON.stringify(projects));
-            localStorage.removeItem('w1nfy_autosave_' + currentProjectId); // Очищаем автосейв
+            localStorage.removeItem('w1nfy_autosave_' + currentProjectId);
             
             customAlert("Проект сохранен в Студию!");
             setTimeout(() => window.location.href = 'studio.html', 1000);
