@@ -139,31 +139,29 @@
         .category-zone .heroes-container {
             display: flex; 
             flex-wrap: wrap; 
-            gap: 2px; 
-            padding: 2px; 
+            gap: 1px; 
+            padding: 4px; /* Точный listPadding из Dota */
             align-content: flex-start;
             justify-content: flex-start;
             flex-grow: 1; 
             overflow-y: auto; 
             cursor: pointer;
             box-sizing: border-box;
-            height: calc(100% - 20px); 
+            height: calc(100% - 20px); /* header: 20 */
         }
         .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
         .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
+        /* ЖЕСТКИЕ РАЗМЕРЫ ПОРТРЕТОВ КАК В ДОТЕ */
         .hero-portrait {
-            flex: 1 1 40px;
-            aspect-ratio: 70.6 / 123.1; 
-            max-width: 100%;
-            max-height: 100%; 
-            min-width: 20px;
+            width: 51px;  /* Точный cellWidth из Dota */
+            height: 83px; /* Точный cellHeight из Dota */
+            flex-shrink: 0;
             position: relative;
             border: 1px solid #111;
-            border-radius: 1px;
+            border-radius: 2px;
             overflow: hidden;
             background: #000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
         
         .hero-portrait img { 
@@ -1054,7 +1052,6 @@
             
             if (e.button === 2) { eraseAt(coords.x, coords.y); return; }
 
-            // Сброс выделения при клике на пустое место
             if (currentTool === 'brush' || currentTool === 'smart-brush' || currentTool === 'eraser') {
                 deselectAll();
             }
@@ -1457,6 +1454,7 @@
                 heroesContainer.className = 'heroes-container';
                 heroesContainer.onclick = (e) => { e.stopPropagation(); openHeroPicker(i); };
                 
+                // ИСПОЛЬЗУЕМ ЖЕСТКИЕ РАЗМЕРЫ ИЗ DOTA-RENDERING.MJS
                 cat.heroes.forEach(hId => {
                     const hero = HEROES.find(x => x.id === hId);
                     if (!hero) return;
@@ -1529,7 +1527,7 @@
         }
 
         // ==========================================
-        // ОПТИМИЗАЦИЯ (СОКРАЩЕНИЕ)
+        // ОПТИМИЗАЦИЯ (УМНОЕ СОКРАЩЕНИЕ)
         // ==========================================
         function openOptimizeModal() {
             const slider = document.getElementById('opt-target-slider');
@@ -1537,10 +1535,9 @@
             
             document.getElementById('opt-before').innerText = beforeCount;
             
-            // Настраиваем слайдер
             slider.min = Math.max(100, Math.floor(beforeCount * 0.1));
             slider.max = beforeCount;
-            slider.value = Math.floor(beforeCount * 0.6); // По умолчанию оставляем 60%
+            slider.value = Math.floor(beforeCount * 0.6);
             
             document.getElementById('opt-target-val').innerText = slider.value;
             document.getElementById('opt-after').innerText = slider.value;
@@ -1561,32 +1558,62 @@
                 return;
             }
 
-            // Алгоритм "разрежения" (Thinning)
-            // Разбиваем холст на сетку, размер ячейки зависит от целевого количества
-            const area = 1193 * 593;
-            const cellSize = Math.sqrt(area / targetCount);
-            const keptPoints = [];
-            const occupiedCells = new Set();
-
-            // Перемешиваем точки, чтобы не удалять все из одного угла
-            const shuffled = [...points].sort(() => Math.random() - 0.5);
-
-            for (let i = 0; i < shuffled.length; i++) {
-                const p = shuffled[i];
-                const cx = Math.floor(p.x / cellSize);
-                const cy = Math.floor(p.y / cellSize);
-                const key = `${cx},${cy}`;
-
-                // Если ячейка пуста, оставляем точку
-                if (!occupiedCells.has(key)) {
-                    occupiedCells.add(key);
-                    keptPoints.push(p);
-                }
-                
-                if (keptPoints.length >= targetCount) break;
+            // УМНЫЙ АЛГОРИТМ (Weighted Sample Elimination)
+            // 1. Считаем плотность вокруг каждой точки.
+            // 2. Удаляем точки с самой высокой плотностью (у которых больше всего соседей).
+            
+            let currentPoints = [...points];
+            
+            // Находим самую частую точку (обычно это точка или базовый символ), чтобы защитить редкие детали
+            const symCounts = {};
+            currentPoints.forEach(p => symCounts[p.sym] = (symCounts[p.sym] || 0) + 1);
+            let mostCommonSym = '.';
+            let maxCount = 0;
+            for (const sym in symCounts) {
+                if (symCounts[sym] > maxCount) { maxCount = symCounts[sym]; mostCommonSym = sym; }
             }
 
-            points = keptPoints;
+            // Радиус для поиска соседей (зависит от целевого количества)
+            const area = 1193 * 593;
+            const densityRadius = Math.sqrt(area / targetCount) * 0.8;
+
+            while (currentPoints.length > targetCount) {
+                // Оцениваем каждую точку
+                const scoredPoints = currentPoints.map((p, index) => {
+                    let neighbors = 0;
+                    // Ищем соседей в радиусе
+                    for (let i = 0; i < currentPoints.length; i++) {
+                        if (i === index) continue;
+                        const other = currentPoints[i];
+                        if (Math.hypot(p.x - other.x, p.y - other.y) < densityRadius) {
+                            neighbors++;
+                        }
+                    }
+                    
+                    // Штраф за то, что символ частый (редкие символы важнее)
+                    const isRare = p.sym !== mostCommonSym;
+                    const score = neighbors * (isRare ? 0.2 : 1.0); // Редкие точки получают меньший вес для удаления
+                    
+                    return { index, score };
+                });
+
+                // Сортируем по убыванию "ненужности"
+                scoredPoints.sort((a, b) => b.score - a.score);
+
+                // Удаляем 10% самых ненужных точек за раз (или меньше, если близко к цели)
+                const toRemove = Math.min(Math.ceil((currentPoints.length - targetCount) * 0.1), Math.floor(currentPoints.length * 0.1));
+                
+                // Создаем Set индексов на удаление
+                const removeIndices = new Set();
+                for (let i = 0; i < toRemove; i++) {
+                    removeIndices.add(scoredPoints[i].index);
+                }
+
+                // Фильтруем
+                currentPoints = currentPoints.filter((_, i) => !removeIndices.has(i));
+            }
+
+            points = currentPoints;
             renderPoints();
             saveState();
             triggerAutoSave();
