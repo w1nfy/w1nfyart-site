@@ -134,34 +134,29 @@
             background: #1a1a1f; color: #aaa; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
             display: flex; justify-content: space-between; align-items: center; height: 20px; flex-shrink: 0;
             cursor: move; border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 10;
         }
         
+        /* Контейнер для героев (теперь без флекса) */
         .category-zone .heroes-container {
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 1px; 
-            padding: 4px; /* Точный listPadding из Dota */
-            align-content: flex-start;
-            justify-content: flex-start;
+            position: relative;
             flex-grow: 1; 
-            overflow-y: auto; 
+            overflow: hidden; 
             cursor: pointer;
             box-sizing: border-box;
-            height: calc(100% - 20px); /* header: 20 */
+            height: calc(100% - 20px); 
+            width: 100%;
         }
-        .category-zone .heroes-container::-webkit-scrollbar { width: 4px; }
-        .category-zone .heroes-container::-webkit-scrollbar-thumb { background: #6A5ACD; border-radius: 2px; }
 
-        /* ЖЕСТКИЕ РАЗМЕРЫ ПОРТРЕТОВ КАК В ДОТЕ */
+        /* Портрет (позиционируем абсолютно) */
         .hero-portrait {
-            width: 51px;  /* Точный cellWidth из Dota */
-            height: 83px; /* Точный cellHeight из Dota */
-            flex-shrink: 0;
-            position: relative;
+            position: absolute;
             border: 1px solid #111;
-            border-radius: 2px;
+            border-radius: 1px;
             overflow: hidden;
             background: #000;
+            box-sizing: border-box;
         }
         
         .hero-portrait img { 
@@ -169,6 +164,8 @@
             height: 100%; 
             object-fit: cover; 
             display: block;
+            padding: 4px; /* Точный отступ из доты */
+            filter: saturate(0.7); /* Приглушенный фильтр */
         }
 
         .cat-resize-handle {
@@ -600,6 +597,7 @@
             uni: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png"
         };
 
+        // ОБНОВЛЕННАЯ БАЗА (ДОБАВЛЕНЫ KEZ И LARGO)
         const HEROES = [
             { id: 1, name: "Anti-Mage", attr: "agi", img: "antimage" },
             { id: 2, name: "Axe", attr: "str", img: "axe" },
@@ -725,7 +723,9 @@
             { id: 135, name: "Dawnbreaker", attr: "str", img: "dawnbreaker" },
             { id: 136, name: "Marci", attr: "uni", img: "marci" },
             { id: 137, name: "Primal Beast", attr: "str", img: "primal_beast" },
-            { id: 138, name: "Muerta", attr: "int", img: "muerta" }
+            { id: 138, name: "Muerta", attr: "int", img: "muerta" },
+            { id: 145, name: "Kez", attr: "agi", img: "kez" },
+            { id: 155, name: "Largo", attr: "str", img: "largo" }
         ].map(h => ({ ...h, img: `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${h.img}.png` }));
 
         const SYMBOL_CATEGORIES = {
@@ -1402,6 +1402,48 @@
             document.getElementById('sym-count').innerText = points.length;
         }
 
+        // ==========================================
+        // МАТЕМАТИКА РАСКЛАДКИ ГЕРОЕВ (ИЗ CORE.MJS)
+        // ==========================================
+        function calculateHeroLayout(w, h, count) {
+            const padding = 4;
+            const header = 20;
+            const availW = w - padding * 2;
+            const availH = h - header - padding * 2;
+            
+            let bestCols = 1;
+            let bestScale = 0;
+            
+            for (let c = 1; c <= count; c++) {
+                const r = Math.ceil(count / c);
+                // Считаем масштаб для сетки c x r
+                const scaleX = availW / (c * 51);
+                const scaleY = availH / (r * 83);
+                // Берем минимальный масштаб, чтобы всё влезло
+                const scale = Math.min(scaleX, scaleY);
+                
+                if (scale > bestScale) {
+                    bestScale = scale;
+                    bestCols = c;
+                }
+            }
+            
+            // Не даем картинкам быть больше оригинала (51x83)
+            bestScale = Math.min(bestScale, 1);
+            
+            const rows = Math.ceil(count / bestCols);
+            const cardW = 51 * bestScale;
+            const cardH = 83 * bestScale;
+            
+            const totalW = bestCols * cardW;
+            const totalH = rows * cardH;
+            
+            const left = padding;
+            const top = header + padding;
+            
+            return { cols: bestCols, rows, cardW, cardH, left, top };
+        }
+
         let catStartW = 0, catStartH = 0;
 
         function renderCategories() {
@@ -1454,15 +1496,32 @@
                 heroesContainer.className = 'heroes-container';
                 heroesContainer.onclick = (e) => { e.stopPropagation(); openHeroPicker(i); };
                 
-                // ИСПОЛЬЗУЕМ ЖЕСТКИЕ РАЗМЕРЫ ИЗ DOTA-RENDERING.MJS
-                cat.heroes.forEach(hId => {
-                    const hero = HEROES.find(x => x.id === hId);
-                    if (!hero) return;
-                    const portrait = document.createElement('div');
-                    portrait.className = 'hero-portrait'; 
-                    portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
-                    heroesContainer.appendChild(portrait);
-                });
+                // ВЫЧИСЛЯЕМ РАСКЛАДКУ
+                if (cat.heroes.length > 0) {
+                    const layout = calculateHeroLayout(cat.w, cat.h, cat.heroes.length);
+                    
+                    cat.heroes.forEach((hId, idx) => {
+                        const hero = HEROES.find(x => x.id === hId);
+                        if (!hero) return;
+                        
+                        const col = idx % layout.cols;
+                        const row = Math.floor(idx / layout.cols);
+                        
+                        const left = layout.left + col * layout.cardW;
+                        const top = layout.top + row * layout.cardH;
+                        
+                        const portrait = document.createElement('div');
+                        portrait.className = 'hero-portrait';
+                        portrait.style.left = left + 'px';
+                        portrait.style.top = top + 'px';
+                        portrait.style.width = layout.cardW + 'px';
+                        portrait.style.height = layout.cardH + 'px';
+                        
+                        portrait.innerHTML = `<img src="${hero.img}" title="${hero.name}">`;
+                        heroesContainer.appendChild(portrait);
+                    });
+                }
+
                 zone.appendChild(heroesContainer);
                 
                 ['nw', 'ne', 'sw', 'se'].forEach(dir => {
@@ -1558,13 +1617,8 @@
                 return;
             }
 
-            // УМНЫЙ АЛГОРИТМ (Weighted Sample Elimination)
-            // 1. Считаем плотность вокруг каждой точки.
-            // 2. Удаляем точки с самой высокой плотностью (у которых больше всего соседей).
-            
             let currentPoints = [...points];
             
-            // Находим самую частую точку (обычно это точка или базовый символ), чтобы защитить редкие детали
             const symCounts = {};
             currentPoints.forEach(p => symCounts[p.sym] = (symCounts[p.sym] || 0) + 1);
             let mostCommonSym = '.';
@@ -1573,15 +1627,12 @@
                 if (symCounts[sym] > maxCount) { maxCount = symCounts[sym]; mostCommonSym = sym; }
             }
 
-            // Радиус для поиска соседей (зависит от целевого количества)
             const area = 1193 * 593;
             const densityRadius = Math.sqrt(area / targetCount) * 0.8;
 
             while (currentPoints.length > targetCount) {
-                // Оцениваем каждую точку
                 const scoredPoints = currentPoints.map((p, index) => {
                     let neighbors = 0;
-                    // Ищем соседей в радиусе
                     for (let i = 0; i < currentPoints.length; i++) {
                         if (i === index) continue;
                         const other = currentPoints[i];
@@ -1590,26 +1641,21 @@
                         }
                     }
                     
-                    // Штраф за то, что символ частый (редкие символы важнее)
                     const isRare = p.sym !== mostCommonSym;
-                    const score = neighbors * (isRare ? 0.2 : 1.0); // Редкие точки получают меньший вес для удаления
+                    const score = neighbors * (isRare ? 0.2 : 1.0); 
                     
                     return { index, score };
                 });
 
-                // Сортируем по убыванию "ненужности"
                 scoredPoints.sort((a, b) => b.score - a.score);
 
-                // Удаляем 10% самых ненужных точек за раз (или меньше, если близко к цели)
                 const toRemove = Math.min(Math.ceil((currentPoints.length - targetCount) * 0.1), Math.floor(currentPoints.length * 0.1));
                 
-                // Создаем Set индексов на удаление
                 const removeIndices = new Set();
                 for (let i = 0; i < toRemove; i++) {
                     removeIndices.add(scoredPoints[i].index);
                 }
 
-                // Фильтруем
                 currentPoints = currentPoints.filter((_, i) => !removeIndices.has(i));
             }
 
