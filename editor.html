@@ -597,7 +597,6 @@
             uni: "https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png"
         };
 
-        // ОБНОВЛЕННАЯ БАЗА (ДОБАВЛЕНЫ KEZ И LARGO)
         const HEROES = [
             { id: 1, name: "Anti-Mage", attr: "agi", img: "antimage" },
             { id: 2, name: "Axe", attr: "str", img: "axe" },
@@ -1403,7 +1402,7 @@
         }
 
         // ==========================================
-        // МАТЕМАТИКА РАСКЛАДКИ ГЕРОЕВ (ИЗ CORE.MJS)
+        // МАТЕМАТИКА РАСКЛАДКИ ГЕРОЕВ (БЕЗ ОГРАНИЧЕНИЙ)
         // ==========================================
         function calculateHeroLayout(w, h, count) {
             const padding = 4;
@@ -1428,15 +1427,11 @@
                 }
             }
             
-            // Не даем картинкам быть больше оригинала (51x83)
-            bestScale = Math.min(bestScale, 1);
+            // УБРАНО ОГРАНИЧЕНИЕ МАСШТАБА! Теперь они растут.
             
             const rows = Math.ceil(count / bestCols);
             const cardW = 51 * bestScale;
             const cardH = 83 * bestScale;
-            
-            const totalW = bestCols * cardW;
-            const totalH = rows * cardH;
             
             const left = padding;
             const top = header + padding;
