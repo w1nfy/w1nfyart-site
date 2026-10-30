@@ -284,13 +284,13 @@
         .w1-btn-secondary:hover { background: #444; }
 
         /* === МОДАЛКА ОПТИМИЗАЦИИ === */
-        .opt-stats { display: flex; justify-content: space-between; background: #0a0a0c; padding: 15px; border-radius: 6px; border: 1px solid #333; }
+        .opt-stats { display: flex; justify-content: space-between; background: #0a0a0c; padding: 15px; border-radius: 6px; border: 1px solid #333; margin-bottom: 15px; }
         .opt-stat-box { text-align: center; }
         .opt-stat-box h3 { margin: 0; font-size: 1.5rem; color: #fff; }
         .opt-stat-box p { margin: 0; font-size: 0.8rem; color: #888; }
         .opt-stat-arrow { font-size: 1.5rem; color: #6A5ACD; align-self: center; }
-        .opt-options label { display: flex; align-items: center; gap: 10px; color: #ccc; font-size: 0.95rem; cursor: pointer; margin-bottom: 10px; }
-        .opt-options input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6A5ACD; }
+        .opt-options label { display: flex; flex-direction: column; gap: 10px; color: #ccc; font-size: 0.95rem; }
+        .opt-options input[type="range"] { width: 100%; accent-color: #B026FF; cursor: pointer; }
 
         /* === МОДАЛКА ВЫБОРА ГЕРОЕВ === */
         .hero-picker-modal { width: 850px; max-width: 90vw; max-height: 85vh; }
@@ -521,9 +521,9 @@
 
     <!-- МОДАЛКА ОПТИМИЗАЦИИ -->
     <div class="w1-modal-overlay" id="modal-optimize">
-        <div class="w1-modal" style="min-width: 600px;">
-            <h2>⚡ Оптимизация</h2>
-            <p style="color: #aaa; margin: 0;">Объединение символов в строки помогает снизить нагрузку на Dota 2 и избежать лагов.</p>
+        <div class="w1-modal" style="min-width: 500px;">
+            <h2>⚡ Оптимизация (Сокращение)</h2>
+            <p style="color: #aaa; margin: 0;">Уменьшение количества символов помогает избежать лагов в Dota 2.</p>
             
             <div class="opt-stats">
                 <div class="opt-stat-box">
@@ -533,20 +533,21 @@
                 <div class="opt-stat-arrow">➔</div>
                 <div class="opt-stat-box">
                     <h3 id="opt-after" style="color: #B026FF;">0</h3>
-                    <p>После</p>
+                    <p>Цель</p>
                 </div>
             </div>
 
             <div class="opt-options">
                 <label>
-                    <input type="checkbox" id="opt-merge" checked>
-                    Упаковать точки в строки (рекомендуется)
+                    <span>Целевое количество символов:</span>
+                    <input type="range" id="opt-target-slider" min="100" max="8000" value="2000">
+                    <span id="opt-target-val" style="text-align: center; color: #B026FF; font-weight: bold; font-size: 1.2rem;">2000</span>
                 </label>
             </div>
 
             <div class="w1-modal-buttons">
                 <button class="w1-btn w1-btn-secondary" onclick="closeModal('modal-optimize')">Отмена</button>
-                <button class="w1-btn w1-btn-primary" onclick="applyOptimization()" style="background: #B026FF;">Применить</button>
+                <button class="w1-btn w1-btn-primary" onclick="applyOptimization()" style="background: #B026FF;">Сократить</button>
             </div>
         </div>
     </div>
@@ -1079,7 +1080,7 @@
             activeSelection = [];
             selBox.style.display = 'none';
             document.getElementById('object-properties').style.display = 'none';
-            renderCategories(); // Убираем подсветку
+            renderCategories(); 
         }
 
         selBox.addEventListener('mousedown', (e) => {
@@ -1301,7 +1302,6 @@
                 panel.style.display = 'block';
                 document.getElementById('prop-title').innerText = 'Выделено символов: ' + activeSelection.length;
                 
-                // Считаем bounding box
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 activeSelection.forEach(p => {
                     if(p.x < minX) minX = p.x; if(p.x > maxX) maxX = p.x;
@@ -1333,7 +1333,6 @@
                 updateProperties();
                 saveState();
             } else if (activeSelection.length > 0) {
-                // Перемещаем всю выделенную группу
                 let currentX = Infinity, currentY = Infinity;
                 activeSelection.forEach(p => {
                     if(p.x < currentX) currentX = p.x; if(p.y < currentY) currentY = p.y;
@@ -1347,9 +1346,7 @@
                     activeSelection.forEach(p => p.y += dy);
                 }
                 
-                // Масштабирование выделенного (упрощенное)
                 if (prop === 'w' || prop === 'h') {
-                    // TODO: Сложная логика масштабирования. Пока просто игнорируем ввод W/H для выделения.
                     customAlert("Изменение размера для выделенных символов пока не поддерживается. Используйте мышь.");
                 }
 
@@ -1419,7 +1416,6 @@
                 zone.style.width = cat.w + 'px'; zone.style.height = cat.h + 'px';
                 zone.dataset.index = i;
                 
-                // Клик по категории для выделения
                 zone.onmousedown = (e) => {
                     if (currentTool === 'lasso' || currentTool === 'brush' || currentTool === 'smart-brush') return;
                     e.stopPropagation();
@@ -1441,7 +1437,7 @@
                     isDraggingHeader = true; isDraggingCategoryPos = true; dragCatIndex = i;
                     dragStartMouseX = e.clientX; dragStartMouseY = e.clientY;
                     catStartX = cat.x; catStartY = cat.y;
-                    activeCategoryIndex = i; // Выделяем при перетаскивании
+                    activeCategoryIndex = i;
                     updateProperties();
                 };
                 header.onmouseup = (e) => {
@@ -1533,77 +1529,69 @@
         }
 
         // ==========================================
-        // ОПТИМИЗАЦИЯ
+        // ОПТИМИЗАЦИЯ (СОКРАЩЕНИЕ)
         // ==========================================
         function openOptimizeModal() {
-            document.getElementById('opt-before').innerText = points.length;
-            // Рассчитываем, сколько получится после (очень грубая оценка)
-            let estimated = Math.round(points.length * 0.6); // Предполагаем сокращение на 40%
-            if (points.length < 100) estimated = points.length; 
-            document.getElementById('opt-after').innerText = estimated;
+            const slider = document.getElementById('opt-target-slider');
+            const beforeCount = points.length;
             
+            document.getElementById('opt-before').innerText = beforeCount;
+            
+            // Настраиваем слайдер
+            slider.min = Math.max(100, Math.floor(beforeCount * 0.1));
+            slider.max = beforeCount;
+            slider.value = Math.floor(beforeCount * 0.6); // По умолчанию оставляем 60%
+            
+            document.getElementById('opt-target-val').innerText = slider.value;
+            document.getElementById('opt-after').innerText = slider.value;
+            
+            slider.oninput = () => {
+                document.getElementById('opt-target-val').innerText = slider.value;
+                document.getElementById('opt-after').innerText = slider.value;
+            };
+
             document.getElementById('modal-optimize').classList.add('active');
         }
 
         function applyOptimization() {
-            const shouldMerge = document.getElementById('opt-merge').checked;
+            const targetCount = parseInt(document.getElementById('opt-target-slider').value);
             
-            if (shouldMerge) {
-                // Простой алгоритм: группируем точки по Y, сортируем по X, объединяем близкие
-                const optimizedPoints = [];
-                const rows = {};
-
-                // Группировка по Y с допуском (например, 3 пикселя)
-                points.forEach(p => {
-                    const yKey = Math.round(p.y / 3) * 3;
-                    if (!rows[yKey]) rows[yKey] = [];
-                    rows[yKey].push(p);
-                });
-
-                // Обработка каждой строки
-                for (const yKey in rows) {
-                    const row = rows[yKey].sort((a, b) => a.x - b.x);
-                    
-                    let currentString = "";
-                    let startX = -1;
-                    let lastX = -1;
-                    let baseSym = "";
-
-                    row.forEach((p, index) => {
-                        // Если символы разные, объединять нельзя (или можно, но выглядит странно)
-                        // Для простоты объединяем только если символы одинаковые или если это точки.
-                        // В GridStudio объединяют всё подряд в одну строку, просто меняя X.
-                        // Давай попробуем объединять всё, что близко.
-                        
-                        if (startX === -1) {
-                            startX = p.x;
-                            currentString = p.sym;
-                            lastX = p.x;
-                        } else {
-                            // Если расстояние между точками меньше 12 пикселей (ширина символа)
-                            if (p.x - lastX < 12) {
-                                currentString += p.sym;
-                            } else {
-                                // Разрыв слишком большой, сохраняем текущую строку
-                                optimizedPoints.push({ x: startX, y: parseFloat(yKey), sym: currentString, w: currentString.length * 10, h: 20 });
-                                startX = p.x;
-                                currentString = p.sym;
-                            }
-                            lastX = p.x;
-                        }
-                    });
-                    
-                    if (currentString) {
-                        optimizedPoints.push({ x: startX, y: parseFloat(yKey), sym: currentString, w: currentString.length * 10, h: 20 });
-                    }
-                }
-
-                points = optimizedPoints;
-                renderPoints();
-                saveState();
-                closeModal('modal-optimize');
-                customAlert("Оптимизация завершена! Символов: " + points.length);
+            if (targetCount >= points.length) {
+                customAlert("Целевое количество больше или равно текущему. Сокращение не требуется.");
+                return;
             }
+
+            // Алгоритм "разрежения" (Thinning)
+            // Разбиваем холст на сетку, размер ячейки зависит от целевого количества
+            const area = 1193 * 593;
+            const cellSize = Math.sqrt(area / targetCount);
+            const keptPoints = [];
+            const occupiedCells = new Set();
+
+            // Перемешиваем точки, чтобы не удалять все из одного угла
+            const shuffled = [...points].sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < shuffled.length; i++) {
+                const p = shuffled[i];
+                const cx = Math.floor(p.x / cellSize);
+                const cy = Math.floor(p.y / cellSize);
+                const key = `${cx},${cy}`;
+
+                // Если ячейка пуста, оставляем точку
+                if (!occupiedCells.has(key)) {
+                    occupiedCells.add(key);
+                    keptPoints.push(p);
+                }
+                
+                if (keptPoints.length >= targetCount) break;
+            }
+
+            points = keptPoints;
+            renderPoints();
+            saveState();
+            triggerAutoSave();
+            closeModal('modal-optimize');
+            customAlert(`Готово! Символов сокращено до ${points.length}.`);
         }
 
         // ==========================================
