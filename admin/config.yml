@@ -33,4 +33,5 @@ collections:
       - {label: "Ссылка на пост в TG", name: "tgLink", widget: "string", required: false}
       - {label: "Превью темы", name: "image", widget: "image"}
       - {label: "Баннер для Steam", name: "banner", widget: "image", required: false}
-      - {label: "CSS Код", name: "cssCode", widget: "code", default_language: "css", required: true}
+      - {label: "Файл темы (.txt)", name: "cssFile", widget: "file", required: false}
+      - {label: "CSS Код (старое, для обратной совместимости)", name: "cssCode", widget: "code", default_language: "css", required: false}
