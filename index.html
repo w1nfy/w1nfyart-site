@@ -979,11 +979,6 @@
         function customAlert(text) { document.getElementById('alert-text').innerText = text; document.getElementById('modal-alert').classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
-        const themeCodes = {
-            "hell": `/* Вставь сюда код темы hell */`,
-            "party": `/* Вставь сюда код темы party */`,
-            "flowers": `/* Вставь сюда код темы flowers */`
-        };
 
         function randomPick() {
             const links = Array.from(document.querySelectorAll('.card .link-btn'))
@@ -992,11 +987,7 @@
             if (links.length > 0) window.location.href = links[Math.floor(Math.random() * links.length)];
         }
 
-        async function copyTheme(themeId) {
-            if(themeCodes[themeId]) {
-                navigator.clipboard.writeText(themeCodes[themeId]).then(() => customAlert("Код темы успешно скопирован!")).catch(err => customAlert("Ошибка копирования."));
-                return;
-            }
+                async function downloadThemeFromIndex(themeId) {
             try {
                 const res = await fetch(`https://raw.githubusercontent.com/w1nfy/w1nfyart-site/main/data/themes/${themeId}.md`);
                 if (!res.ok) throw new Error('Not found');
@@ -1004,15 +995,40 @@
                 const match = text.match(/^---\r?\n([\s\S]+?)\r?\n---/);
                 if (!match) throw new Error('Bad format');
                 const yaml = match[1];
-                let css = '';
-                const cssMatch = yaml.match(/cssCode:\s*\|?\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
-                if (cssMatch) css = cssMatch[1].replace(/^  /gm, ''); 
-                else css = yaml.match(/cssCode:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
-                if (css) {
-                    await navigator.clipboard.writeText(css);
-                    customAlert("Код темы из CMS успешно скопирован!");
-                } else customAlert("CSS код не найден в файле темы.");
-            } catch (e) { customAlert("Ошибка: Не удалось скачать тему из CMS."); }
+                
+                let contentToDownload = '';
+
+                // Ищем сначала загруженный файл (cssFile)
+                const fileMatch = yaml.match(/cssFile:\s*["']?([^"'\n]+)["']?/);
+                if (fileMatch && fileMatch[1]) {
+                    const fileRes = await fetch(fileMatch[1]);
+                    contentToDownload = await fileRes.text();
+                } else {
+                    // Если файла нет, берем старый текст (cssCode)
+                    let css = '';
+                    const cssMatch = yaml.match(/cssCode:\s*\|?\s*\n([\s\S]*?)(?=\n[a-zA-Z0-9_-]+:|$)/);
+                    if (cssMatch) css = cssMatch[1].replace(/^  /gm, ''); 
+                    else css = yaml.match(/cssCode:\s*["']?([^"'\n]+)["']?/)?.[1] || '';
+                    contentToDownload = css;
+                }
+
+                if (!contentToDownload) throw new Error('Empty');
+
+                // Скачиваем как .txt
+                const blob = new Blob([contentToDownload], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `w1nfy_${themeId}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (e) {
+                customAlert("Ошибка: Не удалось скачать тему из CMS.");
+            }
         }
 
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
@@ -1149,7 +1165,7 @@
                                     <p>${desc}</p>
                                     <div class="card-buttons">
                                         <a href="theme.html?id=${encodeURIComponent(id)}" class="link-btn" style="margin-bottom: 10px;">Подробнее</a>
-                                        <button class="copy-btn" onclick="copyTheme('${id}')">Скопировать CSS</button>
+                                        <button class="copy-btn" onclick="downloadThemeFromIndex('${id}')">💾 Скачать .txt</button>
                                     </div>
                                 </div>
                             </div>`;
