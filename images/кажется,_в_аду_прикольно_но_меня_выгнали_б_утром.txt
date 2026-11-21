@@ -1,0 +1,266 @@
+/*
+==========================================================================
+STEAM THEME: "В АДУ ПРИКОЛЬНО, НО МЕНЯ ВЫГНАЛИ" (CUPSIZE)
+BY W1NFY
+==========================================================================
+*/
+
+/* --- 1. ПЕРЕМЕННЫЕ (ТЕМНАЯ РОЗОВО-БОРДОВАЯ ГАММА) --- */
+:root, body {
+  --bg-dark: #15090c !important;        /* Глубокий темно-бордовый */
+  --panel-dark: #241116 !important;     /* Чуть светлее для панелей */
+  --accent-pink: #e3a8b9 !important;    /* Пыльная роза */
+  --text-pink: #f7dce3 !important;      /* Светло-розовый текст */
+
+  --minimal_dark_color: #e3a8b9 !important; 
+  --minimal_dark_color_rgb: 227, 168, 185 !important;
+  --minimal_dark_be_grey: #241116 !important;
+  --minimal_dark_black: var(--bg-dark) !important; 
+  --minimal_dark_blacker: var(--panel-dark) !important;
+  --minimal_dark_blacker_alt: #2e161d !important;
+  --minimal_dark_greyblack: #3d1e26 !important;
+  --minimal_dark_topgrey: var(--text-pink) !important;
+  --minimal_dark_less_white: var(--text-pink) !important; 
+  --minimal_dark_invisiblegrey: rgba(227, 168, 185, 0.15) !important;
+  
+  --minimal_dark_corner: 2px !important; 
+
+  --bg-all: url("https://i.ibb.co/rKY7Xx07/image.png");
+  --shade: linear-gradient(rgba(21, 9, 12, 0.85), rgba(21, 9, 12, 0.95));
+}
+
+/* =========================================
+   2. ГЛОБАЛЬНЫЙ ФОН
+   ========================================= */
+body, 
+.Library,
+.ActivityFeedContainer,
+.RightColumn,
+.FriendsSection,
+.CommunityContentContainer {
+  background-color: var(--bg-dark) !important;
+  background-image: var(--shade), var(--bg-all) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+/* =========================================
+   3. ЛЕВОЕ МЕНЮ
+   ========================================= */
+.Library .ReactVirtualized__List,
+.Library .ReactVirtualized__Grid,
+.Library [class*="GameList"] {
+  background-color: var(--bg-dark) !important;
+  background-image: linear-gradient(rgba(21, 9, 12, 0.7), rgba(21, 9, 12, 0.7)), var(--bg-all) !important;
+  background-attachment: local !important; 
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.Library [class*="GameListEntryContainer"] *,
+.Library [class*="gamelistentry"] *,
+.Library [class*="libraryItem"] * {
+  color: var(--text-pink) !important;
+}
+
+.Library [class*="GameListEntryContainer"],
+.Library [class*="gamelistentry"] {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(227, 168, 185, 0.1) !important;
+}
+
+/* Игры при наведении (тут инверсию оставляем, так как это не кнопки) */
+.Library [class*="gamelistentry"]:hover,
+.Library [class*="GameListEntryContainer"]:hover,
+.Library [class*="Selected"] [class*="GameListEntryContainer"] {
+  background: var(--accent-pink) !important;
+}
+
+.Library [class*="gamelistentry"]:hover *,
+.Library [class*="GameListEntryContainer"]:hover *,
+.Library [class*="Selected"] [class*="GameListEntryContainer"] * {
+  color: var(--bg-dark) !important;
+}
+
+/* =========================================
+   4. ВЕРХНЯЯ ПАНЕЛЬ (ТОТАЛЬНЫЙ ФИКС КВАДРАТОВ)
+   ========================================= */
+.TopBar,
+.TopBar > div,
+.TopBar .TitleBar,
+.TopBar .RootMenuBar,
+.TopBar .SuperNavBar {
+  background-color: var(--bg-dark) !important; 
+  background-image: var(--shade), var(--bg-all) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+  border-bottom: 1px solid rgba(227, 168, 185, 0.2) !important;
+}
+
+.TopBar span,
+.TopBar svg,
+.TopBar svg *,
+.TopBar img {
+  color: var(--text-pink) !important;
+  fill: var(--text-pink) !important;
+}
+
+/* ЖЕСТКИЙ СБРОС ФОНА ПРИ НАВЕДЕНИИ (Убираем квадраты) */
+.TopBar [class*="Button"],
+.TopBar .RootMenuButton,
+.TopBar .MenuWrapper,
+.TopBar .SuperNavMenu,
+.TopBar .SuperNav .Arrow,
+.TopBar button {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.TopBar [class*="Button"]:hover,
+.TopBar .RootMenuButton:hover,
+.TopBar .MenuWrapper:hover,
+.TopBar .SuperNavMenu:hover,
+.TopBar .SuperNav .Arrow:hover,
+.TopBar button:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Вместо фона при наведении зажигаем текст и иконки */
+.TopBar [class*="Button"]:hover span,
+.TopBar [class*="Button"]:hover svg *,
+.TopBar .RootMenuButton:hover span,
+.TopBar .RootMenuButton:hover svg *,
+.TopBar .SuperNavMenu:hover span,
+.TopBar .SuperNav .Arrow:hover path {
+  color: var(--accent-pink) !important;
+  fill: var(--accent-pink) !important;
+}
+
+/* Кнопки управления окном (Свернуть, Закрыть) */
+.TopBar .windowControlButton:hover {
+  background: transparent !important;
+}
+.TopBar .windowControlButton:hover svg * {
+  fill: var(--accent-pink) !important;
+}
+.TopBar .windowControlButton.closeButton:hover svg * {
+  fill: #ff4444 !important; /* Красный крестик при закрытии */
+}
+
+/* Логотип Steam */
+.TopBar .RootMenuButton img,
+.TopBar .RootMenuButton svg {
+  filter: brightness(0) invert(1) opacity(0.8) !important; 
+}
+
+/* =========================================
+   5. ПАНЕЛИ (Активность, Друзья)
+   ========================================= */
+.Library [class*="ActivityFeedContainer"],
+.Library [class*="RightColumn"],
+.Library [class*="FriendsSection"] {
+  background-color: var(--panel-dark) !important; 
+  border: 1px solid rgba(227, 168, 185, 0.2) !important; 
+}
+
+.Library [class*="ActivityFeedContainer"] *,
+.Library [class*="RightColumn"] * {
+  color: var(--text-pink) !important;
+}
+
+[class*="ActivityFeed"] input,
+[class*="ActivityFeed"] textarea,
+.DialogInput,
+input[type="text"] {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--accent-pink) !important; 
+  color: var(--text-pink) !important;
+}
+
+/* =========================================
+   6. КНОПКИ И ВКЛАДКИ В БИБЛИОТЕКЕ (Без квадратов)
+   ========================================= */
+.Library [class*="Tabs"] [class*="Tab"],
+.Library button:not([class*="windowControlButton"]):not([class*="TopBar"] button):not([class*="PlayBar"] button) {
+  background-color: transparent !important; 
+  color: var(--text-pink) !important;
+  border: 1px solid rgba(227, 168, 185, 0.3) !important; 
+  font-weight: bold !important;
+}
+
+/* При наведении только свечение текста */
+.Library [class*="Tabs"] [class*="Tab"]:hover,
+.Library button:not([class*="windowControlButton"]):not([class*="TopBar"] button):not([class*="PlayBar"] button):hover {
+  background-color: transparent !important;
+  border-color: var(--accent-pink) !important;
+}
+
+.Library [class*="Tabs"] [class*="Tab"]:hover span,
+.Library button:hover span,
+.Library button:hover svg * {
+  color: var(--accent-pink) !important;
+  fill: var(--accent-pink) !important;
+}
+
+/* =========================================
+   7. ПАНЕЛЬ СТАТИСТИКИ (PlayBar)
+   ========================================= */
+.Library [class*="PlayBar"] * {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-pink) !important;
+}
+
+.Library [class*="PlayButton"] {
+  background-color: transparent !important;
+}
+.Library [class*="PlayButton"] svg * {
+  fill: var(--text-pink) !important;
+}
+
+.Library [class*="PlayBar"] button:hover,
+.Library [class*="PlayBar"] [class*="Focusable"]:hover {
+  background-color: transparent !important;
+}
+.Library [class*="PlayBar"] button:hover svg *,
+.Library [class*="PlayBar"] button:hover span {
+  fill: var(--accent-pink) !important;
+  color: var(--accent-pink) !important;
+}
+
+/* =========================================
+   8. ОКНО ДРУЗЕЙ
+   ========================================= */
+.friendsui-container,
+.popup_chat_frame,
+.chat_main,
+.friendlist,
+.FriendsListContent,
+.friendlistListContainer {
+  background-color: var(--panel-dark) !important;
+  color: var(--text-pink) !important;
+  border-left: 1px solid rgba(227, 168, 185, 0.3) !important;
+}
+
+.friend:hover, .friendStatusHover:hover { background: var(--accent-pink) !important; }
+.friend:hover *, .friendStatusHover:hover * { color: var(--bg-dark) !important; }
+.friend.online .playerName { color: var(--accent-pink) !important; font-weight: bold !important; }
+.friendTab.activeTab { color: var(--bg-dark) !important; background: var(--accent-pink) !important; }
+
+/* =========================================
+   9. СКРОЛЛБАР
+   ========================================= */
+::-webkit-scrollbar { width: 8px !important; }
+::-webkit-scrollbar-track { background: var(--bg-dark) !important; }
+::-webkit-scrollbar-thumb { background: var(--accent-pink) !important; border-radius: 0px !important; }
